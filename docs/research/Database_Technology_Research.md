@@ -151,8 +151,6 @@ Set the MySQL connection/session timezone to UTC. Update `last_seen_at` from ser
 - Do not assume ordinary database rows form a tamper-proof audit trail. Stronger audit guarantees would require additional design.
 - Store command requests separately from physical observations if remote locking is added. A successful API call is not evidence that a physical lock moved.
 
-The immediate scope is a student monitoring prototype. Any later operational use would need separately agreed availability, emergency access, hardware reliability and data-governance requirements.
-
 ## 9. Learning resources and references
 
 
