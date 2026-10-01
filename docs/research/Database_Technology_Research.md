@@ -11,7 +11,7 @@
 | Backend                | FastAPI                          | Python                              | Authenticate devices and users, validate messages and retrieve data         |
 | Database connector     | MySQL Connector/Python           | Python                              | Let the backend execute parameterised MySQL queries                         |
 | Central database       | MySQL with InnoDB                | SQL                                 | Store boxes, access permissions and historical observations                 |
-| User interface         | Web application                  | HTML, CSS and JavaScript/TypeScript | Display status, history and a map                                           |
+| User interface         | Web application                  | HTML, CSS and JavaScript            | Display status, history and a map                                           |
 | Scheduled processing   | cron running application scripts | cron syntax and Python              | Produce summaries, check stale devices and perform maintenance              |
 
 ## 2. Data requirements
