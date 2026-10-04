@@ -2,7 +2,8 @@
 
 The project involves the development of an IoT-based monitoring system for a controlled drug box used in an ambulance.
 
-The main purpose of the system is to monitor the storage temperature of controlled drugs and alert the user if the temperature exceeds the recommended limit.
+The main purpose of the system is to monitor the storage temperature of controlled drugs and alert the user if the
+temperature exceeds the recommended limit.
 
 ## Included in the Project
 
