@@ -34,6 +34,3 @@ Universal Design Project (UDP) · Semester 1 · 2026/2027
 - A reflective report for every student; an individual interview where required.
 
 **Assessment weighting:** group CA **70%** (non-recoverable); individual CA **30%**.
-
-Source: *GD3 SD3 2026_2027_UDP_CA_Schedule_V1.pdf*. Pre-induction weeks are omitted. The individual assessment spans
-several weeks in the source; the table does not imply separate weekly submission deadlines.
