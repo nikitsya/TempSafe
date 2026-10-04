@@ -3,6 +3,8 @@
 **Class Group:** SD3a-G2  
 **Team Size:** 3 members
 
+**Documentation last updated:** 4 October 2026
+
 ## Team Members
 
 | Name              | Responsibilities                                     |
@@ -45,8 +47,6 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 - `docs/hardware/`: prototype components and hardware documentation.
 - `docs/research/`: evidence, technology comparisons and proposed technical decisions.
 
-Start with the scope and requirements, then consult the supporting hardware and research documents.
-
 | Document                                                                              | Contents                                                                  |
 |---------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
 | [Project scope](docs/project/project-scope.md)                                        | What the prototype includes and excludes.                                 |
@@ -56,6 +56,3 @@ Start with the scope and requirements, then consult the supporting hardware and 
 | [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.     |
 | [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.         |
 | [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                |
-
-Keep this index up to date as new documents are added. Research supports the requirements and implementation choices;
-the functional requirements define the behaviour expected from the prototype.
