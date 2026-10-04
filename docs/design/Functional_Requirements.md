@@ -1,260 +1,117 @@
 # Smart Box — Functional Requirements and Use Cases
 
-**Date:** 1 October 2026  
-**Version:** 0.1  
-**Status:** Draft for team review
+**Date:** 4 October 2026  
+**Version:** 0.2  
+**Status:** Agreed project direction
 
-## 1. Purpose
-
-Smart Box is an IoT project intended to help paramedics monitor an equipment box. The proposed first version records lid
-opening and closing, reports the box's location, and provides a web interface for viewing its latest reported state and
-event history.
-
-## 2. Scope and assumptions
+## 1. Users and context (UTSE)
 
-### Proposed first version
-
-- An authorised user signs in and accesses permitted boxes.
-- The device detects whether the lid is open or closed.
-- The system records lid transitions and valid location observations.
-- The interface displays the latest reported lid state, last known location and observation timestamps.
-- The user can review historical events.
-- The interface indicates when the device has stopped reporting.
+| Element      | Proposed definition                                                                                                                                       |
+|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Users        | Paramedic or staff member authorised to monitor assigned boxes; exact operational responsibility to be validated                                          |
+| Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                                            |
+| Systems      | One temperature sensor, Raspberry Pi, local SQLite queue, authenticated HTTPS API, MySQL database and web application                                     |
+| Environments | Portable medication box used in an emergency-service context; initial demonstration on a bench with no medicines; intermittent Wi-Fi/hotspot connectivity |
 
-## 3. Actors
+## 3. Functional requirements
 
-| Actor                       | Role                                                                                                               |
-|-----------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Paramedic / authorised user | Signs in, checks permitted boxes, views location and reviews history                                               |
-| Smart Box device            | Detects lid changes and submits observations and contact updates                                                   |
-| Project team                | Provisions the prototype's accounts, devices and access permissions; not a separate application role in this draft |
+| ID    | Requirement                                              | Priority | Acceptance criteria                                                                                                                                                                                                     |
+|-------|----------------------------------------------------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FR-01 | Sign in and sign out                                     | Must     | Valid credentials grant a session; invalid credentials do not; sign-out invalidates the session                                                                                                                         |
+| FR-02 | Restrict access to assigned boxes                        | Must     | Both UI and API enforce box permissions; changing a box ID does not expose another user's data                                                                                                                          |
+| FR-03 | Measure and record internal temperature                  | Must     | Each sample attempt has a unique ID, box ID, persistent sequence number, UTC observation time (or explicit unreliable-clock status), profile ID and quality status; valid readings are recorded in degrees Celsius      |
+| FR-04 | Show the latest temperature and its freshness            | Must     | Show value, unit, observation time and last device contact separately; show unknown before any reading and stale when readings are old; a newer sensor error is visible even if the last valid value remains in history |
+| FR-05 | Classify valid samples against a configured profile      | Must     | With limits L < U: T < L is low, T > U is high, and L <= T <= U is within range; invalid samples are unknown, never normal; the applied profile is preserved                                                            |
+| FR-06 | Warn locally when valid readings are outside the profile | Must     | A dedicated warning LED turns on by the next completed out-of-range sample, including without Wi-Fi; an invalid read uses a distinct blink pattern; off is not proof of safe conditions or working power                |
+| FR-07 | Display temperature history and out-of-range records     | Must     | Filter by box and time; provide graph plus readable table; show thresholds, gaps and quality issues; use observation times, not upload times                                                                            |
+| FR-08 | Identify loss of device contact                          | Must     | After the contact timeout show not reporting and the last contact time; never-connected devices have a separate state; contact alone does not make buffered readings fresh                                              |
+| FR-09 | Buffer data while offline                                | Must     | At least 24 hours at the configured sampling interval survive a normal device restart and upload after reconnection; original IDs and times are retained; unacknowledged records are not discarded                      |
+| FR-10 | Handle duplicate and delayed uploads                     | Must     | Identical retries create one sample; conflicting reuse of an ID is rejected; old data does not replace the latest state or trigger a misleading current warning                                                         |
+| FR-11 | Refresh the dashboard automatically                      | Should   | With connectivity, accepted data appears within the proposed five-second polling interval; refresh failure is visible                                                                                                   |
+| FR-12 | Record that a user has reviewed a flagged sample         | Should   | Store reviewer and server timestamp for a flagged sample; acknowledgement does not change the measurement or remove an ongoing warning                                                                                  |
+| FR-13 | Estimate observed excursion periods                      | Should   | Group consecutive low/high observations using observation order; label duration as estimated; missing/invalid samples break continuity; delayed data causes affected history to be recalculated                         |
+| FR-14 | Send email/push notifications                            | Could    | Only after a delivery channel, recipient permissions and deduplication rules are defined; not part of baseline promises                                                                                                 |
 
-The backend, database and web interface are parts of the Smart Box system rather than separate end-user actors.
+## 4. Proposed prototype settings
 
-## 4. Priority definitions
+| Setting            | Proposal                                                                                                                     |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Sampling interval  | 30 seconds                                                                                                                   |
+| Heartbeat interval | 60 seconds; transmitted independently of whether the sensor read succeeds                                                    |
+| Contact timeout    | 3 minutes                                                                                                                    |
+| Local buffer       | At least 24 hours (2,880 sample attempts at 30-second intervals)                                                             |
+| Threshold profile  | Immutable versioned lower/upper limits and source note; configured by the team, not hard-coded as a universal medicine range |
 
-| Priority                     | Meaning in this draft                                               |
-|------------------------------|---------------------------------------------------------------------|
-| Must have                    | Required for the proposed core prototype                            |
-| Should have                  | Valuable resilience or usability feature, after the core flow works |
-| Could have                   | Optional extension if time and hardware allow                       |
-| Won't have in this iteration | Explicitly excluded from this proposed iteration                    |
+## 5. Use cases
 
-## 5. Functional requirements
-
-| ID    | Requirement                                                                                                                             | Priority    | Acceptance criteria                                                                                                                                                                                                 |
-|-------|-----------------------------------------------------------------------------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FR-01 | The system shall allow a provisioned user to sign in and sign out.                                                                      | Must have   | Valid credentials establish a session; invalid credentials do not. After sign-out, protected information cannot be retrieved using the ended session.                                                               |
-| FR-02 | The system shall restrict each user's access to permitted boxes.                                                                        | Must have   | The user sees only permitted boxes. A direct request for an unpermitted box returns no box telemetry, even if its identifier is known.                                                                              |
-| FR-03 | The system shall display the latest reported lid position for a selected box.                                                           | Must have   | The interface shows open or closed with its observation time. Before the first report it shows unknown. Old readings are labelled as stale rather than presented as live.                                           |
-| FR-04 | The system shall record each detected, stable lid transition with its box identifier and observation time.                              | Must have   | One deliberate opening followed by one closing produces two transition records. Sensor bounce does not create extra transitions. A startup state snapshot is distinguishable from a new opening.                    |
-| FR-05 | The system shall store valid location observations for the correct box.                                                                 | Must have   | Each stored observation identifies the box, coordinates and observation time. Invalid coordinates are rejected. An unavailable location fix is not replaced with invented coordinates.                              |
-| FR-06 | The system shall show the selected box's last known location on a map.                                                                  | Must have   | A stored valid location is shown as a map marker with its observation time. If no location is available, the interface states this. If the map cannot load, coordinates and their timestamp remain available.       |
-| FR-07 | The system shall allow the user to view lid-event history for a selected box and time interval.                                         | Must have   | The results contain only that permitted box's events in the requested interval, ordered by observation time. An empty interval displays an explanatory empty state.                                                 |
-| FR-08 | The system shall indicate whether a box has recently contacted the server.                                                              | Must have   | After the configured contact timeout, the interface marks the device as not recently reporting and shows its last contact time. A valid new contact updates this status. A never-connected box is shown separately. |
-| FR-09 | The device shall retain pending observations during a network interruption and upload them when connectivity returns.                   | Should have | During a controlled disconnection within the agreed buffer capacity, recorded events survive a normal device restart and are uploaded after reconnection. They retain their original observation times.             |
-| FR-10 | The system shall process repeated and delayed uploads without duplicating events or replacing a newer reported state with an older one. | Must have   | Resending the same event produces one history entry. Uploading an older event after a newer event preserves both in history but does not roll back the latest state.                                                |
-| FR-11 | The dashboard shall refresh box information without requiring the user to reload the entire page.                                       | Should have | While the dashboard is open and connected, newly accepted data appears within the agreed refresh interval. A failed refresh is indicated while previous readings retain their timestamps.                           |
+### UC-01 — Sign in and select a box
 
-### Proposed configuration for the prototype
+**Actor:** Authorised user. **Requirements:** FR-01, FR-02.
 
-| Setting                             | Proposed starting value                  | What needs confirmation                                 |
-|-------------------------------------|------------------------------------------|---------------------------------------------------------|
-| Location reporting interval         | 30 seconds when a valid fix is available | Receiver capability, power use and network availability |
-| Device contact / heartbeat interval | 60 seconds                               | Battery and connectivity constraints                    |
-| Device contact timeout              | 3 minutes                                | Appropriate tolerance for normal network interruptions  |
-| Dashboard refresh interval          | 5 seconds                                | Backend load and acceptable user experience             |
-| Offline buffer capacity             | To be agreed before FR-09 testing        | Expected outage duration and device storage             |
-| Historical data retention           | To be agreed                             | How much history users need and available storage       |
+1. User signs in and sees assigned boxes.
+2. User selects a box.
+3. Backend checks permissions on every request.
 
-## 6. Main use cases
+Invalid credentials, an empty assignment list and denied access have explicit UI states.
 
-### UC-01 — Sign in and access a box
+### UC-02 — Record a sample and provide a local warning
 
-**Primary actor:** Authorised user  
-**Goal:** Access the monitoring information for a permitted box.  
-**Preconditions:** The user has a provisioned account.  
-**Trigger:** The user opens the application.  
-**Requirements:** FR-01, FR-02
+**Actor:** Device. **Requirements:** FR-03, FR-05, FR-06, FR-09, FR-10.
 
-**Main flow:**
+1. Read the internal sensor every 30 seconds.
+2. Record a valid temperature or a sensor-error status; never substitute zero for failure.
+3. Compare a valid value with the provisioned profile and update the local LED.
+4. Persist the sample and transmit it if connectivity is available.
+5. Server authenticates the device, validates its box/profile, and stores the sample idempotently.
 
-1. The application displays the sign-in screen.
-2. The user enters their credentials.
-3. The system validates the credentials and establishes a session.
-4. The system displays the boxes available to that user.
-5. The user selects a box and opens its dashboard.
+A read failure or unsynchronised clock is identified explicitly. A network failure does not stop local sampling or the
+LED. Loss of electrical power stops the prototype; it is not a fail-safe medical alarm.
 
-**Alternative flows:**
+### UC-03 — Check current condition
 
-- Invalid credentials: the system displays a sign-in error and does not provide protected data.
-- No assigned boxes: the system displays an empty state explaining that no boxes are available to the user.
-- Unauthorised box request: the system refuses access without returning its telemetry.
+**Actor:** Authorised user. **Requirements:** FR-02, FR-04, FR-05, FR-08, FR-11.
 
-**Postcondition:** The user has an authenticated session and can access only permitted boxes.
+1. Open dashboard and check temperature, profile limits and timestamps.
+2. View within range / low / high / sensor error / stale status using text and symbols, not colour alone.
+3. Distinguish a currently received warning from a historical event uploaded late.
 
-### UC-02 — Check lid status
+No measurements means unknown. A connected device with failed reads is not shown as healthy temperature monitoring.
 
-**Primary actor:** Authorised user  
-**Goal:** Check the latest reported lid position.  
-**Preconditions:** The user is signed in and has access to the box.  
-**Trigger:** The user opens the box dashboard.  
-**Requirements:** FR-02, FR-03, FR-08, FR-11
+### UC-04 — Review history and flagged observations
 
-**Main flow:**
+**Actor:** Authorised user. **Requirements:** FR-02, FR-07, FR-12, FR-13.
 
-1. The user selects the box.
-2. The system retrieves the latest lid observation and contact information.
-3. The dashboard displays open or closed and the observation time.
-4. While the dashboard remains open, it refreshes according to the agreed interval if FR-11 is included.
+1. Select a time interval and inspect temperature graph and table.
+2. Review out-of-range observations with their original profile.
+3. If implemented, view estimated excursion periods and record acknowledgement.
 
-**Alternative flows:**
+Empty and invalid intervals have explanatory states. Gaps are not drawn as proof of continuous safe conditions.
 
-- No lid observation: display unknown, not closed by default.
-- Device contact timeout: retain the last reported lid position and clearly indicate that it may be outdated.
-- Refresh failure: show that the information could not be updated; do not change the observation timestamp.
+### UC-05 — Recover from a network outage
 
-**Postcondition:** The user can distinguish the latest reported lid position from an unknown or stale reading.
+**Actor:** Device. **Requirements:** FR-08, FR-09, FR-10.
 
-### UC-03 — Record an opening or closing
+1. Continue sampling, local warnings and durable queuing offline.
+2. Reconnect and transmit records with unchanged IDs, sequence numbers and times.
+3. Delete/mark queue entries delivered only after acknowledgement.
+4. Show restored contact, while showing the actual age of the latest reading.
 
-**Primary actor:** Smart Box device  
-**Goal:** Preserve a reliable record of a physical lid transition.  
-**Preconditions:** The device is provisioned and the lid sensor is configured.  
-**Trigger:** The sensor detects a stable change in lid position.  
-**Requirements:** FR-04, FR-09, FR-10
+A lost acknowledgement causes a safe retry. Records older than the latest sample enrich history without rolling current
+status back. Exceeding tested capacity or loss of power is reported as a limitation.
 
-**Main flow:**
+## 6. Traceability and testing
 
-1. A person physically opens or closes the lid.
-2. The device confirms the stable change and creates an observation with a unique identifier, box identifier, state and
-   observation time.
-3. If offline buffering is included, the device saves the pending observation locally before transmission.
-4. The device sends the observation to the backend.
-5. The backend authenticates the device and validates the observation.
-6. The system stores the observation and acknowledges successful acceptance.
-7. The observation becomes available in history and, if newer, updates the latest reported state.
-
-**Alternative flows:**
-
-- Network unavailable: if FR-09 is included, retain the observation and follow UC-06.
-- Duplicate upload: acknowledge the already accepted matching observation without creating another history entry.
-- Invalid observation or wrong device identity: reject it; do not update the box's state.
-- Startup snapshot: record the observed state as an initial snapshot rather than a new opening or closing transition.
-
-**Postcondition:** One valid transition is represented once in stored history after successful upload.
-
-A lid sensor does not identify the person who opened the box. This use case must not claim to record a person's identity
-without a separate identification mechanism.
-
-### UC-04 — Locate a box
-
-**Primary actor:** Authorised user  
-**Goal:** Find the box's last known reported location.  
-**Preconditions:** The user is signed in and has access to the box.  
-**Trigger:** The user opens the location view.  
-**Requirements:** FR-02, FR-05, FR-06, FR-08
-
-**Main flow:**
-
-1. The user selects a box and opens its location view.
-2. The system retrieves the latest valid location observation.
-3. The interface shows a marker on the map with the observation time.
-4. The user checks the timestamp to judge whether the position is recent.
-
-**Alternative flows:**
-
-- No valid location has been received: display location unavailable.
-- The device stops reporting: show the last known location with its age and the device's stale contact status.
-- A GPS fix is unavailable: do not make a previous coordinate appear newly measured.
-- Map service fails: show available coordinates and the observation time in text.
-- Simulated location is used in development: label the displayed data as simulated.
-
-**Postcondition:** The user sees a timestamped last known location or an explicit unavailable state. The system does not
-imply that stale coordinates are the box's current position.
-
-### UC-05 — Review lid-event history
-
-**Primary actor:** Authorised user  
-**Goal:** Review when the box was opened or closed.  
-**Preconditions:** The user is signed in and has access to the box.  
-**Trigger:** The user opens the history view.  
-**Requirements:** FR-02, FR-04, FR-07, FR-10
-
-**Main flow:**
-
-1. The user selects a box and opens its history.
-2. The user selects a start and end time.
-3. The system validates the interval and retrieves matching events.
-4. The interface displays each transition and its observation time in chronological order.
-5. The user changes the interval if needed.
-
-**Alternative flows:**
-
-- No matching events: show an empty state rather than an error.
-- Invalid interval: ask the user to correct it.
-- Delayed upload: include the event at its original observation time when the history is refreshed.
-- An initial state snapshot is displayed: label it separately from opening/closing transitions.
-
-**Postcondition:** The user can inspect recorded lid activity for the chosen interval. The history does not establish
-who opened the box.
-
-### UC-06 — Recover after a network interruption
-
-**Primary actor:** Smart Box device  
-**Goal:** Transfer buffered observations after connectivity is restored.  
-**Preconditions:** FR-09 is included; pending observations have been saved within the supported buffer capacity.  
-**Trigger:** The device reconnects to the backend.  
-**Requirements:** FR-08, FR-09, FR-10
-
-**Main flow:**
-
-1. The device establishes an authenticated connection.
-2. It sends pending observations while preserving their identifiers and original times.
-3. The backend validates and stores each observation without duplicates.
-4. The backend acknowledges accepted observations.
-5. The device removes or marks acknowledged items as delivered.
-6. The dashboard reflects restored contact and the latest available observations.
-
-**Alternative flows:**
-
-- Connection fails again: retain unacknowledged observations for a later retry.
-- An acknowledgement is lost: resend the same observation identifier safely.
-- An older observation arrives after a newer one: add it to history without replacing the newer state.
-- Local storage reaches capacity: follow an explicitly agreed overflow policy; do not silently claim that all events
-  were retained.
-
-**Postcondition:** Successfully acknowledged observations are stored centrally once. Reconnection alone does not make an
-old GPS fix fresh.
-
-## 7. Requirement-to-use-case traceability
-
-| Requirement | Related use cases          |
-|-------------|----------------------------|
-| FR-01       | UC-01                      |
-| FR-02       | UC-01, UC-02, UC-04, UC-05 |
-| FR-03       | UC-02                      |
-| FR-04       | UC-03, UC-05               |
-| FR-05       | UC-04                      |
-| FR-06       | UC-04                      |
-| FR-07       | UC-05                      |
-| FR-08       | UC-02, UC-04, UC-06        |
-| FR-09       | UC-03, UC-06               |
-| FR-10       | UC-03, UC-05, UC-06        |
-| FR-11       | UC-02                      |
-
-## 8. Optional features and exclusions
-
-| Feature                                 | Proposed treatment                             | Reason                                                                     |
-|-----------------------------------------|------------------------------------------------|----------------------------------------------------------------------------|
-| Remote lock/unlock                      | Unresolved; excluded from the initial baseline | Requires confirmation of the intended behaviour and physical lock hardware |
-| Battery-level display                   | Could have                                     | Requires a supported way to measure battery state                          |
-| Location route history                  | Could have                                     | Last-known location is the initial user-facing requirement                 |
-| Email or push alerts                    | Could have                                     | Dashboard status is sufficient for the initial scope                       |
-| Equipment inventory                     | Won't have in this iteration                   | Contents tracking has not been requested or defined                        |
-| Patient information                     | Won't have in this iteration                   | The current scope is equipment monitoring                                  |
-| User registration and administration UI | Won't have in this iteration                   | Accounts and permissions can initially be provisioned by the team          |
-
-## 9. Document basis and acknowledgement
-
-AI assistance: OpenAI ChatGPT assisted with structuring this document.
+| Use case | Requirements                      | Planned evidence                                                                                              |
+|----------|-----------------------------------|---------------------------------------------------------------------------------------------------------------|
+| UC-01    | FR-01, FR-02                      | Valid/invalid login, logout and denied cross-box API access                                                   |
+| UC-02    | FR-03, FR-05, FR-06, FR-09, FR-10 | Reference thermometer comparison; synthetic boundary values; disconnected sensor; local LED during Wi-Fi loss |
+| UC-03    | FR-02, FR-04, FR-05, FR-08, FR-11 | Fresh, stale, never-connected and read-failure UI demonstrations                                              |
+| UC-04    | FR-02, FR-07, FR-12, FR-13        | Filtered history, visible gaps, acknowledgement and delayed-event recalculation                               |
+| UC-05    | FR-08, FR-09, FR-10               | Recorded outage/restart, queue reconciliation and duplicate resend                                            |
+
+## 7. UX and boundaries
+
+- Keyboard-accessible controls, readable labels, Celsius units and accessible table alternative to charts.
+- Clear observation and receipt times; no colour-only warnings.
+- No patient records, prescribing, drug-dose accounting or automated medicine-disposal decisions.
+- Future external temperature comparison is separate research scope, not a second sensor promised for this release.
