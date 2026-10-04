@@ -6,7 +6,7 @@
 **Age:** 32  
 **Occupation:** Advanced Paramedic  
 **Experience:** 7 years in pre-hospital emergency care  
-**Location:** Ireland  
+**Location:** Ireland
 
 **User type:** Confident smartphone and workplace digital-system user, but not a technical expert.
 
@@ -14,11 +14,14 @@
 
 Shannon works as an Advanced Paramedic and regularly responds to emergency calls.
 
-During her shift, she works with controlled drugs that are stored in a secure **Controlled Drug Box**. The Controlled Drug Box is placed inside a **Vehicle Security Safe** in the ambulance.
+During her shift, she works with controlled drugs that are stored in a secure **Controlled Drug Box**. The Controlled
+Drug Box is placed inside a **Vehicle Security Safe** in the ambulance.
 
-Shannon works in stressful and fast-moving situations, so the monitoring system should not require constant attention or regular manual checks.
+Shannon works in stressful and fast-moving situations, so the monitoring system should not require constant attention or
+regular manual checks.
 
-The main purpose of the system is to monitor the temperature inside the Controlled Drug Box automatically and notify Shannon only when the temperature is approaching the allowed limit or exceeds it.
+The main purpose of the system is to monitor the temperature inside the Controlled Drug Box automatically and notify
+Shannon only when the temperature is approaching the allowed limit or exceeds it.
 
 ## Goals
 
@@ -67,7 +70,8 @@ Shannon regularly uses a smartphone and digital systems at work.
 
 The system should require minimal interaction.
 
-If the temperature inside the Controlled Drug Box remains within the normal range, Shannon should not need to check or enter anything manually.
+If the temperature inside the Controlled Drug Box remains within the normal range, Shannon should not need to check or
+enter anything manually.
 
 The system should operate automatically in the background.
 
@@ -86,7 +90,8 @@ The Controlled Drug Box is stored inside the Vehicle Security Safe in the ambula
 
 Shannon does not check the temperature manually because the IoT system continuously monitors it.
 
-As long as the temperature remains within the normal range, the system works in the background and requires no action from the user.
+As long as the temperature remains within the normal range, the system works in the background and requires no action
+from the user.
 
 If the temperature begins to approach the configured limit, Shannon receives an early warning:
 
@@ -110,13 +115,17 @@ After receiving the alert, Shannon can open the application and review the detai
 
 The system is designed for use **inside an ambulance**.
 
-Controlled drugs are stored in a secure **Controlled Drug Box**, which is placed inside a **Vehicle Security Safe** in the ambulance.
+Controlled drugs are stored in a secure **Controlled Drug Box**, which is placed inside a **Vehicle Security Safe** in
+the ambulance.
 
 This is a closed storage area, so the temperature inside it may differ from the outside temperature.
 
-Even when the outdoor temperature is moderate, the inside of the ambulance and the enclosed storage area may become significantly warmer, especially if the vehicle is parked in direct sunlight for a period of time.
+Even when the outdoor temperature is moderate, the inside of the ambulance and the enclosed storage area may become
+significantly warmer, especially if the vehicle is parked in direct sunlight for a period of time.
 
-Research on medication storage in emergency vehicles has shown that temperatures inside vehicles and medication storage areas can rise significantly above outside temperatures. In one study, the temperature inside an insulated drug pouch reached more than 40°C, despite substantially lower outdoor temperatures.
+Research on medication storage in emergency vehicles has shown that temperatures inside vehicles and medication storage
+areas can rise significantly above outside temperatures. In one study, the temperature inside an insulated drug pouch
+reached more than 40°C, despite substantially lower outdoor temperatures.
 
 For this reason, the outside temperature is not a reliable indicator of the storage conditions for controlled drugs.
 
@@ -143,9 +152,11 @@ The user should interact with the system only when attention is required.
 
 ## Main Use Case
 
-**The IoT system continuously monitors the temperature inside the Controlled Drug Box located in the ambulance security safe.**
+**The IoT system continuously monitors the temperature inside the Controlled Drug Box located in the ambulance security
+safe.**
 
-If the temperature remains within the normal range, the system operates in the background and requires no action from the Advanced Paramedic.
+If the temperature remains within the normal range, the system operates in the background and requires no action from
+the Advanced Paramedic.
 
 If the temperature approaches the configured limit, the system automatically sends an early warning.
 
@@ -190,6 +201,9 @@ The temperature is monitored automatically.
 
 If the storage conditions are normal, the user receives no notification and does not need to take any action.
 
-The system attracts the Advanced Paramedic’s attention only when the temperature begins to approach a potentially unsafe level or exceeds it.
+The system attracts the Advanced Paramedic’s attention only when the temperature begins to approach a potentially unsafe
+level or exceeds it.
 
-> **An automatic IoT temperature-monitoring system for a Controlled Drug Box inside an ambulance, designed to work in the background and notify the Advanced Paramedic only when the temperature approaches or exceeds the configured storage limit.**
+> **An automatic IoT temperature-monitoring system for a Controlled Drug Box inside an ambulance, designed to work in
+the background and notify the Advanced Paramedic only when the temperature approaches or exceeds the configured storage
+limit.**
