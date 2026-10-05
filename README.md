@@ -51,9 +51,6 @@ later review.
 - A durable local queue for at least 24 hours of sample attempts, with retries that do not create duplicate records.
 - Accessible controls and warnings that use text and symbols as well as colour.
 
-Review acknowledgements and estimated excursion periods are Should Have features. Email and push notifications are
-Could Have features and are outside the baseline prototype.
-
 ## Proposed Architecture
 
 | Component             | Proposed technology      | Purpose                                                                       |
