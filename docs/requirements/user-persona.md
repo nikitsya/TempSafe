@@ -1,12 +1,10 @@
-# User Persona
-
-## Persona
+# Persona – TempSafe
 
 **Name:** Shannon Rice  
 **Age:** 32  
 **Occupation:** Advanced Paramedic  
 **Experience:** 7 years in pre-hospital emergency care  
-**Location:** Ireland
+**Location:** Ireland  
 
 **User type:** Confident smartphone and workplace digital-system user, but not a technical expert.
 
@@ -14,196 +12,145 @@
 
 Shannon works as an Advanced Paramedic and regularly responds to emergency calls.
 
-During her shift, she works with controlled drugs that are stored in a secure **Controlled Drug Box**. The Controlled
-Drug Box is placed inside a **Vehicle Security Safe** in the ambulance.
+During her shift, controlled drugs are stored in a secure **Controlled Drug Box** inside a **Vehicle Security Safe** in the ambulance.
 
-Shannon works in stressful and fast-moving situations, so the monitoring system should not require constant attention or
-regular manual checks.
+Shannon often works in stressful and time-critical situations. While she is treating a patient, she may not be able to return to the parked ambulance to check the drug box or change the vehicle conditions.
 
-The main purpose of the system is to monitor the temperature inside the Controlled Drug Box automatically and notify
-Shannon only when the temperature is approaching the allowed limit or exceeds it.
+TempSafe is designed to monitor the temperature inside the Controlled Drug Box automatically over time and provide clear feedback only when attention is required.
 
 ## Goals
 
 Shannon wants to:
 
-- make sure controlled drugs are stored within suitable temperature conditions;
+- make sure temperature-sensitive controlled drugs remain within suitable storage conditions;
 - avoid spending time on regular manual temperature checks;
-- receive an early warning if the temperature approaches the allowed limit;
-- receive an alert if the temperature exceeds the configured limit;
-- review temperature history after a temperature excursion;
-- quickly understand whether any action is required;
-- receive only important notifications that do not distract her from emergency work.
+- receive an early warning if the temperature is approaching the configured limit;
+- know how long the medication has been exposed to an elevated temperature;
+- quickly understand whether a temperature excursion has occurred;
+- receive clear feedback without needing to open the phone application every time;
+- receive only important notifications that do not distract her from emergency care.
 
 ## User Needs
 
 The Advanced Paramedic needs a system that:
 
-- works automatically;
-- does not require regular interaction;
-- is reliable;
-- is easy to understand;
-- runs continuously in the background;
-- constantly monitors the temperature inside the Controlled Drug Box;
-- sends warnings only when attention is required;
-- automatically stores temperature data;
-- records temperature excursions;
-- shows how long the temperature remained above the configured limit;
-- avoids unnecessary notifications.
+- works automatically in the background;
+- continuously monitors temperature over time;
+- does not require regular user interaction while conditions are normal;
+- records the duration and maximum temperature of a temperature excursion;
+- provides clear visual feedback directly on the box;
+- provides an audible warning when urgent attention is required;
+- sends a phone notification when the temperature approaches or exceeds the configured limit;
+- uses clear text as well as colour so that the status is not communicated by colour alone;
+- is simple and reliable to use under pressure.
 
 ## Frustrations
 
 Shannon may experience the following problems:
 
-- she has limited time for additional manual checks during emergency calls;
-- the temperature inside the ambulance can change significantly during a shift;
+- she cannot leave a patient during emergency care simply to check the temperature of a box in the ambulance;
+- the temperature inside a parked ambulance can rise significantly even when the outside temperature is moderate;
 - the outside air temperature does not show the actual conditions inside a closed vehicle safe;
-- a parked ambulance may heat up, especially if it remains in direct sunlight;
-- without automatic monitoring, a temperature problem may only be noticed after the medicines have already been exposed;
-- regular manual temperature checks take additional time;
+- without continuous monitoring, she may not know how long the medicines were exposed to a high temperature;
+- regular manual checks take additional time;
 - too many unnecessary notifications may be distracting;
+- a status shown only by colour may be unclear or inaccessible;
 - complicated interfaces are difficult to use in emergency situations.
 
 ## Technology Use
 
-Shannon regularly uses a smartphone and digital systems at work.
+Shannon regularly uses a smartphone and digital systems at work, but TempSafe should require minimal interaction.
 
-The system should require minimal interaction.
+If the storage conditions remain normal, Shannon should not need to check or enter anything manually. The system should monitor the box continuously and provide local feedback through an LED indicator.
 
-If the temperature inside the Controlled Drug Box remains within the normal range, Shannon should not need to check or
-enter anything manually.
-
-The system should operate automatically in the background.
-
-The application is mainly used when:
-
-- the user receives a warning;
-- the temperature exceeds the configured limit;
-- the current status needs to be reviewed;
-- the user needs to review the history of a temperature event.
+The web application is mainly used when Shannon receives a warning or alert, or when she needs to review the temperature history and duration of an excursion.
 
 ## Typical Scenario
 
-During a shift, the ambulance is parked for a period of time.
+During an emergency call, Shannon is treating a patient away from the ambulance. The ambulance is parked outside in direct sunlight. The outside temperature may be moderate, for example around **18°C**, but the temperature inside the vehicle and the enclosed storage area can rise much higher.
 
-The Controlled Drug Box is stored inside the Vehicle Security Safe in the ambulance.
+Shannon cannot leave the patient to return to the ambulance and manually check the Controlled Drug Box or turn on the air conditioning.
 
-Shannon does not check the temperature manually because the IoT system continuously monitors it.
+TempSafe continuously monitors the temperature inside the box and records how the temperature changes over time.
 
-As long as the temperature remains within the normal range, the system works in the background and requires no action
-from the user.
+While the temperature remains normal, the system requires no action. A **green LED** provides a simple local indication that the monitored conditions are normal.
 
-If the temperature begins to approach the configured limit, Shannon receives an early warning:
+If the temperature reaches the early-warning range, the LED changes to **amber** and TempSafe sends a phone notification with a clear message, for example:
 
 > **Warning: Controlled Drug Box temperature has reached 24°C.**
 
-This gives her an opportunity to take action before the upper storage limit is exceeded.
-
-If the temperature rises above **25°C**, the system sends a higher-priority notification:
+If the temperature exceeds **25°C**, the LED changes to **red**, the buzzer provides an audible alert, and the system records the temperature excursion. A higher-priority phone alert is also sent:
 
 > **Alert: Controlled Drug Box temperature has exceeded 25°C.**
 
-At the same time, the system automatically records:
-
-- the date and time of the excursion;
-- the maximum recorded temperature;
-- the amount of time the temperature remained above the configured limit.
-
-After receiving the alert, Shannon can open the application and review the details.
+TempSafe records the start time, maximum temperature and duration of the excursion so Shannon can review what happened after the immediate emergency situation.
 
 ## Environment
 
-The system is designed for use **inside an ambulance**.
+TempSafe is designed specifically for use in an ambulance.
 
-Controlled drugs are stored in a secure **Controlled Drug Box**, which is placed inside a **Vehicle Security Safe** in
-the ambulance.
+The Controlled Drug Box is kept inside a Vehicle Security Safe in the vehicle. Because this is an enclosed storage area, its temperature can differ significantly from the outside air temperature.
 
-This is a closed storage area, so the temperature inside it may differ from the outside temperature.
+Research on medication storage in emergency vehicles has shown that medication storage areas can become considerably hotter than the outdoor environment. In one study, the temperature inside an insulated drug pouch reached more than **40°C**.
 
-Even when the outdoor temperature is moderate, the inside of the ambulance and the enclosed storage area may become
-significantly warmer, especially if the vehicle is parked in direct sunlight for a period of time.
-
-Research on medication storage in emergency vehicles has shown that temperatures inside vehicles and medication storage
-areas can rise significantly above outside temperatures. In one study, the temperature inside an insulated drug pouch
-reached more than 40°C, despite substantially lower outdoor temperatures.
-
-For this reason, the outside temperature is not a reliable indicator of the storage conditions for controlled drugs.
-
-In this project, the temperature is measured **directly inside the Controlled Drug Box**, close to the medicines.
-
-The system should operate continuously and automatically while the ambulance is in use.
+For this reason, TempSafe measures the temperature directly inside the Controlled Drug Box rather than relying on the outside temperature.
 
 ## Tasks
 
-The Advanced Paramedic should not need to check the temperature manually on a regular basis.
-
-The system should automatically:
+The Advanced Paramedic should not need to perform regular manual temperature checks. TempSafe should automatically:
 
 - measure the temperature inside the Controlled Drug Box;
-- store temperature readings;
-- operate without user input while the temperature is normal;
-- send an early warning when the temperature approaches the configured limit;
-- send an alert when the temperature exceeds 25°C;
-- record a temperature excursion;
-- store the maximum recorded temperature;
-- store the duration of the temperature excursion.
-
-The user should interact with the system only when attention is required.
+- record temperature readings over time;
+- operate without user input while conditions are normal;
+- provide green, amber and red LED feedback for quick local status recognition;
+- send an early phone warning when the temperature approaches the configured limit;
+- use the buzzer and a higher-priority alert when the configured upper limit is exceeded;
+- record the start time, maximum temperature and duration of a temperature excursion;
+- allow the user to review the recorded event later.
 
 ## Main Use Case
 
-**The IoT system continuously monitors the temperature inside the Controlled Drug Box located in the ambulance security
-safe.**
+TempSafe continuously monitors temperature over time inside the Controlled Drug Box located in the ambulance security safe.
 
-If the temperature remains within the normal range, the system operates in the background and requires no action from
-the Advanced Paramedic.
+While conditions are normal, the system works in the background and requires no action from Shannon.
 
-If the temperature approaches the configured limit, the system automatically sends an early warning.
+If the temperature approaches the configured limit, TempSafe provides an early warning through the LED indicator and a phone notification. If the temperature exceeds the limit, it provides stronger visual and audible feedback and records how long the excursion lasts.
 
-If the temperature exceeds **25°C**, the system sends an alert and automatically records the temperature excursion.
-
-The Advanced Paramedic receives a notification only when the storage conditions require attention.
+The aim is to give the Advanced Paramedic useful information at the right time without adding unnecessary manual checks during patient care.
 
 ## System
 
-The system includes:
+The TempSafe system includes:
 
 - **Controlled Drug Box** – secure container used to store controlled drugs;
 - **Vehicle Security Safe** – secure safe inside the ambulance where the Controlled Drug Box is kept;
 - **Raspberry Pi** – collects and processes sensor data;
-- **DHT22 sensor** – measures the temperature inside the Controlled Drug Box;
+- **DHT22 temperature sensor** – measures the temperature inside the Controlled Drug Box;
+- **LED indicator** – provides immediate visual feedback about the temperature status;
+- **Buzzer** – provides audible feedback when urgent attention is required;
 - **Database / Data Storage** – stores temperature readings and temperature excursion events;
-- **Web Application** – displays current status, alerts and historical data;
+- **Web Application** – displays current status, temperature history, alerts and excursion duration;
 - **Notification System** – sends warnings and alerts to the user;
 - **Internet Connection** – allows data to be transferred from the Raspberry Pi to the application.
 
-## Temperature Logic
+## Temperature and Feedback Logic
 
-The prototype uses the following temperature logic:
+The prototype uses the following temperature and feedback logic:
 
-- **Below 24°C – Normal**
-- **24°C to 25°C – Warning**
-- **Above 25°C – Alert**
+- **Below 24°C – Normal:** green LED, no alert;
+- **24°C to 25°C – Warning:** amber LED and early phone warning;
+- **Above 25°C – Temperature excursion:** red LED, buzzer and high-priority phone alert.
 
-The **24°C threshold** is an early-warning level created for the project.
+The **24°C threshold** is a project-defined early warning. The **25°C threshold** is used in the prototype as the upper storage limit for Morphine Sulphate and Fentanyl.
 
-It allows the user to be notified before the maximum storage temperature is exceeded.
-
-The **25°C threshold** is used in the project as the upper storage limit for **Morphine Sulphate** and **Fentanyl**.
+Colour is not used as the only form of communication. The web interface also displays a clear text status and the measured temperature, and the buzzer provides an additional form of feedback for urgent events.
 
 ## Main Project Value
 
-The main purpose of the system is not to make the Advanced Paramedic check the medicines more often.
+The main purpose of TempSafe is not to give the Advanced Paramedic more data to check. It is designed to reduce manual checking and provide useful feedback only when the storage conditions require attention.
 
-Instead, the system is designed to **reduce manual checks and save time**.
+The key information is not only the current temperature, but also **temperature over time**: whether an excursion occurred, how high the temperature became, and how long it lasted.
 
-The temperature is monitored automatically.
+TempSafe supports the existing work of the Advanced Paramedic instead of requiring the user to constantly adapt to the technology.
 
-If the storage conditions are normal, the user receives no notification and does not need to take any action.
-
-The system attracts the Advanced Paramedic’s attention only when the temperature begins to approach a potentially unsafe
-level or exceeds it.
-
-> **An automatic IoT temperature-monitoring system for a Controlled Drug Box inside an ambulance, designed to work in
-the background and notify the Advanced Paramedic only when the temperature approaches or exceeds the configured storage
-limit.**
+> **TempSafe is an automatic IoT monitoring system for a Controlled Drug Box that tracks temperature over time and gives clear visual, audible and mobile feedback when storage conditions require attention.**
