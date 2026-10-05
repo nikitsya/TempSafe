@@ -3,7 +3,7 @@
 **Class Group:** SD3a-G2  
 **Team Size:** 3 members
 
-**Documentation last updated:** 4 October 2026
+**Documentation last updated:** 5 October 2026
 
 ## Team Members
 
@@ -31,12 +31,65 @@ experienced a temperature change and when it occurred.
 
 ## Our Solution
 
-Smart Box monitors the temperature inside the box, keeps a history of readings and warns when a reading falls outside
-the configured range. Staff can check the latest information and review earlier changes.
+The planned prototype will monitor the temperature inside the box, keep a history of sample attempts and warn when a
+valid reading falls outside a configured temperature profile. Staff will be able to check the latest information and
+review earlier changes.
 
 For example, if the temperature rises above the set limit during a shift, the system highlights the change. The
 responsible person can check the box and follow their service's procedures. The recorded history remains available for
 later review.
+
+## Planned Features
+
+- User sign-in and access restricted to assigned boxes.
+- One internal temperature sensor, with proposed sampling every 30 seconds.
+- Current temperature, observation time and device contact time shown separately, with explicit unknown, stale and
+  sensor-error states.
+- Configured, versioned lower and upper temperature limits retained with each observation.
+- A local warning LED that works during a network outage, with a distinct sensor-error indication.
+- Temperature history presented as a graph and readable table, including gaps and out-of-range observations.
+- A durable local queue for at least 24 hours of sample attempts, with retries that do not create duplicate records.
+- Accessible controls and warnings that use text and symbols as well as colour.
+
+Review acknowledgements and estimated excursion periods are Should Have features. Email and push notifications are
+Could Have features and are outside the baseline prototype.
+
+## Proposed Architecture
+
+| Component             | Proposed technology      | Purpose                                                                       |
+|-----------------------|--------------------------|-------------------------------------------------------------------------------|
+| Sensor and controller | DHT22 and Raspberry Pi   | Measure the internal temperature and operate the local warning LED.           |
+| Device software       | Python                   | Record sample attempts, apply the temperature profile and upload data.        |
+| Offline storage       | SQLite                   | Retain pending observations until the backend acknowledges receipt.           |
+| Backend               | Python with FastAPI      | Authenticate users and devices, validate uploads and enforce box permissions. |
+| Central storage       | MySQL with InnoDB        | Store boxes, profiles, access permissions and temperature history.            |
+| Web application       | HTML, CSS and JavaScript | Display temperature, freshness, warnings and history.                         |
+| Communication         | HTTPS with JSON payloads | Transfer observations from the device to the backend.                         |
+
+The Raspberry Pi will sample and queue data locally before sending it to the API. The web application will retrieve
+data through the backend. Delayed uploads will retain their original observation times and enrich history without
+replacing a newer current state.
+
+## Prototype Boundaries
+
+The prototype is intended for bench demonstration and testing with no real medicines. It will not provide automatic
+cooling, GPS tracking, box-opening detection, patient records or integration with ambulance-service clinical systems.
+It will not replace official controlled-drug records or be deployed in a clinical environment.
+
+Temperature limits will be configured through versioned profiles. The sensor research describes a proposed 25°C upper
+limit and a project-defined 24°C early warning; these are prototype research settings, not a universal medicine storage
+range. The functional requirements define classification against the configured lower and upper limits.
+
+## Repository Structure
+
+| Directory   | Intended contents                                            | Current state                                                 |
+|-------------|--------------------------------------------------------------|---------------------------------------------------------------|
+| `docs/`     | Planning, requirements, hardware and research documentation. | Documentation available.                                      |
+| `device/`   | Raspberry Pi sampling, local warnings and offline queue.     | Empty; implementation planned.                                |
+| `backend/`  | API, authentication and data validation.                     | Empty; implementation planned.                                |
+| `database/` | Schema, migrations and database scripts.                     | Empty; example SQL is in the database research document.      |
+| `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                |
+| `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document. |
 
 ## Project Documentation
 
@@ -56,3 +109,7 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 | [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.     |
 | [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.         |
 | [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                |
+
+## Licence
+
+This project is distributed under the [MIT licence](LICENSE).
