@@ -1,25 +1,28 @@
 # Project Scope
 
-The project involves the development of an IoT-based monitoring system for a controlled drug box used in an ambulance.
+**TempSafe** is an IoT monitoring system for a Controlled Drug Box stored inside an ambulance. It continuously monitors temperature over time and alerts the Advanced Paramedic when storage conditions approach or exceed the configured temperature limit.
 
-The main purpose of the system is to monitor the storage temperature of controlled drugs and alert the user if the
-temperature exceeds the recommended limit.
+The project focuses on reducing unnecessary manual temperature checks by providing automatic monitoring, local visual and audible feedback, mobile/web alerts, and a record of temperature-excursion events.
 
 ## Included in the Project
 
-- Monitoring the temperature inside the controlled drug box.
-- Using a temperature sensor connected to a Raspberry Pi.
-- Continuous collection and storage of temperature data.
-- Warning the user when the temperature approaches 25°C or exceeds this limit.
-- Recording temperature history and temperature excursion events.
-- A web-based application for viewing the current temperature, alerts, and historical data.
-- Testing the system using a prototype controlled drug box.
+- Continuous temperature monitoring inside the Controlled Drug Box using a DHT22 sensor.
+- Use of a Raspberry Pi to collect, process and store temperature readings.
+- Monitoring temperature over time, including the start time, maximum temperature and duration of a temperature excursion.
+- Early warning when the temperature approaches 25°C and an alert when it exceeds 25°C.
+- LED visual feedback: green for Normal, amber for Warning and red for Alert.
+- Buzzer feedback when urgent attention is required.
+- A web-based application for viewing current status, alerts and temperature history.
+- Automatic logging of temperature readings and temperature-excursion events.
+- Testing the system using a prototype Controlled Drug Box.
 
 ## Excluded from the Project
 
-- Automatic cooling or temperature regulation inside the drug box.
+- Automatic cooling or temperature regulation of the Controlled Drug Box.
 - Direct integration with National Ambulance Service systems or ePCR.
-- Recording medication administration for individual patients.
-- Replacing official controlled drug records or clinical documentation.
-- Using real controlled drugs during testing.
-- Deploying the prototype in a real ambulance or clinical environment.
+- GPS/location tracking or bag-opening detection.
+- Tracking medication administration to individual patients.
+- Replacing official controlled-drug records or clinical documentation.
+- Automatically deciding whether a medication is clinically safe to use after a temperature excursion.
+- Use of real controlled drugs during testing.
+- Deployment of the prototype in a real ambulance or clinical environment.
