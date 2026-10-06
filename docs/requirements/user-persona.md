@@ -82,6 +82,10 @@ If the temperature reaches the early-warning range, the LED changes to **amber**
 If the temperature exceeds **25°C**, the LED changes to **red**, the buzzer provides an audible alert, and the system records the temperature excursion. A higher-priority phone alert is also sent:
 
 > **Alert: Controlled Drug Box temperature has exceeded 25°C.**
+> 
+When the temperature exceeds **25°C**, the database records the start time of the excursion. The web application shows how long the drugs have been above the safe limit, for example:
+
+> **EXCURSION – 12 min – max 27.4°C**
 
 TempSafe records the start time, maximum temperature and duration of the excursion so Shannon can review what happened after the immediate emergency situation.
 
@@ -128,7 +132,7 @@ The TempSafe system includes:
 - **DHT22 temperature sensor** – measures the temperature inside the Controlled Drug Box;
 - **LED indicator** – provides immediate visual feedback about the temperature status;
 - **Buzzer** – provides audible feedback when urgent attention is required;
-- **Database / Data Storage** – stores temperature readings and temperature excursion events;
+- **Database / Data Storage** – stores temperature readings and temperature excursion events, and tracks each excursion: start time, end time, maximum temperature and duration;
 - **Web Application** – displays current status, temperature history, alerts and excursion duration;
 - **Notification System** – sends warnings and alerts to the user;
 - **Internet Connection** – allows data to be transferred from the Raspberry Pi to the application.
