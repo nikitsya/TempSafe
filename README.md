@@ -120,7 +120,7 @@ and Universal Design checks. Tests have not yet been executed.
 
 ## Generative AI Use
 
-ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis.
+ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis. AI helped create an SVG wiring diagram based on our description of the sensors, components, and pin connections used in the Smart Box project.
 
 ## Licence
 
