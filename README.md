@@ -113,6 +113,10 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 | [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.                                       |
 | [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                                              |
 
+## Generative AI Use
+
+ChatGPT/Codex was used to improve the Markdown formatting and presentation of existing documentation, including tables, headings and text emphasis.
+
 ## Licence
 
 This project is distributed under the [MIT licence](LICENSE).
