@@ -1,7 +1,6 @@
 # Smart Box
 
-**Class Group:** SD3a-G2  
-**Team Size:** 3 members
+**Class Group:** SD3a-G2 **Team Size:** 3 members
 
 **Documentation last updated:** 5 October 2026
 
@@ -46,7 +45,10 @@ later review.
 - Current temperature, observation time and device contact time shown separately, with explicit unknown, stale and
   sensor-error states.
 - Configured, versioned lower and upper temperature limits retained with each observation.
-- A local warning LED that works during a network outage, with a distinct sensor-error indication.
+- A single-colour LED that lights when the temperature reaches the warning range or falls outside the configured limits,
+  including during a network outage; a distinct blink pattern indicates sensor failure.
+- Phone notifications for temperature warnings and alerts when connectivity is available.
+- A buzzer as a Should Have enhancement for audible alerts.
 - Temperature history presented as a graph and readable table, including gaps and out-of-range observations.
 - A durable local queue for at least 24 hours of sample attempts, with retries that do not create duplicate records.
 - Accessible controls and warnings that use text and symbols as well as colour.
@@ -75,7 +77,8 @@ It will not replace official controlled-drug records or be deployed in a clinica
 
 Temperature limits will be configured through versioned profiles. The sensor research describes a proposed 25°C upper
 limit and a project-defined 24°C early warning; these are prototype research settings, not a universal medicine storage
-range. The functional requirements define classification against the configured lower and upper limits.
+range. The functional requirements define Normal, Warning and Alert states using configured limits and an early-warning
+margin. These colours belong to the application; the physical LED does not need to change colour.
 
 ## Repository Structure
 
@@ -97,15 +100,16 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 - `docs/hardware/`: prototype components and hardware documentation.
 - `docs/research/`: evidence, technology comparisons and proposed technical decisions.
 
-| Document                                                                              | Contents                                                                  |
-|---------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
-| [Project scope](docs/project/project-scope.md)                                        | What the prototype includes and excludes.                                 |
-| [Functional requirements and use cases](docs/requirements/functional-requirements.md) | Required system behaviour, priorities, acceptance criteria and use cases. |
-| [User persona](docs/requirements/user-persona.md)                                     | The intended user's goals, tasks and working environment.                 |
-| [Hardware parts list](docs/hardware/hardware-parts-list.md)                           | Prototype components, their purpose and estimated costs.                  |
-| [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.     |
-| [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.         |
-| [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                |
+| Document                                                                              | Contents                                                                                                |
+|---------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| [Project scope](docs/project/project-scope.md)                                        | What the prototype includes and excludes.                                                               |
+| [Functional requirements and use cases](docs/requirements/functional-requirements.md) | Required system behaviour, priorities, acceptance criteria and use cases.                               |
+| [MoSCoW prioritisation](docs/requirements/moscow-prioritisation.md)                   | Feature priorities, user and Universal Design justification, exclusions and decisions for group review. |
+| [User persona](docs/requirements/user-persona.md)                                     | The intended user's goals, tasks and working environment.                                               |
+| [Hardware parts list](docs/hardware/hardware-parts-list.md)                           | Prototype components, their purpose and estimated costs.                                                |
+| [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.                                   |
+| [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.                                       |
+| [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                                              |
 
 ## Licence
 

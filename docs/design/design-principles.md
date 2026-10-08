@@ -22,13 +22,13 @@ immediately and understood at a glance. For this reason, Principle 4 is the most
 
 ### How it affects our design decisions
 
-| Guideline                                                | Design decision in Smart Box                                                                                                                           |
-|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 4a. Use different modes for essential information        | Every alert is shown in more than one way: colour, icon, text and sound or vibration.                                                                  |
-| 4b. Provide adequate contrast                            | Text and key values meet WCAG AA contrast (at least 4.5:1). The dashboard works in bright light and in a dark vehicle.                                 |
-| 4c. Maximise legibility                                  | The current temperature is shown in large, clear numbers. Labels are short and use plain words.                                                        |
-| 4d. Differentiate elements in ways that can be described | Each status has its own name and icon: **Normal**, **Warning**, **Out of range**. Staff can say "the box is out of range" instead of "the box is red". |
-| 4e. Compatibility with assistive technology              | We use semantic HTML, text alternatives for icons and correct labels, so screen readers can read the status.                                           |
+| Guideline                                                | Design decision in Smart Box                                                                                                                                             |
+|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 4a. Use different modes for essential information        | Application warnings use colour, icon and text. Phone notifications are Must Have when connected and permitted. The local LED is single-colour; a buzzer is Should Have. |
+| 4b. Provide adequate contrast                            | Text and key values are planned to meet a minimum contrast ratio of 4.5:1; readability in bright light and a dark vehicle will be tested.                                |
+| 4c. Maximise legibility                                  | The current temperature is shown in large, clear numbers. Labels are short and use plain words.                                                                          |
+| 4d. Differentiate elements in ways that can be described | Each status has its own name and icon: **Normal**, **Warning**, **Alert**. Staff can say "the box is in Alert" instead of "the box is red".                              |
+| 4e. Compatibility with assistive technology              | We use semantic HTML, text alternatives for icons and correct labels, so screen readers can read the status.                                                             |
 
 **Rule:** colour is never the only way to show a problem.
 
@@ -37,47 +37,60 @@ immediately and understood at a glance. For this reason, Principle 4 is the most
 |               |                                                                                                                                                                             |
 |---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Actor**     | Paramedic                                                                                                                                                                   |
-| **Goal**      | Notice quickly that the medicine box is outside its safe temperature range.                                                                                                 |
+| **Goal**      | Notice quickly that the medicine box is outside its configured temperature range.                                                                                           |
 | **Situation** | The paramedic is treating a patient outdoors on a hot day. The box has been in direct sunlight. The paramedic is busy, under stress and cannot look at the screen for long. |
 | **Trigger**   | The temperature inside the box rises above the configured upper limit.                                                                                                      |
 
 **Main flow**
 
 1. The sensor records a reading above the limit.
-2. The system changes the box status to **Out of range**.
-3. The dashboard shows the alert in several ways at the same time: red colour, warning icon, the text "Out of range",
-   and a sound or vibration on the device.
-4. The paramedic notices the alert without reading long text.
-5. When there is time, the paramedic opens the dashboard and sees the current temperature in large numbers and the time
-   the problem started.
-6. The paramedic checks the box and follows the service's procedures.
-7. The reading history keeps the record for later review.
+2. The system changes the box status to **Alert**.
+3. The dashboard shows red colour, a warning icon and the text "Alert". The single-colour LED lights.
+4. A phone notification identifies the box, temperature and observation time when connectivity and permission are
+   available. The delivery channel still needs to be selected and tested; delivery is unavailable during a network
+   outage.
+5. If implemented, the Should Have buzzer sounds locally on Alert. Silencing it does not clear the LED or application
+   warning.
+6. The paramedic notices the alert without reading long text.
+7. When there is time, the paramedic opens the dashboard and sees the current temperature in large numbers and its
+   observation time. Estimated excursion start, duration and maximum-temperature summaries are Should Have enhancements.
+8. The paramedic checks the box and follows the service's procedures.
+9. The reading history keeps the record for later review.
 
 **How Principle 4 supports this use case**
 
 - If the alert used colour only, the paramedic could miss it in bright sunlight or if they have a colour vision
-  deficiency. Icon, text and sound make sure the message gets through (4a).
+  deficiency. Icon and text provide alternatives to colour. Phone notifications add another channel; a buzzer can add
+  sound if implemented (4a).
 - High contrast and large numbers make the temperature readable outdoors and in a dark vehicle (4b, 4c).
-- A clear status name, "Out of range", lets the paramedic tell a colleague exactly what is wrong (4d).
+- A clear status name, "Alert", lets the paramedic tell a colleague exactly what is wrong (4d).
 
 ## Supporting principles
 
 ### Principle 3 – Simple and Intuitive Use
 
 The main screen shows only what staff need first: the current temperature, the status and the time of the last reading.
-The temperature history and settings are on separate screens. This keeps the interface easy to use when the user is
+Temperature history is accessed separately from the primary status view. This keeps the interface easy to use when the
+user is
 tired or under pressure.
 
 ### Principle 5 – Tolerance for Error
 
-The system warns clearly when the temperature moves outside the configured range. Changing the allowed temperature range
-needs a confirmation step, so it cannot be changed by accident. The reading history cannot be deleted from the
-interface, so the record remains available for review.
+The system distinguishes Normal, Warning and Alert from sensor failure, stale readings and missing device contact.
+Invalid readings must never appear as Normal. Temperature profiles are configured by the team and versioned, so
+observations retain their original interpretation.
+
+Local LED feedback continues without Wi-Fi. Buffered readings retain their original times and identifiers; delayed
+uploads must not replace newer current information or trigger misleading current phone alerts. Repeated notifications
+for an unchanged state are suppressed. The interface provides no deletion workflow for recorded history.
+
+These are design intentions to validate against the functional requirements, not claims that testing has already passed.
 
 ## Summary
 
-Smart Box is designed so that a paramedic can understand the condition of the medicine box in a few seconds, in any
-environment. Principle 4 (Perceptible Information) is our key principle, supported by Principle 3 (Simple and Intuitive
+Smart Box is designed so that a paramedic can understand the condition of the medicine box quickly in the intended
+working environment, subject to usability testing. Principle 4 (Perceptible Information) is our key principle, supported
+by Principle 3 (Simple and Intuitive
 Use) and Principle 5 (Tolerance for Error).
 
 ## Reference

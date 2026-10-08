@@ -8,7 +8,7 @@ to collect the following data:
 - Current temperature inside the controlled drug box (°C).
 - Date and time of each temperature reading.
 - Temperature status, for example `Normal`, `Warning` or `Alert`.
-- Duration of any temperature excursion above the configured storage limit.
+- Timestamped out-of-range observations; estimated excursion duration is a Should Have summary.
 
 **Current project scope:** GPS/location tracking and bag-opening detection are not included in this version of the
 project.
@@ -30,7 +30,7 @@ threshold.
 
 **Prototype threshold logic:**
 
-- Below 24°C = `Normal`
+- For valid readings within the configured lower limit: below 24°C = `Normal`
 - 24–25°C = `Warning`
 - Above 25°C = `Alert`
 
@@ -45,8 +45,12 @@ The 24°C warning level is a project-defined early warning, not a clinical stora
 | BME280  | Measures temperature, humidity and air pressure; compact digital sensor                 | More expensive and provides data not required by the current scope |
 
 **Chosen option: DHT22.** It is inexpensive, easy to connect to a Raspberry Pi, and suitable for a student IoT
-prototype. The project will mainly use its temperature readings; humidity can be displayed as additional information if
-required.
+prototype. The project uses temperature readings only. Humidity reporting is outside this release. DS18B20 and BME280
+are comparison alternatives, not additional installed sensors.
+
+The physical single-colour LED is off for Normal and on for Warning or Alert, with a distinct blink pattern for sensor
+failure. The application uses green, amber and red with text and symbols. Phone notifications are Must Have with
+connectivity and permission; the buzzer is Should Have.
 
 ## 4. Proposed system behaviour
 
@@ -54,9 +58,10 @@ required.
 2. The Raspberry Pi receives the sensor readings and stores them with a timestamp.
 3. The web application displays the current temperature and temperature status.
 4. When the temperature reaches the warning range, the system shows an early warning.
-5. If the temperature exceeds 25°C, the system records a temperature-excursion event and displays an alert.
-6. The system records how long the temperature remains above the configured limit so that the event can be reviewed
-   later.
+5. If the temperature exceeds 25°C or falls below the configured lower limit, the system records the out-of-range
+   observation and displays Alert.
+6. Timestamped readings support later review. Estimated excursion duration and maximum-temperature summaries are Should
+   Have enhancements.
 
 ## 5. Short use-case summary
 

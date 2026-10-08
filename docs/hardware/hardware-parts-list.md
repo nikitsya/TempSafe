@@ -1,30 +1,36 @@
 # IoT Controlled Drug Box – Development Parts List
 
 This parts list reflects the current **TempSafe** project scope: continuous temperature monitoring inside a prototype
-controlled drug box using a Raspberry Pi and DHT22 sensor, with local visual and audible feedback using an LED indicator
-and buzzer.
+controlled drug box using a Raspberry Pi and DHT22 sensor, with a single-colour warning LED. A buzzer is a Should Have
+enhancement, subject to component availability and testing.
 
 ## Parts List
 
-| Part                                        | Purpose / Notes                                                                                                                                                                   | Link / Source                                                                                 | Cost           |
-|---------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|----------------|
-| Raspberry Pi                                | Main controller. Collects temperature readings, processes the temperature status, stores data and sends it to the web application. It also controls the LED indicator and buzzer. | Use existing Raspberry Pi if available                                                        | Existing / TBD |
-| DHT22 temperature & humidity sensor         | Measures the temperature inside the controlled drug box. Temperature is the main value used by the project.                                                                       | https://thepihut.com/collections/the-pi-hut/products/dht22-temperature-humidity-sensor-extras | £8.70          |
-| RGB LED or three LEDs (green / amber / red) | Provides immediate visual feedback without requiring the Advanced Paramedic to open the web application. Green = Normal, amber = Warning, red = Alert.                            | Lecturer parts list / The Pi Hut                                                              | TBD            |
-| Active buzzer                               | Provides an audible alert when the temperature exceeds the configured upper limit and urgent attention is required.                                                               | Lecturer parts list / The Pi Hut                                                              | TBD            |
-| LED resistor(s) (approx. 220–330 Ω)         | Protect the LED(s) by limiting current. The exact number depends on whether an RGB LED or separate LEDs are used.                                                                 | Lecturer parts list / The Pi Hut                                                              | TBD            |
-| Full-size breadboard                        | Used to build and test the circuit without soldering.                                                                                                                             | https://thepihut.com/products/full-sized-breadboard                                           | £5.00          |
-| Jumper wires                                | Connect the DHT22, LED indicator, buzzer and breadboard to the Raspberry Pi. Male/Male and Female/Male wires are useful for prototyping.                                          | Lecturer parts list / The Pi Hut                                                              | Approx. €4–8   |
-| Pull-up resistor (4.7–10 kΩ)                | May be required for the DHT22 data line, depending on the sensor module used.                                                                                                     | May already be included with the DHT22 module                                                 | €0–6           |
-| microSD card                                | Stores Raspberry Pi OS, project software and local log data.                                                                                                                      | Any compatible microSD card, e.g. 32 GB                                                       | Existing / TBD |
-| Power supply / power bank                   | Powers the Raspberry Pi, sensor and feedback devices during testing. The exact option depends on the Raspberry Pi model.                                                          | To be selected after the Raspberry Pi model is confirmed                                      | TBD            |
-| Controlled drug box / prototype case        | Physical enclosure used to demonstrate sensor installation, temperature monitoring and local feedback. No real controlled drugs will be used.                                     | Use an existing suitable lockable case/box                                                    | Existing / TBD |
+| Part                                 | Purpose / Notes                                                                                                                                                                                                            | Link / Source                                                                                 | Cost           |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|----------------|
+| Raspberry Pi                         | Main controller. Collects temperature readings, processes the temperature status, stores data and sends it to the web application. It controls the LED indicator and, if implemented, the buzzer.                          | Use existing Raspberry Pi if available                                                        | Existing / TBD |
+| DHT22 temperature & humidity sensor  | Measures the temperature inside the controlled drug box. Only temperature is used; humidity reporting is outside this release.                                                                                             | https://thepihut.com/collections/the-pi-hut/products/dht22-temperature-humidity-sensor-extras | £8.70          |
+| Single-colour LED                    | Provides immediate visual feedback without requiring the Advanced Paramedic to open the web application. Lights for Warning or Alert; off for Normal; distinct blinking for sensor failure. No RGB capability is required. | Lecturer parts list / The Pi Hut                                                              | TBD            |
+| Active buzzer                        | Should Have: provides an audible alert on Alert, with a silence control; not a guaranteed baseline component.                                                                                                              | Lecturer parts list / The Pi Hut                                                              | TBD            |
+| LED resistor(s) (approx. 220–330 Ω)  | Protect the LED(s) by limiting current. Select the resistor value for the actual LED and supply voltage.                                                                                                                   | Lecturer parts list / The Pi Hut                                                              | TBD            |
+| Full-size breadboard                 | Used to build and test the circuit without soldering.                                                                                                                                                                      | https://thepihut.com/products/full-sized-breadboard                                           | £5.00          |
+| Jumper wires                         | Connect the DHT22, LED indicator, buzzer and breadboard to the Raspberry Pi. Male/Male and Female/Male wires are useful for prototyping.                                                                                   | Lecturer parts list / The Pi Hut                                                              | Approx. €4–8   |
+| Pull-up resistor (4.7–10 kΩ)         | May be required for the DHT22 data line, depending on the sensor module used.                                                                                                                                              | May already be included with the DHT22 module                                                 | €0–6           |
+| microSD card                         | Stores Raspberry Pi OS, project software and local log data.                                                                                                                                                               | Any compatible microSD card, e.g. 32 GB                                                       | Existing / TBD |
+| Power supply / power bank            | Powers the Raspberry Pi, sensor and feedback devices during testing. The exact option depends on the Raspberry Pi model.                                                                                                   | To be selected after the Raspberry Pi model is confirmed                                      | TBD            |
+| Controlled drug box / prototype case | Physical enclosure used to demonstrate sensor installation, temperature monitoring and local feedback. No real controlled drugs will be used.                                                                              | Use an existing suitable lockable case/box                                                    | Existing / TBD |
 
 ## Feedback Logic
 
-- **Below 24°C – Normal:** green LED, no buzzer.
-- **24°C to 25°C – Warning:** amber LED and early warning in the application.
-- **Above 25°C – Alert:** red LED, buzzer and high-priority alert in the application.
+- **Normal:** physical LED off; application shows green with a text label and symbol.
+- **Warning:** physical LED on; application shows amber with text and a symbol; send a phone notification when
+  connected.
+- **Alert:** physical LED on; application shows red with text and a symbol; send a phone notification when connected.
+  Sound the buzzer if implemented.
+- **Sensor failure:** distinct LED blinking and an explicit application error, never Normal.
+
+For the existing demo example, Warning starts at 24°C and high-temperature Alert starts above 25°C. Configured
+lower-limit violations also produce Alert.
 
 The LED and buzzer are **output / feedback devices**, not sensors. The DHT22 remains the main sensor used to collect
 environmental data.

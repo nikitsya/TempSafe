@@ -2,7 +2,8 @@
 
 **Updated:** 4 October 2026.
 
-**Scope:** one internal temperature sensor for a paramedic medication box.
+**Scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
+paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
 
 The device records temperature inside a portable medication box. MySQL is the proposed central database; SQLite provides
 a durable offline queue on the Raspberry Pi.
@@ -25,14 +26,14 @@ is not included in this schema.
 
 ## 2. Data requirements
 
-| Data                   | Example fields                                           | Proposed policy                                                    | Purpose                                             |
-|------------------------|----------------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------|
-| Box metadata           | Box ID, name, last contact                               | Provisioned once; contact updated on authenticated device requests | Identify the monitored box and connection freshness |
-| Temperature samples    | Sample ID, sequence number, temperature Celsius, quality | Every 30 seconds, including explicit failed sample attempts        | Current state and history                           |
-| Timing                 | Observed-at UTC, received-at UTC, clock reliability      | Every sample; preserve original values on retry                    | Distinguish historical uploads and uncertain timing |
-| Threshold profiles     | Profile ID, lower/upper limits, source note, demo flag   | Immutable version for each configuration change                    | Reproduce the interpretation applied when recorded  |
-| User access            | User ID and permitted box IDs                            | On provisioning/change                                             | Enforce authorisation                               |
-| Review acknowledgement | Sample ID, reviewer, reviewed-at                         | Optional Should Have workflow                                      | Record review without altering measurements         |
+| Data                   | Example fields                                                            | Proposed policy                                                    | Purpose                                             |
+|------------------------|---------------------------------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------|
+| Box metadata           | Box ID, name, last contact                                                | Provisioned once; contact updated on authenticated device requests | Identify the monitored box and connection freshness |
+| Temperature samples    | Sample ID, sequence number, temperature Celsius, quality                  | Every 30 seconds, including explicit failed sample attempts        | Current state and history                           |
+| Timing                 | Observed-at UTC, received-at UTC, clock reliability                       | Every sample; preserve original values on retry                    | Distinguish historical uploads and uncertain timing |
+| Threshold profiles     | Profile ID, lower/upper limits, warning threshold, source note, demo flag | Immutable version for each configuration change                    | Reproduce the interpretation applied when recorded  |
+| User access            | User ID and permitted box IDs                                             | On provisioning/change                                             | Enforce authorisation                               |
+| Review acknowledgement | Sample ID, reviewer, reviewed-at                                          | Optional Should Have workflow                                      | Record review without altering measurements         |
 
 Heartbeats are sent every 60 seconds. Proposed contact timeout is 3 minutes. The
 device needs at least 24 hours of local queue capacity (2,880 sample attempts).
@@ -118,12 +119,13 @@ CREATE TABLE threshold_profiles
     box_id      VARCHAR(64)   NOT NULL,
     lower_c     DECIMAL(5, 2) NOT NULL,
     upper_c     DECIMAL(5, 2) NOT NULL,
+    warning_c DECIMAL(5, 2) NOT NULL,
     source_note TEXT          NOT NULL,
     is_demo     BOOLEAN       NOT NULL DEFAULT TRUE,
     created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     UNIQUE KEY uq_profile_box (profile_id, box_id),
     FOREIGN KEY (box_id) REFERENCES boxes (box_id),
-    CHECK (lower_c < upper_c),
+    CHECK (lower_c < warning_c AND warning_c < upper_c),
     CHECK (is_demo IN (0, 1))
 ) ENGINE=InnoDB;
 
@@ -178,9 +180,9 @@ SELECT s.sample_id,
        b.last_seen_at,
        CASE
            WHEN s.quality <> 'valid' THEN 'unknown'
-           WHEN s.temperature_c < p.lower_c THEN 'low'
-           WHEN s.temperature_c > p.upper_c THEN 'high'
-           ELSE 'within_range' END AS recorded_band
+           WHEN s.temperature_c < p.lower_c OR s.temperature_c > p.upper_c THEN 'Alert'
+           WHEN s.temperature_c >= p.warning_c THEN 'Warning'
+           ELSE 'Normal' END AS recorded_band
 FROM temperature_samples s
          JOIN threshold_profiles p ON p.profile_id = s.profile_id
          JOIN boxes b ON b.box_id = s.box_id
