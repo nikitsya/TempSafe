@@ -1,6 +1,8 @@
 # Smart Box
 
-**Class Group:** SD3a-G2 **Team Size:** 3 members
+**Class Group:** SD3a-G2 
+
+**Team Size:** 3 members
 
 **Documentation last updated:** 5 October 2026
 
