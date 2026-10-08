@@ -120,9 +120,7 @@ and Universal Design checks. Tests have not yet been executed.
 
 ## Generative AI Use
 
-ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis; help structure
-Sprint tasks and Definitions of Done; draft MoSCoW justifications and the initial test plan; and revise project
-documentation and presentation text for consistency.
+ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis.
 
 ## Licence
 
