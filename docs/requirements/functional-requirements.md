@@ -14,7 +14,7 @@ project direction.
 
 | Element      | Proposed definition                                                                                                                                       |
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Users        | Paramedic or staff member authorised to monitor assigned boxes; exact operational responsibility to be validated                                          |
+| Users        | Paramedic or staff member authorised to monitor the single shared prototype box; exact operational responsibility to be validated                         |
 | Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                                            |
 | Systems      | One temperature sensor, Raspberry Pi, local SQLite queue, authenticated HTTPS API, MySQL database and web application                                     |
 | Environments | Portable medication box used in an emergency-service context; initial demonstration on a bench with no medicines; intermittent Wi-Fi/hotspot connectivity |
@@ -24,7 +24,7 @@ project direction.
 | ID    | Requirement                                          | Priority | Acceptance criteria                                                                                                                                                                                                                                                                                            |
 |-------|------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | FR-01 | Sign in and sign out                                 | Must     | Valid credentials grant a session; invalid credentials do not; sign-out invalidates the session                                                                                                                                                                                                                |
-| FR-02 | Restrict access to assigned boxes                    | Must     | Both UI and API enforce box permissions; changing a box ID does not expose another user's data                                                                                                                                                                                                                 |
+| FR-02 | Restrict access to the assigned prototype box        | Must     | Multiple authorised users can access the same prototype box; UI and API deny access to unassigned users; unknown box IDs expose no data                                                                                                                                                                        |
 | FR-03 | Measure and record internal temperature              | Must     | Each sample attempt has a unique ID, box ID, persistent sequence number, UTC observation time (or explicit unreliable-clock status), profile ID and quality status; valid readings are recorded in degrees Celsius                                                                                             |
 | FR-04 | Show the latest temperature and its freshness        | Must     | Show value, unit, observation time and last device contact separately; show unknown before any reading and stale when readings are old; a newer sensor error is visible even if the last valid value remains in history                                                                                        |
 | FR-05 | Classify valid samples against a configured profile  | Must     | With limits L < W < U: T < L or T > U is Alert; W <= T <= U is Warning; L <= T < W is Normal. W is the configured early-warning threshold; invalid samples are unknown, never Normal; preserve the applied profile                                                                                             |
@@ -55,15 +55,15 @@ medicine storage range.
 
 ## 5. Use cases
 
-### UC-01 — Sign in and select a box
+### UC-01 — Sign in and open the prototype box
 
 **Actor:** Authorised user. **Requirements:** FR-01, FR-02.
 
-1. User signs in and sees assigned boxes.
-2. User selects a box.
+1. User signs in.
+2. An assigned user opens the single prototype box dashboard; other assigned users can access the same box.
 3. Backend checks permissions on every request.
 
-Invalid credentials, an empty assignment list and denied access have explicit UI states.
+Invalid credentials, an unassigned user and denied access have explicit UI states.
 
 ### UC-02 — Record a sample and provide a local warning
 
@@ -125,9 +125,12 @@ be tested. Phone delivery is not guaranteed during an outage; local LED feedback
 
 ## 6. Traceability and testing
 
+Detailed preconditions, actions, expected results and an execution record are provided in
+the [Initial Test Plan](../testing/initial-test-plan.md).
+
 | Use case | Requirements                      | Planned evidence                                                                                              |
 |----------|-----------------------------------|---------------------------------------------------------------------------------------------------------------|
-| UC-01    | FR-01, FR-02                      | Valid/invalid login, logout and denied cross-box API access                                                   |
+| UC-01    | FR-01, FR-02                      | Valid/invalid login, logout and denied API access for an unassigned user                                      |
 | UC-02    | FR-03, FR-05, FR-06, FR-09, FR-10 | Reference thermometer comparison; synthetic boundary values; disconnected sensor; local LED during Wi-Fi loss |
 | UC-03    | FR-02, FR-04, FR-05, FR-08, FR-11 | Fresh, stale, never-connected and read-failure UI demonstrations                                              |
 | UC-04    | FR-02, FR-07, FR-12, FR-13        | Filtered history, visible gaps, acknowledgement and delayed-event recalculation                               |

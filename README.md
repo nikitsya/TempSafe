@@ -42,7 +42,8 @@ later review.
 
 ## Planned Features
 
-- User sign-in and access restricted to assigned boxes.
+- One physical prototype box with its own box ID; multiple authorised users may be assigned to the same box.
+- User sign-in and access restricted to the assigned prototype box.
 - One internal temperature sensor, with proposed sampling every 30 seconds.
 - Current temperature, observation time and device contact time shown separately, with explicit unknown, stale and
   sensor-error states.
@@ -101,6 +102,7 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 - `docs/requirements/`: user needs, required system behaviour and acceptance criteria.
 - `docs/hardware/`: prototype components and hardware documentation.
 - `docs/research/`: evidence, technology comparisons and proposed technical decisions.
+- `docs/testing/`: initial test plans and, when available, execution evidence.
 
 | Document                                                                              | Contents                                                                                                |
 |---------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
@@ -113,10 +115,14 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 | [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.                                       |
 | [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                                              |
 
+The [Initial Test Plan](docs/testing/initial-test-plan.md) covers functional behaviour, faults, recovery, notifications
+and Universal Design checks. Tests have not yet been executed.
+
 ## Generative AI Use
 
-ChatGPT/Codex was used to improve the Markdown formatting and presentation of existing documentation, including tables,
-headings and text emphasis.
+ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis; help structure
+Sprint tasks and Definitions of Done; draft MoSCoW justifications and the initial test plan; and revise project
+documentation and presentation text for consistency.
 
 ## Licence
 
