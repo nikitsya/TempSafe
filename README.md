@@ -115,7 +115,8 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 
 ## Generative AI Use
 
-ChatGPT/Codex was used to improve the Markdown formatting and presentation of existing documentation, including tables, headings and text emphasis.
+ChatGPT/Codex was used to improve the Markdown formatting and presentation of existing documentation, including tables,
+headings and text emphasis.
 
 ## Licence
 
