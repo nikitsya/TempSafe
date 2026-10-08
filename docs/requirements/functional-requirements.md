@@ -1,6 +1,10 @@
 # Smart Box — Functional Requirements and Use Cases
 
-**Date:** 8 October 2026 **Version:** 0.3 **Status:** Agreed project direction
+**Date:** 8 October 2026 
+
+**Version:** 0.3 
+
+**Status:** Agreed project direction
 
 Priority reasons, Universal Design links and proposed scope decisions are documented in
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
