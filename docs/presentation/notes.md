@@ -4,7 +4,8 @@ Presentation files for the TempSafe application, developed by team Smart Box.
 
 ## Agreed hardware and feature direction
 
-- Must Have: one internal DHT22 temperature sensor, one single-colour warning LED, phone notifications with connectivity
+- Must Have: one internal SCD-41 temperature sensor, one single-colour warning LED, phone notifications with
+  connectivity
   and permission, and the web application with accessible status and history.
 - The physical LED lights for Warning or Alert; it does not change colour. A distinct blink pattern indicates sensor
   failure.

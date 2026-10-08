@@ -60,7 +60,7 @@ later review.
 
 | Component             | Proposed technology      | Purpose                                                                       |
 |-----------------------|--------------------------|-------------------------------------------------------------------------------|
-| Sensor and controller | DHT22 and Raspberry Pi   | Measure the internal temperature and operate the local warning LED.           |
+| Sensor and controller | SCD-41 and Raspberry Pi  | Measure the internal temperature and operate the local warning LED.           |
 | Device software       | Python                   | Record sample attempts, apply the temperature profile and upload data.        |
 | Offline storage       | SQLite                   | Retain pending observations until the backend acknowledges receipt.           |
 | Backend               | Python with FastAPI      | Authenticate users and devices, validate uploads and enforce box permissions. |

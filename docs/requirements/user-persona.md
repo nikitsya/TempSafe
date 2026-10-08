@@ -150,7 +150,7 @@ The TempSafe system includes:
 - **Controlled Drug Box** – secure container used to store controlled drugs;
 - **Vehicle Security Safe** – secure safe inside the ambulance where the Controlled Drug Box is kept;
 - **Raspberry Pi** – collects and processes sensor data;
-- **DHT22 temperature sensor** – measures the temperature inside the Controlled Drug Box;
+- **SCD-41 temperature sensor** – measures the temperature inside the Controlled Drug Box;
 - **LED indicator** – provides immediate visual feedback about the temperature status;
 - **Buzzer** – provides audible feedback when urgent attention is required;
 - **Database / Data Storage** – stores temperature readings and temperature excursion events, and tracks each excursion:

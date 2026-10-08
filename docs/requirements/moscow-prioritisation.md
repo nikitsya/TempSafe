@@ -81,7 +81,7 @@ optional features should not be invented just to fill this category.
 - Phone notifications are Must Have. Select and test the delivery channel and permission handling before implementation
   is considered complete.
 - The buzzer is Should Have; select the part, sound pattern and silence control if implemented.
-- Humidity is outside this release, even though the DHT22 can measure it.
+- Humidity and CO₂ reporting are outside this release, even though the SCD-41 can measure both.
 - Demo upper-temperature settings use 24°C for Warning and above 25°C for Alert; the profile also needs a configured
   lower limit. These are prototype settings, not a universal medicine storage range.
 - Record the clarified priorities and any subsequent group decisions in Scrumwise. This document does not claim that a

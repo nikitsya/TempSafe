@@ -10,7 +10,7 @@ summaries are Should Have enhancements.
 
 ## Included in the Project
 
-- Continuous temperature monitoring inside the Controlled Drug Box using a DHT22 sensor.
+- Continuous temperature monitoring inside the Controlled Drug Box using an SCD-41 sensor.
 - Use of a Raspberry Pi to collect, process and store temperature readings.
 - Monitoring temperature over time through timestamped readings and accessible history. Estimated excursion timing and
   maximum-temperature summaries are Should Have.
