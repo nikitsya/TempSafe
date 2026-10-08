@@ -1,6 +1,6 @@
 # Smart Box
 
-**Class Group:** SD3a-G2 
+**Class Group:** SD3a-G2
 
 **Team Size:** 3 members
 

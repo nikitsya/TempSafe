@@ -1,8 +1,8 @@
 # Smart Box — Functional Requirements and Use Cases
 
-**Date:** 8 October 2026 
+**Date:** 8 October 2026
 
-**Version:** 0.3 
+**Version:** 0.3
 
 **Status:** Agreed project direction
 

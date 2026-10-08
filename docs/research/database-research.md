@@ -119,7 +119,7 @@ CREATE TABLE threshold_profiles
     box_id      VARCHAR(64)   NOT NULL,
     lower_c     DECIMAL(5, 2) NOT NULL,
     upper_c     DECIMAL(5, 2) NOT NULL,
-    warning_c DECIMAL(5, 2) NOT NULL,
+    warning_c   DECIMAL(5, 2) NOT NULL,
     source_note TEXT          NOT NULL,
     is_demo     BOOLEAN       NOT NULL DEFAULT TRUE,
     created_at  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
