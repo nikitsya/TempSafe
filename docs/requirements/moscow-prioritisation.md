@@ -78,7 +78,7 @@ optional features should not be invented just to fill this category.
 ## Confirmed direction and remaining implementation choices
 
 - One internal temperature sensor and one single-colour LED; no RGB LED promise.
-- Phone notifications are Must Have. Select and test the delivery channel and permission handling before implementation
+- Phone notifications are Must Have. Validate the proposed Web Push channel, browser support and permission handling before implementation
   is considered complete.
 - The buzzer is Should Have; select the part, sound pattern and silence control if implemented.
 - Humidity and CO₂ reporting are outside this release, even though the SCD-41 can measure both.

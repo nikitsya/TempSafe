@@ -14,15 +14,17 @@ summaries are Should Have enhancements.
 - Use of a Raspberry Pi to collect, process and store temperature readings.
 - Monitoring temperature over time through timestamped readings and accessible history. Estimated excursion timing and
   maximum-temperature summaries are Should Have.
-- Early warning when the temperature approaches 25°C and an alert when it exceeds 25°C.
+- Classification against versioned lower/upper limits: demonstration Warning begins at 24°C; Alert is above 25°C or
+  below the configured lower limit.
 - A single-colour LED lights for Warning or Alert and uses a distinct blink pattern for sensor failure. Normal leaves it
   off; an unlit LED does not prove acceptable temperature or working power.
 - The application shows Normal, Warning and Alert using green, amber and red, together with text and symbols.
-- Phone notifications for Warning and Alert with connectivity and permission. The delivery channel is still to be
-  selected and tested.
+- Phone notifications for Warning and Alert with connectivity and permission. Web Push is the proposed delivery channel;
+  browser support and delivery still need testing.
 - Buzzer feedback on Alert is Should Have, rather than a guaranteed baseline component.
 - A web-based application for viewing current status, alerts and temperature history.
-- Automatic logging of temperature readings, including quality and original observation times.
+- Automatic logging of sample attempts, including errors, quality and original observation times.
+- Device publishing through MQTT over TLS, a cloud ingestion worker and MySQL; HTTPS for the web API.
 - Testing the system using a prototype Controlled Drug Box.
 
 ## Excluded from the Project

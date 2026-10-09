@@ -1,6 +1,6 @@
 # Smart Box: Database Technology Research
 
-**Updated:** 4 October 2026.
+**Updated:** 9 October 2026.
 
 **Scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
 paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
@@ -17,7 +17,7 @@ is not included in this schema.
 |------------------------|----------------------------------|--------------------------|---------------------------------------------------------------------|
 | Device application     | Raspberry Pi application         | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
 | Device's local storage | SQLite                           | SQL through Python       | Keep an offline upload queue on the device                          |
-| Network messages       | HTTPS API                        | JSON payloads            | Transfer observations to the backend                                |
+| Network messages       | MQTT over TLS                    | JSON payloads            | Publish observations through the broker to the ingestion worker     |
 | Backend                | FastAPI                          | Python                   | Authenticate devices and users, validate messages and retrieve data |
 | Database connector     | MySQL Connector/Python           | Python                   | Let the backend execute parameterised MySQL queries                 |
 | Central database       | MySQL with InnoDB                | SQL                      | Store boxes, access permissions and historical observations         |
@@ -90,6 +90,11 @@ a second competing central database. Proposed intervals are starting values for 
 
 ## 7. Proposed relational schema and queries
 
+This core schema is a proposal, not an executed migration. `auth_subject` stores the local login identifier and
+`password_hash` its Argon2id hash. Session, device-certificate, notification subscription/outbox and maintenance tables
+remain implementation work. [G-CA1 design](../project/iot-gca1-design.md) defines proposed cron jobs, 90-second
+freshness, Web Push and retention settings.
+
 ```sql
 CREATE TABLE boxes
 (
@@ -101,7 +106,8 @@ CREATE TABLE boxes
 CREATE TABLE app_users
 (
     user_id      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    auth_subject VARCHAR(191) NOT NULL UNIQUE
+    auth_subject VARCHAR(191) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE box_access
@@ -251,15 +257,15 @@ retained locally so offline warnings still work.
 
 - Device loop: sample every 30 seconds, validate, classify and control local LED without internet; heartbeat every 60
   seconds when connected.
-- API ingestion: authenticate device, enforce its box identity, validate and deduplicate, preserve historical times and
-  profiles.
+- MQTT ingestion worker: enforce authenticated topic/box identity, validate and deduplicate, preserve historical times
+  and profiles; acknowledge only after database commit. HTTPS serves user-facing API requests.
 - Dashboard: show current freshness, raw history, threshold bands and flagged observations; do not rely on cron for the
   local warning.
 
 ### Security
 
-- Per-device credentials, revocation, HTTPS, request validation and rate limiting; no central DB password on a Pi or in
-  a browser.
+- Per-device credentials, revocation, MQTT over TLS and HTTPS, message/request validation and rate limiting; no central
+  DB password on a Pi or in a browser.
 - Application authentication plus box-level authorisation on every read, review and history endpoint; protected sessions
   and password handling or a managed identity provider.
 - Restricted DB network access, protected connections, least-privilege database accounts, backups and tested restore

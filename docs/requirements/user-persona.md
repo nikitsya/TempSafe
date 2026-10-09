@@ -40,9 +40,9 @@ The Advanced Paramedic needs a system that:
 - works automatically in the background;
 - continuously monitors temperature over time;
 - does not require regular user interaction while conditions are normal;
-- records the duration and maximum temperature of a temperature excursion;
+- records timestamped out-of-range observations; estimated duration and maximum-temperature summaries are Should Have;
 - provides clear visual feedback directly on the box;
-- provides an audible warning when urgent attention is required;
+- can add an audible warning if the Should Have buzzer is implemented;
 - sends a phone notification when the temperature approaches or exceeds the configured limit;
 - uses clear text as well as colour so that the status is not communicated by colour alone;
 - is simple and reliable to use under pressure.
@@ -81,26 +81,28 @@ air conditioning.
 
 TempSafe continuously monitors the temperature inside the box and records how the temperature changes over time.
 
-While the temperature remains normal, the system requires no action. A **green LED** provides a simple local indication
-that the monitored conditions are normal.
+While the temperature remains normal, the system requires no action. The single-colour LED is off; the application shows
+Normal with text and a symbol.
 
-If the temperature reaches the early-warning range, the LED changes to **amber** and TempSafe sends a phone notification
+With connectivity and notification permission, if the temperature reaches the early-warning range, the single-colour LED
+lights and TempSafe sends a phone notification
 with a clear message, for example:
 
 > **Warning: Controlled Drug Box temperature has reached 24°C.**
 
-If the temperature exceeds **25°C**, the LED changes to **red**, the buzzer provides an audible alert, and the system
-records the temperature excursion. A higher-priority phone alert is also sent:
+If the temperature exceeds **25°C**, the LED remains lit and, if implemented, the buzzer provides an audible alert, and
+the system
+records the temperature excursion. With connectivity and permission, a phone Alert is also sent:
 
 > **Alert: Controlled Drug Box temperature has exceeded 25°C.**
 >
-When the temperature exceeds **25°C**, the database records the start time of the excursion. The web application shows
-how long the drugs have been above the safe limit, for example:
+If the Should Have excursion summary is implemented, the web application can show an estimated period and maximum
+temperature, for example:
 
-> **EXCURSION – 12 min – max 27.4°C**
+> **ESTIMATED EXCURSION – 12 min – max 27.4°C**
 
-TempSafe records the start time, maximum temperature and duration of the excursion so Shannon can review what happened
-after the immediate emergency situation.
+The baseline records individual observations for later review. Estimated summaries must break at gaps and invalid
+samples; they do not prove continuous exposure.
 
 ## Environment
 
@@ -123,10 +125,10 @@ The Advanced Paramedic should not need to perform regular manual temperature che
 - measure the temperature inside the Controlled Drug Box;
 - record temperature readings over time;
 - operate without user input while conditions are normal;
-- provide green, amber and red LED feedback for quick local status recognition;
+- provide a single-colour local LED warning and application status text with symbols;
 - send an early phone warning when the temperature approaches the configured limit;
-- use the buzzer and a higher-priority alert when the configured upper limit is exceeded;
-- record the start time, maximum temperature and duration of a temperature excursion;
+- send an Alert when connected and, if implemented, use the optional buzzer locally;
+- retain out-of-range observations; offer estimated timing/maximum summaries if implemented;
 - allow the user to review the recorded event later.
 
 ## Main Use Case
@@ -137,8 +139,8 @@ safe.
 While conditions are normal, the system works in the background and requires no action from Shannon.
 
 If the temperature approaches the configured limit, TempSafe provides an early warning through the LED indicator and a
-phone notification. If the temperature exceeds the limit, it provides stronger visual and audible feedback and records
-how long the excursion lasts.
+phone notification. If the temperature exceeds the limit, it displays Alert and retains the observations; optional
+buzzer and estimated summaries can add feedback.
 
 The aim is to give the Advanced Paramedic useful information at the right time without adding unnecessary manual checks
 during patient care.
@@ -152,26 +154,27 @@ The TempSafe system includes:
 - **Raspberry Pi** – collects and processes sensor data;
 - **SCD-41 temperature sensor** – measures the temperature inside the Controlled Drug Box;
 - **LED indicator** – provides immediate visual feedback about the temperature status;
-- **Buzzer** – provides audible feedback when urgent attention is required;
-- **Database / Data Storage** – stores temperature readings and temperature excursion events, and tracks each excursion:
-  start time, end time, maximum temperature and duration;
-- **Web Application** – displays current status, temperature history, alerts and excursion duration;
+- **Buzzer** – Should Have audible feedback, subject to implementation;
+- **Database / Data Storage** – stores sample attempts and profiles; estimated excursion summaries are Should Have;
+- **Web Application** – displays current status, freshness, history and alerts; estimated excursion duration is
+  optional;
 - **Notification System** – sends warnings and alerts to the user;
 - **Internet Connection** – allows data to be transferred from the Raspberry Pi to the application.
 
 ## Temperature and Feedback Logic
 
-The prototype uses the following temperature and feedback logic:
+For valid readings within the agreed lower limit, the demonstration uses the following upper-temperature feedback logic.
+Values below the configured lower limit also produce Alert; sensor failure is an error state with distinct LED blinking:
 
-- **Below 24°C – Normal:** green LED, no alert;
-- **24°C to 25°C – Warning:** amber LED and early phone warning;
-- **Above 25°C – Temperature excursion:** red LED, buzzer and high-priority phone alert.
+- **Below 24°C – Normal:** physical LED off; application Normal;
+- **24°C to 25°C – Warning:** physical LED on and early phone warning when connected;
+- **Above 25°C – Temperature excursion:** physical LED on, optional buzzer and phone alert when connected.
 
-The **24°C threshold** is a project-defined early warning. The **25°C threshold** is used in the prototype as the upper
-storage limit for Morphine Sulphate and Fentanyl.
+The **24°C threshold** is a project-defined early warning. The **25°C threshold** is a demonstration upper limit drawn
+from the project research; it is not a universal medicine storage range.
 
 Colour is not used as the only form of communication. The web interface also displays a clear text status and the
-measured temperature, and the buzzer provides an additional form of feedback for urgent events.
+measured temperature, and an optional buzzer provides an additional form of feedback for urgent events.
 
 ## Main Project Value
 

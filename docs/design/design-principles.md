@@ -47,7 +47,7 @@ immediately and understood at a glance. For this reason, Principle 4 is the most
 2. The system changes the box status to **Alert**.
 3. The dashboard shows red colour, a warning icon and the text "Alert". The single-colour LED lights.
 4. A phone notification identifies the box, temperature and observation time when connectivity and permission are
-   available. The delivery channel still needs to be selected and tested; delivery is unavailable during a network
+   available. Web Push is proposed and still needs browser/support testing; delivery is unavailable during a network
    outage.
 5. If implemented, the Should Have buzzer sounds locally on Alert. Silencing it does not clear the LED or application
    warning.

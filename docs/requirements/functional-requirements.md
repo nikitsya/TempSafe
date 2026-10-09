@@ -1,10 +1,10 @@
 # Smart Box — Functional Requirements and Use Cases
 
-**Date:** 8 October 2026
+**Date:** 9 October 2026
 
-**Version:** 0.3
+**Version:** 0.4
 
-**Status:** Agreed project direction
+**Status:** Proposed design update for team review
 
 Priority reasons, Universal Design links and proposed scope decisions are documented in
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
@@ -16,10 +16,10 @@ project direction.
 |--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Users        | Paramedic or staff member authorised to monitor the single shared prototype box; exact operational responsibility to be validated                         |
 | Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                                            |
-| Systems      | One temperature sensor, Raspberry Pi, local SQLite queue, authenticated HTTPS API, MySQL database and web application                                     |
+| Systems      | One temperature sensor, Raspberry Pi, local SQLite queue, authenticated MQTT/TLS broker, HTTPS web API, MySQL database and web application                |
 | Environments | Portable medication box used in an emergency-service context; initial demonstration on a bench with no medicines; intermittent Wi-Fi/hotspot connectivity |
 
-## 3. Functional requirements
+## 2. Functional requirements
 
 | ID    | Requirement                                          | Priority | Acceptance criteria                                                                                                                                                                                                                                                                                            |
 |-------|------------------------------------------------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -39,7 +39,7 @@ project direction.
 | FR-14 | Send phone notifications                             | Must     | With connectivity and notification permission, send a clear Warning or Alert notification to authorised recipients; define and test the phone delivery channel, suppress repeated notifications for an unchanged state, distinguish delayed historical events from current alerts and expose delivery failures |
 | FR-15 | Provide an audible buzzer alert                      | Should   | If implemented, sound on Alert, operate locally without Wi-Fi and provide a silence control; silencing does not clear the LED or dashboard state. Define and test the sound pattern and repeat behaviour.                                                                                                      |
 
-## 4. Proposed prototype settings
+## 3. Proposed prototype settings
 
 For the existing demo profile, the early-warning threshold is 24°C and the upper limit is 25°C; the lower limit remains
 to be selected. Boundary tests cover L, W and U, including exact equality. These settings do not define a universal
@@ -49,11 +49,13 @@ medicine storage range.
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Sampling interval  | 30 seconds                                                                                                                                            |
 | Heartbeat interval | 60 seconds; transmitted independently of whether the sensor read succeeds                                                                             |
+| Reading freshness  | Proposed 90 seconds; independent of device contact                                                                                                    |
+| Phone channel      | Proposed Web Push; test permission, browser support and a 60-second online receipt target                                                             |
 | Contact timeout    | 3 minutes                                                                                                                                             |
 | Local buffer       | At least 24 hours (2,880 sample attempts at 30-second intervals)                                                                                      |
 | Threshold profile  | Immutable versioned lower/upper limits, early-warning threshold and source note; configured by the team, not hard-coded as a universal medicine range |
 
-## 5. Use cases
+## 4. Use cases
 
 ### UC-01 — Sign in and open the prototype box
 
@@ -72,8 +74,9 @@ Invalid credentials, an unassigned user and denied access have explicit UI state
 1. Read the internal sensor every 30 seconds.
 2. Record a valid temperature or a sensor-error status; never substitute zero for failure.
 3. Compare a valid value with the provisioned profile and update the local LED.
-4. Persist the sample and transmit it if connectivity is available.
-5. Server authenticates the device, validates its box/profile, and stores the sample idempotently.
+4. Persist the attempt in SQLite before publishing via MQTT over TLS when connected.
+5. The broker authenticates the device; the ingestion worker validates its box/profile, stores the sample idempotently
+   and publishes an application acknowledgement after commit.
 
 A read failure or unsynchronised clock is identified explicitly. A network failure does not stop local sampling or the
 LED. Loss of electrical power stops the prototype; it is not a fail-safe medical alarm.
@@ -105,7 +108,8 @@ Empty and invalid intervals have explanatory states. Gaps are not drawn as proof
 
 1. Continue sampling, local warnings and durable queuing offline.
 2. Reconnect and transmit records with unchanged IDs, sequence numbers and times.
-3. Delete/mark queue entries delivered only after acknowledgement.
+3. Delete/mark queue entries delivered only after application acknowledgement of a committed database record; broker
+   PUBACK is insufficient.
 4. Show restored contact, while showing the actual age of the latest reading.
 
 A lost acknowledgement causes a safe retry. Records older than the latest sample enrich history without rolling current
@@ -115,7 +119,7 @@ status back. Exceeding tested capacity or loss of power is reported as a limitat
 
 **Actor:** Authorised user. **Requirements:** FR-05, FR-14.
 
-1. Enable notifications through the selected phone delivery channel.
+1. Enable notifications through the proposed Web Push channel on a supported browser.
 2. Receive a Warning or Alert notification containing the box identity, temperature and observation time when
    connectivity is available.
 3. Open the application to check current freshness and history.
@@ -123,7 +127,7 @@ status back. Exceeding tested capacity or loss of power is reported as a limitat
 Repeated unchanged states must not flood the phone. Denied permission, missing connectivity and delivery failures must
 be tested. Phone delivery is not guaranteed during an outage; local LED feedback continues.
 
-## 6. Traceability and testing
+## 5. Traceability and testing
 
 Detailed preconditions, actions, expected results and an execution record are provided in
 the [Initial Test Plan](../testing/initial-test-plan.md).
@@ -140,7 +144,7 @@ the [Initial Test Plan](../testing/initial-test-plan.md).
 Buzzer testing (FR-15), if implemented: local activation on Alert, operation without Wi-Fi and silencing without
 clearing the warning.
 
-## 7. UX and boundaries
+## 6. UX and boundaries
 
 - Keyboard-accessible controls, readable labels, Celsius units and accessible table alternative to charts.
 - Clear observation and receipt times; no colour-only warnings.

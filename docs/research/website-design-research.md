@@ -4,7 +4,7 @@
 **Sprint:** Sprint 1 – Design research
 
 > **Note:** This research was done in Sprint 1, when the project was called *Paramedik Box*. The project is now
-> **TempSafe**, and the final visual style was changed to match the team presentation. This file records the options
+> **TempSafe**, and the proposed visual style was changed to match the team presentation. This file records the options
 > explored and the reasons behind the first concept.
 
 ---

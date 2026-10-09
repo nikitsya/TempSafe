@@ -4,7 +4,8 @@
 **Sprint:** Sprint 1 – Design research
 
 > **Note:** This research was done in Sprint 1, when the project was called *Paramedik Box* and the scope still included
-> bag location. The project is now **TempSafe**. The final dashboard uses a different visual style that matches the team
+> bag location. The project is now **TempSafe**. The proposed dashboard uses a different visual style that matches the
+> team
 > presentation, but some ideas from this research were kept: large live values, a clear status, an event list and simple
 > temperature charts.
 

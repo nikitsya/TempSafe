@@ -4,7 +4,7 @@
 
 **Team Size:** 3 members
 
-**Documentation last updated:** 8 October 2026
+**Documentation last updated:** 9 October 2026
 
 ## Team Members
 
@@ -47,6 +47,7 @@ later review.
 - One internal temperature sensor, with proposed sampling every 30 seconds.
 - Current temperature, observation time and device contact time shown separately, with explicit unknown, stale and
   sensor-error states.
+- Proposed Web Push notifications, subject to browser support, permission and delivery testing.
 - Configured, versioned lower and upper temperature limits retained with each observation.
 - A single-colour LED that lights when the temperature reaches the warning range or falls outside the configured limits,
   including during a network outage; a distinct blink pattern indicates sensor failure.
@@ -66,9 +67,10 @@ later review.
 | Backend               | Python with FastAPI      | Authenticate users and devices, validate uploads and enforce box permissions. |
 | Central storage       | MySQL with InnoDB        | Store boxes, profiles, access permissions and temperature history.            |
 | Web application       | HTML, CSS and JavaScript | Display temperature, freshness, warnings and history.                         |
-| Communication         | HTTPS with JSON payloads | Transfer observations from the device to the backend.                         |
+| Communication         | MQTT over TLS; HTTPS     | Publish device data through a broker; serve the browser through HTTPS.        |
 
-The Raspberry Pi will sample and queue data locally before sending it to the API. The web application will retrieve
+The Raspberry Pi will sample and queue data locally before publishing it to the cloud MQTT broker for backend ingestion.
+The web application will retrieve
 data through the backend. Delayed uploads will retain their original observation times and enrich history without
 replacing a newer current state.
 
@@ -93,6 +95,15 @@ margin. These colours belong to the application; the physical LED does not need 
 | `database/` | Schema, migrations and database scripts.                     | Empty; example SQL is in the database research document.      |
 | `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                |
 | `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document. |
+
+## IoT G-CA1 submission
+
+Repository: https://github.com/nikitsya/Smart-Box
+
+The [G-CA1 design](docs/project/iot-gca1-design.md) consolidates the proposal, including secure pub-sub communication,
+cron processing, security and UI wireframes. The [submission checklist](docs/project/iot-gca1-submission-checklist.md)
+records outstanding official forms and team verification. Run `python3 scripts/package-gca1.py` to build the draft ZIP.
+The IoT deadline is 11 October 2026 at 23:55 (Europe/Dublin).
 
 ## Project Documentation
 

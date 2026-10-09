@@ -11,6 +11,12 @@
 | 3                             | GPIO2 / SDA1 | SDA                                 |
 | 5                             | GPIO3 / SCL1 | SCL                                 |
 
+## Proposed LED connections
+
+Physical pin 11 (BCM GPIO17) → 1 kΩ series resistor → LED anode; LED cathode → physical pin 9 (GND). This matches the
+SVG/PNG drawing. Verify the actual LED ratings, polarity and brightness before powering the circuit. The resistor value
+is a proposal, not a measured result.
+
 ## What each part does
 
 | Part                     | Role                                                                                                                   |

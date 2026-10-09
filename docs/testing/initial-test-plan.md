@@ -1,6 +1,6 @@
 # Smart Box / TempSafe - Initial Test Plan
 
-**Date:** 8 October 2026
+**Date:** 9 October 2026
 
 ## Purpose
 
@@ -11,7 +11,8 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 
 - Raspberry Pi 400, Adafruit SCD-41, single-colour LED, suitable resistor, wiring and power supply; prototype box.
 - Reference thermometer for comparison; record its stated accuracy and placement.
-- Device software, local SQLite queue, backend, MySQL and web application when available.
+- Device software, local SQLite queue, MQTT/TLS broker, ingestion worker, backend, MySQL and web application when
+  available.
 - Controllable Wi-Fi, a phone with the chosen notification channel and two authorised users assigned to the same
   physical prototype box, plus an unassigned test user.
 - Synthetic readings and controlled faults for repeatable boundary/recovery tests; these do not prove physical sensor
@@ -21,18 +22,18 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 
 ## Settings to record before execution
 
-| Setting                  | Proposal or required decision                                                                                      |
-|--------------------------|--------------------------------------------------------------------------------------------------------------------|
-| Sampling interval        | 30 seconds                                                                                                         |
-| Heartbeat interval       | 60 seconds                                                                                                         |
-| Device-contact timeout   | 3 minutes                                                                                                          |
-| Offline capacity         | At least 24 hours: 2,880 attempts at 30-second intervals                                                           |
-| Profile                  | L < W < U. Demo W = 24°C; U = 25°C. Lower limit L remains to be agreed.                                            |
-| Stale-reading threshold  | Agree separately from device-contact timeout.                                                                      |
-| Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                         |
-| Notifications            | Select channel; agree recipients, repeat suppression, delivery-time target, failure indication and recovery rules. |
-| LED sensor-error pattern | Define a blink pattern distinguishable from a steady warning.                                                      |
-| Buzzer, if implemented   | Define sound pattern, repetition, silence and reset behaviour.                                                     |
+| Setting                  | Proposal or required decision                                                                                                                 |
+|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| Sampling interval        | 30 seconds                                                                                                                                    |
+| Heartbeat interval       | 60 seconds                                                                                                                                    |
+| Device-contact timeout   | 3 minutes                                                                                                                                     |
+| Offline capacity         | At least 24 hours: 2,880 attempts at 30-second intervals                                                                                      |
+| Profile                  | L < W < U. Demo W = 24°C; U = 25°C. Lower limit L remains to be agreed.                                                                       |
+| Stale-reading threshold  | Proposed 90 seconds; agree and test independently of the 180-second contact timeout.                                                          |
+| Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                                                    |
+| Notifications            | Proposed Web Push; verify browser support/permission, authorised recipients, unchanged-state suppression and 60-second online receipt target. |
+| LED sensor-error pattern | Proposed two short flashes followed by a pause; agree timings and test recognition.                                                           |
+| Buzzer, if implemented   | Define sound pattern, repetition, silence and reset behaviour.                                                                                |
 
 ## Functional tests
 
@@ -73,6 +74,17 @@ results separately.
 | U−0.1, U          | Warning, provided U−0.1 >= W          |
 | U+0.1             | Alert                                 |
 | Invalid / missing | Unknown or sensor error, never Normal |
+
+## Additional secure pub-sub tests
+
+| ID     | Actions                                                                                       | Expected result                                                                                           |
+|--------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| SEC-01 | Connect using missing, revoked or untrusted certificates; try plaintext transport.            | Connections rejected; no fallback to plaintext.                                                           |
+| SEC-02 | Publish to another box topic, forge payload box ID or publish an acknowledgement as a device. | Broker ACL or worker rejects the action; no unauthorised records.                                         |
+| SEC-03 | Receive broker PUBACK, interrupt ingestion before commit and restart the device.              | Pending record remains in SQLite until application acknowledgement after commit.                          |
+| SEC-04 | Replay old heartbeats and upload old samples during an outage.                                | Contact freshness does not advance without a valid current heartbeat challenge/live sample.               |
+| SEC-05 | Run cron jobs twice, overlap runs and force backup failure.                                   | No duplicate transition events; locks prevent overlaps; retention does not run without successful backup. |
+| SEC-06 | Restore an encrypted backup in an isolated test environment.                                  | Authorised restore succeeds and sample IDs/counts reconcile.                                              |
 
 ## Conditional Should Have tests
 

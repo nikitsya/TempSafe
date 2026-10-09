@@ -1,2 +1,6 @@
 .idea/
 Universal Design Project
+
+output/
+__pycache__/
+*.pyc
