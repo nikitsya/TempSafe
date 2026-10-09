@@ -245,14 +245,14 @@ have been executed for the application yet.
 
 ## 9. Assessment traceability
 
-| Criterion                     | Evidence                                                                                                                          |
-|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| Documentation (20%)           | This design, linked scope/requirements and individually identifiable review commits.                                              |
-| Hardware (20%)                | Parts list, wiring SVG/PNG, manufacturer references, power/procurement discussion. A native Fritzing diagram remains outstanding. |
-| Data/storage/processing (20%) | Data contract, database schema/queries, queue semantics and explicit cron entries.                                                |
-| Security/privacy (10%)        | Threat/control/test table and secure pub-sub design.                                                                              |
-| UI/users/testing (20%)        | Wireframes, persona, user stories and functional/automated/end-user test proposals.                                               |
-| Version control (10%)         | Accessible repository and genuine incremental contributions; verify before submission.                                            |
+| Criterion                     | Evidence                                                                                                                                                                                                                                                                               |
+|-------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Documentation (20%)           | This design, linked scope/requirements and individually identifiable review commits.                                                                                                                                                                                                   |
+| Hardware (20%)                | Parts list, [native Fritzing diagram](../hardware/fritzing/prototype_wiring.fzz), manufacturer references and power/procurement discussion. R1 is corrected to a 1 kΩ through-hole resistor; see the [wiring review](../hardware/prototype-wiring.md#fritzing-review--9-october-2026). |
+| Data/storage/processing (20%) | Data contract, database schema/queries, queue semantics and explicit cron entries.                                                                                                                                                                                                     |
+| Security/privacy (10%)        | Threat/control/test table and secure pub-sub design.                                                                                                                                                                                                                                   |
+| UI/users/testing (20%)        | Wireframes, persona, user stories and functional/automated/end-user test proposals.                                                                                                                                                                                                    |
+| Version control (10%)         | Accessible repository and genuine incremental contributions; verify before submission.                                                                                                                                                                                                 |
 
 See the [submission checklist](iot-gca1-submission-checklist.md) for critical items
 

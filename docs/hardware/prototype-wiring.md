@@ -1,6 +1,6 @@
 # Prototype wiring — Raspberry Pi 400 and Adafruit SCD-41
 
-![Proposed prototype wiring](../assets/hardware/prototype-wiring.png)
+[Editable Fritzing diagram](fritzing/prototype_wiring.fzz) — open with **File → Open** in Fritzing.
 
 ## Sensor connections
 
@@ -14,7 +14,8 @@
 ## Proposed LED connections
 
 Physical pin 11 (BCM GPIO17) → 1 kΩ series resistor → LED anode; LED cathode → physical pin 9 (GND). This matches the
-SVG/PNG drawing. Verify the actual LED ratings, polarity and brightness before powering the circuit. The resistor value
+reference wiring diagram. Verify the actual LED ratings, polarity and brightness before powering the circuit. The
+resistor value
 is a proposal, not a measured result.
 
 ## What each part does
@@ -37,3 +38,15 @@ is a proposal, not a measured result.
 - [Adafruit SCD-4x pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts)
 - [Raspberry Pi GPIO documentation and pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-and-the-40-pin-header)
 
+## Fritzing review — 9 October 2026
+
+The [Fritzing file](fritzing/prototype_wiring.fzz) includes the SCD-41 custom part. The Raspberry Pi 4B library part
+represents the Pi 400's equivalent 40-pin GPIO connections; it does not represent the Pi 400's physical enclosure.
+
+Inspection of the saved connections and the installed Fritzing part definitions confirms:
+
+- Sensor VIN → physical pin 1; GND → pin 6; SDA → pin 3; SCL → pin 5.
+- GPIO17 / physical pin 11 → breadboard row 15 A–E → R1 → row 11 A–E → LED anode.
+- LED cathode → row 10 A–E → physical pin 9 / GND.
+
+The Pi needs a separate compatible USB-C 5 V / 3 A supply and uses built-in Wi-Fi for internet access.

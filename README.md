@@ -105,6 +105,9 @@ margin. These colours belong to the application; the physical LED does not need 
 
 ## Project Documentation
 
+The editable [Fritzing prototype diagram](docs/hardware/fritzing/prototype_wiring.fzz) is available with a
+[connection review and R1 correction](docs/hardware/prototype-wiring.md#fritzing-review--9-october-2026).
+
 Documentation is organised by purpose and uses lower-case, hyphen-separated filenames:
 
 - [Shared assets](docs/assets/): organised into `presentation/`, `hardware/` and `research/` (with `website/` and
