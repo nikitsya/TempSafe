@@ -1,4 +1,8 @@
 # Persona – TempSafe
+<img src="Persona2.jpg"
+     alt="Advanced Paramedic"
+     width="220"
+     align="right">
 
 **Name:** Shannon Rice  
 **Age:** 32  
@@ -7,7 +11,7 @@
 **Location:** Ireland
 
 **User type:** Confident smartphone and workplace digital-system user, but not a technical expert.
-
+<br clear="right">
 ## About
 
 Shannon works as an Advanced Paramedic and regularly responds to emergency calls.
