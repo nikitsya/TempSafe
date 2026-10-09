@@ -13,7 +13,8 @@ https://pubmed.ncbi.nlm.nih.gov/21067876/
 
 **Environmental temperature stress on drugs in prehospital EMS**
 
-The study measured drug storage temperatures in emergency vehicles and found that recommended storage temperatures were exceeded for significant periods of time.
+The study measured drug storage temperatures in emergency vehicles and found that recommended storage temperatures were
+exceeded for significant periods of time.
 
 Source:
 https://pubmed.ncbi.nlm.nih.gov/12694141/
