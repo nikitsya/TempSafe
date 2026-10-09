@@ -70,7 +70,7 @@ The system will combine colour with clear text in the web application. This supp
 
 ## 5. Proposed system behaviour
 
-## 1. The DHT22 measures the temperature inside the Controlled Drug Box at regular intervals.
+## 1. The SCD-41 measures the temperature inside the Controlled Drug Box at regular intervals.
 
 ## 2. The Raspberry Pi receives the readings and stores them with a timestamp.
 
