@@ -1,10 +1,25 @@
 # Smart Box: IoT G-CA1 design
 
+**Module:** IoT Development, G-CA1 (joint design work with Universal Design Project)
+
 **Team:** SD3a-G2
 
 **Date:** 9 October 2026
 
 **Submission deadline:** Sunday 11 October, 23:55 (Europe/Dublin).
+
+## Contents
+
+1. [Purpose, users and scope](#1-purpose-users-and-scope)
+2. [Hardware, power and procurement](#2-hardware-power-and-procurement)
+3. [Architecture and secure pub-sub communication](#3-architecture-and-secure-pub-sub-communication)
+4. [Data contract, storage and processing](#4-data-contract-storage-and-processing)
+5. [Security and privacy](#5-security-and-privacy)
+6. [UI and notifications](#6-ui-and-notifications)
+7. [Testing and success criteria](#7-testing-and-success-criteria)
+8. [Responsibilities](#8-responsibilities)
+9. [Assessment traceability](#9-assessment-traceability)
+10. [References](#10-references)
 
 ## 1. Purpose, users and scope
 
@@ -43,11 +58,18 @@ bench scope; uninterrupted mobile connectivity is not claimed.
 
 Before submission, Hanna inventories owned parts and identifies missing LED/resistor, enclosure and cables. Order
 missing parts at the start of implementation.
+Pi, sensor and bench power are listed as existing; enclosure and any missing
+cables/LED/resistor require an inventory check. Wi-Fi connects the Pi to the laboratory router; MQTT uses that internet
+connection rather than a direct laptop cable. No third-party data API is used.
 
 Manufacturer
 references: [Adafruit breakout pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts), [Raspberry Pi GPIO](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-and-the-40-pin-header), [Sensirion SCD41 and linked datasheet](https://sensirion.com/products/catalog/SCD41).
 The SCD41 primarily measures CO₂ using photoacoustic sensing and contains integrated temperature/humidity sensing. Only
 temperature is retained in this project.
+The [Sensirion datasheet, version 1.5, sections 3.5 and 3.6](https://sensirion.com/media/documents/48C4B7FB/64C134E7/Sensirion_SCD4x_Datasheet.pdf)
+describes a five-second update interval in standard periodic mode. The proposed application reads a data-ready
+temperature every 30 seconds; sensor update frequency and stored-sample frequency are different. Validate
+placement/self-heating and any offset against a reference thermometer before interpreting alerts.
 
 ## 3. Architecture and secure pub-sub communication
 
@@ -77,6 +99,14 @@ SSH access.
 | `smartbox/v1/boxes/{box_id}/challenge` | Ingestion worker | Assigned device  | QoS 1, non-retained; expiring single-use heartbeat nonce. |
 | `smartbox/v1/boxes/{box_id}/ack`       | Ingestion worker | Assigned device  | QoS 1, non-retained; committed sample ID.                 |
 
+Each Raspberry Pi can send and receive messages only for its own box. Certificates confirm that the device and server
+are trusted; access can be revoked if credentials are compromised.
+The Pi keeps each reading locally until the server confirms that it has been saved in MySQL. If the reading is sent
+again, its original ID prevents duplicate records. Record numbering continues after a restart.
+Old readings are added to the history but do not make the device appear online. Separate heartbeat messages confirm that
+it is currently connected. These security and reliability measures must be tested before deployment.
+See [Mosquitto configuration](https://mosquitto.org/man/mosquitto-conf-5.html).
+
 ## 4. Data contract, storage and processing
 
 Every 30 seconds, persist an attempt locally before publishing. Heartbeats occur every 60 seconds. Store UTC times and
@@ -105,6 +135,8 @@ ownership. Preserve observation and receipt times separately.
 The [database research](../research/database-research.md) supplies relational tables, foreign keys and parameterised
 queries; [schema.sql](../../database/schema.sql) extracts that proposed schema for review.
 `auth_subject` is the login identifier; `password_hash` stores the Argon2id hash for the proposed local-account design.
+This is a core schema proposal, not a tested migration. Session storage, device certificate registration, notification
+subscriptions/outbox and job-run records require additional tables during implementation.
 Boxes link to users through `box_access`; each sample links to the profile for that box. Optional review records do not
 alter measurements. Local SQLite stores pending messages and the persistent next sequence atomically.
 
@@ -118,6 +150,29 @@ separately from freshness. An old Normal reading cannot establish current Normal
 persistent device sequence, so delayed lower-sequence uploads enrich history without replacing current state. Unreliably
 timed readings remain explicitly unknown in timed history. Estimated excursions are optional: break intervals at
 missing/error samples and label duration as an estimate.
+
+### Scheduled processing with cron
+
+Sampling and immediate local warnings run in the device loop, not cron. On a UTC-configured cloud host, a restricted
+service account runs these proposed jobs:
+
+```cron
+* * * * * /usr/bin/flock -n /run/smartbox/stale.lock /opt/smartbox/.venv/bin/python /opt/smartbox/jobs/check_stale.py
+*/5 * * * * /usr/bin/flock -n /run/smartbox/summary.lock /opt/smartbox/.venv/bin/python /opt/smartbox/jobs/rebuild_summaries.py
+15 2 * * * /usr/bin/flock -n /run/smartbox/backup.lock /opt/smartbox/.venv/bin/python /opt/smartbox/jobs/backup.py
+45 2 * * * /usr/bin/flock -n /run/smartbox/retention.lock /opt/smartbox/.venv/bin/python /opt/smartbox/jobs/apply_retention.py
+```
+
+| Job                | Data processing                                                                                                     |
+|--------------------|---------------------------------------------------------------------------------------------------------------------|
+| Every minute       | Check authenticated live contact age; create one event for a transition to not reporting.                           |
+| Every five minutes | If FR-13 is implemented, recalculate affected estimated summaries after delayed observations; break at gaps/errors. |
+| Daily at 02:15 UTC | Create an encrypted backup, record outcome and copy off-host; separately test restoration.                          |
+| Daily at 02:45 UTC | Apply agreed retention in bounded batches only after a verified successful backup.                                  |
+
+Paths and scripts are deployment examples, not implemented jobs. Provision writable lock directories and log errors.
+Locks prevent overlapping runs; jobs must be idempotent. The retention job must check the recorded backup result rather
+than assume that running later means the backup succeeded.
 
 Provision lock directories with service ownership. Stale checks create one transition event per outage. Summary jobs
 recompute affected periods after delayed uploads. Backups are encrypted and copied off-host; test restoration. Proposed
@@ -143,7 +198,8 @@ credentials and tokens. Provide account/subscription removal and a documented re
 
 ## 6. UI and notifications
 
-[UI wireframes](//TODO) show sign-in, current status and history. They use synthetic values
+[UI concepts and interaction design](../design/ui-design.md) show sign-in, current status and history. They use
+synthetic values
 and are design artefacts, not a functioning application. The authenticated user sees only their assigned box. Display
 temperature/unit, recorded status, observation time, last contact and freshness separately. Provide a date range, graph
 and equivalent table, with visible gaps and error labels. Empty, denied-access, stale, sensor-error and offline states
@@ -193,3 +249,25 @@ have been executed for the application yet.
 | Version control (10%)         | Accessible repository and genuine incremental contributions; verify before submission.                                            |
 
 See the [submission checklist](iot-gca1-submission-checklist.md) for critical items
+
+## 10. References
+
+Access date for web references: 9 October 2026.
+
+- Sensirion
+  (2023), [SCD4x datasheet, version 1.5](https://sensirion.com/media/documents/48C4B7FB/64C134E7/Sensirion_SCD4x_Datasheet.pdf),
+  sections 3.5–3.6: periodic readings and temperature compensation.
+- Adafruit (n.d.), [SCD-4x pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts): breakout
+  connections.
+- Raspberry Pi
+  (n.d.), [Raspberry Pi 400 specifications](https://www.raspberrypi.com/products/raspberry-pi-400/specifications/):
+  controller, wireless connectivity and power.
+- Eclipse Mosquitto (n.d.), [mosquitto.conf manual](https://mosquitto.org/man/mosquitto-conf-5.html): proposed broker
+  certificate and access controls.
+- SQLite (n.d.), [Appropriate uses](https://www.sqlite.org/whentouse.html): embedded local storage rationale.
+- MySQL (n.d.), [InnoDB documentation](https://dev.mysql.com/doc/refman/8.4/en/innodb-storage-engine.html): central
+  relational storage rationale.
+- Beams, C. (n.d.), [How to Write a Git Commit Message](https://chris.beams.io/git-commit): commit-writing guidance.
+- HPRA / Mercury Pharmaceuticals
+  (2024), [Fentanyl injection leaflet](https://assets.hpra.ie/products/Human/14423/f0277fab-f69b-4e45-90ac-a1d83b53ce28.pdf),
+  section 5: one product-specific storage example. It does not establish a universal medicine range.
