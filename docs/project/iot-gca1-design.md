@@ -143,7 +143,7 @@ credentials and tokens. Provide account/subscription removal and a documented re
 
 ## 6. UI and notifications
 
-[UI wireframes](../design/iot-gca1-wireframes.svg) show sign-in, current status and history. They use synthetic values
+[UI wireframes](//TODO) show sign-in, current status and history. They use synthetic values
 and are design artefacts, not a functioning application. The authenticated user sees only their assigned box. Display
 temperature/unit, recorded status, observation time, last contact and freshness separately. Provide a date range, graph
 and equivalent table, with visible gaps and error labels. Empty, denied-access, stale, sensor-error and offline states
