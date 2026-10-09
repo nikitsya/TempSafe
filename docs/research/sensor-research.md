@@ -88,7 +88,7 @@ The system will combine colour with clear text in the web application. This supp
 
 ## 6. Short use-case summary
 
-TempSafe uses a DHT22 sensor connected to a Raspberry Pi to monitor the temperature inside a Controlled Drug Box over time. The Advanced Paramedic does not need to perform regular manual checks while conditions are normal. A green LED shows that conditions are normal. If the temperature approaches the configured limit, the LED changes to amber and the user receives an early warning. If the temperature exceeds 25°C, the LED changes to red, the buzzer sounds, and the system records the temperature excursion and sends an alert. The prototype is designed for monitoring, feedback and logging only; it does not cool the box automatically.
+TempSafe uses a SCD-41 sensor connected to a Raspberry Pi to monitor the temperature inside a Controlled Drug Box over time. The Advanced Paramedic does not need to perform regular manual checks while conditions are normal. A green LED shows that conditions are normal. If the temperature approaches the configured limit, the LED changes to amber and the user receives an early warning. If the temperature exceeds 25°C, the LED changes to red, the buzzer sounds, and the system records the temperature excursion and sends an alert. The prototype is designed for monitoring, feedback and logging only; it does not cool the box automatically.
 
 ## 7. Prototype limitations
 
