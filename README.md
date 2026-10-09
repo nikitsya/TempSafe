@@ -131,12 +131,6 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 The [Initial Test Plan](docs/testing/initial-test-plan.md) covers functional behaviour, faults, recovery, notifications
 and Universal Design checks. Tests have not yet been executed.
 
-## Generative AI Use
-
-ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis. AI helped create an
-SVG wiring diagram based on our description of the sensors, components, and pin connections used in the Smart Box
-project. It was also used to generate an image visualising the proposed prototype.
-
 ## Licence
 
 This project is distributed under the [MIT licence](LICENSE).
