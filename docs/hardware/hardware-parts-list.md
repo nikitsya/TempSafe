@@ -38,7 +38,8 @@ environmental data.
 
 - **Scope note:** The reed switch/opening sensor and GNSS/GPS module are not included in the current version of the
   project.
-- **Project focus:** The prototype focuses on temperature monitoring over time, logging, mobile/web alerts, and clear
+- **Project focus:** The prototype focuses on temperature monitoring over time, logging, web alerts and phone
+  notifications, and clear
   local feedback through light and sound.
 - **Temperature threshold:** The prototype uses **25°C** as the upper temperature limit for alerting, with an early
   warning before the limit is exceeded.

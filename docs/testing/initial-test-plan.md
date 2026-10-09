@@ -22,18 +22,18 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 
 ## Settings to record before execution
 
-| Setting                  | Proposal or required decision                                                                                                                 |
-|--------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| Sampling interval        | 30 seconds                                                                                                                                    |
-| Heartbeat interval       | 60 seconds                                                                                                                                    |
-| Device-contact timeout   | 3 minutes                                                                                                                                     |
-| Offline capacity         | At least 24 hours: 2,880 attempts at 30-second intervals                                                                                      |
-| Profile                  | L < W < U. Demo W = 24°C; U = 25°C. Lower limit L remains to be agreed.                                                                       |
-| Stale-reading threshold  | Proposed 90 seconds; agree and test independently of the 180-second contact timeout.                                                          |
-| Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                                                    |
-| Notifications            | Proposed Web Push; verify browser support/permission, authorised recipients, unchanged-state suppression and 60-second online receipt target. |
-| LED sensor-error pattern | Proposed two short flashes followed by a pause; agree timings and test recognition.                                                           |
-| Buzzer, if implemented   | Define sound pattern, repetition, silence and reset behaviour.                                                                                |
+| Setting                  | Proposal or required decision                                                                                                                                                                    |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Sampling interval        | 30 seconds                                                                                                                                                                                       |
+| Heartbeat interval       | 60 seconds                                                                                                                                                                                       |
+| Device-contact timeout   | 3 minutes                                                                                                                                                                                        |
+| Offline capacity         | At least 24 hours: 2,880 attempts at 30-second intervals                                                                                                                                         |
+| Profile                  | L < W < U. Demo W = 24°C; U = 25°C. Lower limit L remains to be agreed.                                                                                                                          |
+| Stale-reading threshold  | Proposed 90 seconds; agree and test independently of the 180-second contact timeout.                                                                                                             |
+| Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                                                                                                       |
+| Notifications            | Proposed Web Push; verify browser/platform support, home-screen installation where required, permission, authorised recipients, unchanged-state suppression and 60-second online receipt target. |
+| LED sensor-error pattern | Proposed two short flashes followed by a pause; agree timings and test recognition.                                                                                                              |
+| Buzzer, if implemented   | Define sound pattern, repetition, silence and reset behaviour.                                                                                                                                   |
 
 ## Functional tests
 
@@ -115,3 +115,10 @@ participant notes.
 | Test ID                             | Tester / date | Build / settings | Actual result | Status | Evidence / defect link |
 |-------------------------------------|---------------|------------------|---------------|--------|------------------------|
 | To be completed when testing begins | —             | —                | -             | -      | —                      |
+
+## Planned PWA checks
+
+When home-screen installation is implemented, verify the name/icon, launch URL and standalone display on the selected
+phones. Check that browser and home-screen access use the same authorised box and history. Test Web Push from the
+installed web application where the platform requires it, including permission denial and notification links. Confirm
+that offline or stale information remains explicit.
