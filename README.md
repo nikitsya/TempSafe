@@ -124,7 +124,7 @@ and Universal Design checks. Tests have not yet been executed.
 
 ChatGPT/Codex was used to improve Markdown formatting, including tables, headings and text emphasis. AI helped create an
 SVG wiring diagram based on our description of the sensors, components, and pin connections used in the Smart Box
-project.
+project. It was also used to generate an image visualising the proposed prototype.
 
 ## Licence
 
