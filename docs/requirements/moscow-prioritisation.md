@@ -60,8 +60,9 @@ colour; the application uses green, amber and red with labels and symbols.
 
 ## Could Have
 
-No separate Could Have feature is currently selected. Phone notifications are Must Have and the buzzer is Should Have;
-optional features should not be invented just to fill this category.
+A separate native mobile application is a likely follow-up to the web application. It remains provisional until
+the team confirms feasibility, timing and scope. The responsive web application with a FastAPI backend is confirmed;
+PWA support for home-screen access is planned.
 
 ## Won't Have This Time
 

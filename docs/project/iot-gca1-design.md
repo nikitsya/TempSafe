@@ -52,7 +52,8 @@ connection is not yet approved.
 
 Use a compatible 5 V / 3 A USB-C supply for the Pi 400. Keep the controller outside the monitored box and route the
 sensor cable through a protected opening to reduce controller heat effects. This mains arrangement does not provide
-portable operation. A mobile revision must select a regulated power bank capable of the controller's load, measure
+portable operation. A future portable hardware revision must select a regulated power bank capable of the controller's
+load, measure
 runtime and decide between a phone hotspot and a separately researched cellular modem. No GSM module is required for the
 bench scope; uninterrupted mobile connectivity is not claimed.
 
@@ -197,6 +198,11 @@ GPS, medication inventories or real operational records. Restrict access to noti
 credentials and tokens. Provide account/subscription removal and a documented retention policy.
 
 ## 6. UI and notifications
+
+TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
+Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
+in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
+A separate native mobile application is likely to follow the web application, subject to a final team decision.
 
 [UI concepts and interaction design](../design/ui-design.md) show sign-in, current status and history. They use
 synthetic values

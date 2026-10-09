@@ -8,6 +8,13 @@ The project focuses on reducing unnecessary manual temperature checks by providi
 feedback, phone notifications and a record of temperature observations. Audible buzzer feedback and estimated excursion
 summaries are Should Have enhancements.
 
+## Application platform
+
+TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
+Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
+in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
+A separate native mobile application is likely to follow the web application, subject to a final team decision.
+
 ## Included in the Project
 
 - Continuous temperature monitoring inside the Controlled Drug Box using an SCD-41 sensor.
@@ -22,7 +29,7 @@ summaries are Should Have enhancements.
 - Phone notifications for Warning and Alert with connectivity and permission. Web Push is the proposed delivery channel;
   browser support and delivery still need testing.
 - Buzzer feedback on Alert is Should Have, rather than a guaranteed baseline component.
-- A web-based application for viewing current status, alerts and temperature history.
+- A responsive web application with a FastAPI backend for viewing current status, alerts and temperature history.
 - Automatic logging of sample attempts, including errors, quality and original observation times.
 - Device publishing through MQTT over TLS, a cloud ingestion worker and MySQL; HTTPS for the web API.
 - Testing the system using a prototype Controlled Drug Box.

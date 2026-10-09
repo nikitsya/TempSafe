@@ -10,6 +10,11 @@ Priority reasons, Universal Design links and proposed scope decisions are docume
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
 project direction.
 
+TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
+Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
+in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
+A separate native mobile application is likely to follow the web application, subject to a final team decision.
+
 ## 1. Users and context (UTSE)
 
 | Element      | Proposed definition                                                                                                                                       |
@@ -50,7 +55,7 @@ medicine storage range.
 | Sampling interval  | 30 seconds                                                                                                                                            |
 | Heartbeat interval | 60 seconds; transmitted independently of whether the sensor read succeeds                                                                             |
 | Reading freshness  | Proposed 90 seconds; independent of device contact                                                                                                    |
-| Phone channel      | Proposed Web Push; test permission, browser support and a 60-second online receipt target                                                             |
+| Phone channel      | Proposed Web Push; test permission, browser/platform support, required home-screen installation and a 60-second online receipt target                 |
 | Contact timeout    | 3 minutes                                                                                                                                             |
 | Local buffer       | At least 24 hours (2,880 sample attempts at 30-second intervals)                                                                                      |
 | Threshold profile  | Immutable versioned lower/upper limits, early-warning threshold and source note; configured by the team, not hard-coded as a universal medicine range |

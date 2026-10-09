@@ -36,7 +36,7 @@ Shannon wants to:
 - receive an early warning if the temperature is approaching the configured limit;
 - know how long the medication has been exposed to an elevated temperature;
 - quickly understand whether a temperature excursion has occurred;
-- receive clear feedback without needing to open the phone application every time;
+- receive clear feedback without needing to open the web application on her phone every time;
 - receive only important notifications that do not distract her from emergency care.
 
 ## User Needs
@@ -194,4 +194,4 @@ TempSafe supports the existing work of the Advanced Paramedic instead of requiri
 technology.
 
 > **TempSafe is an automatic IoT monitoring system for a Controlled Drug Box that tracks temperature over time and gives
-clear visual, audible and mobile feedback when storage conditions require attention.**
+clear visual, audible and phone-notification feedback when storage conditions require attention.**

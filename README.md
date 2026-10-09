@@ -74,6 +74,13 @@ The web application will retrieve
 data through the backend. Delayed uploads will retain their original observation times and enrich history without
 replacing a newer current state.
 
+## Web application and phone access
+
+TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
+Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
+in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
+A separate native mobile application is likely to follow the web application, subject to a final team decision.
+
 ## Prototype Boundaries
 
 The prototype is intended for bench demonstration and testing with no real medicines. It will not provide automatic
