@@ -37,6 +37,3 @@ is a proposal, not a measured result.
 - [Adafruit SCD-4x pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts)
 - [Raspberry Pi GPIO documentation and pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-and-the-40-pin-header)
 
-## Editable diagram
-
-[SVG source](../assets/hardware/prototype-wiring.svg).
