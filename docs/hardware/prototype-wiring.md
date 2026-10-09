@@ -45,8 +45,15 @@ represents the Pi 400's equivalent 40-pin GPIO connections; it does not represen
 
 Inspection of the saved connections and the installed Fritzing part definitions confirms:
 
-- Sensor VIN → physical pin 1; GND → pin 6; SDA → pin 3; SCL → pin 5.
+- Physical pin 1 / 3.3 V → breadboard A20 → E20 → sensor VIN.
+- Physical pin 6 / GND → breadboard A22 → E22 → sensor GND.
+- Physical pin 3 / GPIO2 SDA → breadboard A24 → E24 → sensor SDA.
+- Physical pin 5 / GPIO3 SCL → breadboard A26 → E26 → sensor SCL.
 - GPIO17 / physical pin 11 → breadboard row 15 A–E → R1 → row 11 A–E → LED anode.
 - LED cathode → row 10 A–E → physical pin 9 / GND.
 
 The Pi needs a separate compatible USB-C 5 V / 3 A supply and uses built-in Wi-Fi for internet access.
+
+Each numbered row connects A–E internally; F–J is a separate group across the centre gap. The sensor connections use
+rows 20, 22, 24 and 26 as four separate junctions, not the side power rails. R1 remains a 1 kΩ through-hole resistor.
+The updated saved connections match the supplied breadboard image.

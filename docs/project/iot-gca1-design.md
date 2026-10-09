@@ -45,7 +45,8 @@ enclosure and accuracy validation.
 Use the team's existing Raspberry Pi 400, Adafruit SCD-41 breakout, microSD card, breadboard, jumper wires and one
 single-colour LED with a current-limiting resistor. See the [parts list](../hardware/hardware-parts-list.md)
 and [wiring drawing](../hardware/prototype-wiring.md). Connect sensor VIN to physical pin 1 (3.3 V), GND to pin 6, SDA
-to pin 3 and SCL to pin 5. Proposed LED connection: physical pin 11 (BCM GPIO17), 1 kΩ series resistor, LED anode; LED
+to pin 3 and SCL to pin 5, through separate breadboard rows 20, 22, 24 and 26 respectively (A–E on each row). Proposed
+LED connection: physical pin 11 (BCM GPIO17), 1 kΩ series resistor, LED anode; LED
 cathode to physical pin 9 (ground). Verify polarity and actual LED ratings before applying power. Never connect an LED
 directly to a GPIO pin. The buzzer is optional and needs a circuit selected from its actual current rating; its GPIO
 connection is not yet approved.
