@@ -96,15 +96,6 @@ margin. These colours belong to the application; the physical LED does not need 
 | `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                |
 | `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document. |
 
-## IoT G-CA1 submission
-
-Repository: https://github.com/nikitsya/Smart-Box
-
-The [G-CA1 design](docs/project/iot-gca1-design.md) consolidates the proposal, including secure pub-sub communication,
-cron processing, security and UI wireframes. The [submission checklist](docs/project/iot-gca1-submission-checklist.md)
-records outstanding official forms and team verification. Run `python3 scripts/package-gca1.py` to build the draft ZIP.
-The IoT deadline is 11 October 2026 at 23:55 (Europe/Dublin).
-
 ## Project Documentation
 
 Documentation is organised by purpose and uses lower-case, hyphen-separated filenames:
