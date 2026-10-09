@@ -57,33 +57,50 @@ The physical single-colour LED is off for Normal and on for Warning or Alert, wi
 failure. The application uses green, amber and red with text and symbols. Phone notifications are Must Have with
 connectivity and permission; the buzzer is Should Have.
 
-## 4. Proposed system behaviour
+## 4. User feedback devices
 
-1. The SCD-41 measures the temperature inside the controlled drug box at regular intervals.
-2. The Raspberry Pi receives the sensor readings and stores them with a timestamp.
-3. The web application displays the current temperature and temperature status.
-4. When the temperature reaches the warning range, the system shows an early warning.
-5. If the temperature exceeds 25°C or falls below the configured lower limit, the system records the out-of-range
-   observation and displays Alert.
-6. Timestamped readings support later review. Estimated excursion duration and maximum-temperature summaries are Should
-   Have enhancements.
+LED and buzzer are not sensors. They are output devices that give the Advanced Paramedic immediate feedback without requiring the user to open the web application.
 
-## 5. Short use-case summary
+| Output device | Purpose | Advantages | Limitations |
+| --- | --- | --- | --- |
+| RGB LED / three LEDs | Provides immediate visual status: green = Normal, amber = Warning, red = Alert | Very quick to understand; visible without opening the app | Colour should not be the only form of communication |
+| Buzzer | Provides an audible alert when urgent attention is required | Can attract attention even when the user is not looking at the box | Should only be used for important alerts to avoid unnecessary distraction |
 
-The controlled drug box will use an SCD-41 sensor connected to a Raspberry Pi to monitor its internal temperature. The
-Raspberry Pi will collect and store temperature readings and make them available to a web application. The application
-will show the current temperature, provide an early warning as the temperature approaches the configured limit, and
-record an alert if the temperature exceeds 25°C.
+The system will combine colour with clear text in the web application. This supports usability and avoids relying on colour alone.
 
-The prototype is designed for monitoring and logging only; it will not cool the box automatically.
+## 5. Proposed system behaviour
 
-## 6. Prototype limitations
+## 1. The DHT22 measures the temperature inside the Controlled Drug Box at regular intervals.
 
-- The system does not automatically cool or regulate the controlled drug box.
-- The prototype will not use real controlled drugs.
-- The project will not integrate directly with NAS clinical or ePCR systems.
-- The prototype is for demonstration and testing and is not intended for clinical deployment.
+## 2. The Raspberry Pi receives the readings and stores them with a timestamp.
 
+## 3. The system calculates the current status and tracks temperature over time.
+
+## 4. Below 24°C, the LED shows green and no alert is sent.
+
+## 5. Between 24°C and 25°C, the LED changes to amber and the system sends an early warning.
+
+## 6. Above 25°C, the LED changes to red, the buzzer sounds, and the system sends a high-priority alert.
+
+## 7. The system records the start time, maximum temperature and duration of the temperature excursion.
+
+## 8. The web application allows the user to review the current status and historical excursion data.
+
+## 6. Short use-case summary
+
+TempSafe uses a DHT22 sensor connected to a Raspberry Pi to monitor the temperature inside a Controlled Drug Box over time. The Advanced Paramedic does not need to perform regular manual checks while conditions are normal. A green LED shows that conditions are normal. If the temperature approaches the configured limit, the LED changes to amber and the user receives an early warning. If the temperature exceeds 25°C, the LED changes to red, the buzzer sounds, and the system records the temperature excursion and sends an alert. The prototype is designed for monitoring, feedback and logging only; it does not cool the box automatically.
+
+## 7. Prototype limitations
+
+The system does not automatically cool or regulate the Controlled Drug Box.
+
+The prototype will not use real controlled drugs.
+
+The project will not integrate directly with NAS clinical or ePCR systems.
+
+The prototype is for demonstration and testing and is not intended for clinical deployment.
+
+The LED and buzzer provide local feedback but do not replace official clinical or medication-storage procedures.
 ## 7. Research sources
 
 - National Ambulance Service (NAS), *NASCG006 – Management and Requisition of Controlled Drugs*, Appendix 11:
