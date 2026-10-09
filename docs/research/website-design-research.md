@@ -13,11 +13,11 @@
 
 *Source: "FATHOM — Understand the Depth" by Cuih on Dribbble*
 
-![FATHOM website – overview](images/website-1-fathom-a.jpg)
+![FATHOM website – overview](../assets/research/website/website-1-fathom-a.jpg)
 
-![FATHOM website – product system](images/website-1-fathom-b.jpg)
+![FATHOM website – product system](../assets/research/website/website-1-fathom-b.jpg)
 
-![FATHOM website – product page](images/website-1-fathom-c.jpg)
+![FATHOM website – product page](../assets/research/website/website-1-fathom-c.jpg)
 
 The first example looks very stylish and modern, and we liked its colour combination. The dark night-sky background with
 white and bright accent colours makes the product stand out and look professional. The layout is clean and simple: a
@@ -28,11 +28,11 @@ product is.
 
 *Source: "Mainbox – Safe Deposit Box Landing Page" by Elux Space on Dribbble*
 
-![Mainbox – hero and feature cards](images/website-2-mainbox-a.jpg)
+![Mainbox – hero and feature cards](../assets/research/website/website-2-mainbox-a.jpg)
 
-![Mainbox – sizes and prices](images/website-2-mainbox-b.jpg)
+![Mainbox – sizes and prices](../assets/research/website/website-2-mainbox-b.jpg)
 
-![Mainbox – how it works](images/website-2-mainbox-c.jpg)
+![Mainbox – how it works](../assets/research/website/website-2-mainbox-c.jpg)
 
 We chose this example because it is clean, bright and easy to read, which is quite different from the dark style of the
 first one. The white background with soft green accents feels calm and trustworthy, and this is important for a product
@@ -44,11 +44,11 @@ the main features of the bag and how the app works.
 
 *Source: "Boxinside – Safe Deposit Box Landing Page" by Elux Design for Elux Space on Dribbble*
 
-![Boxinside – hero with dashboard cards](images/website-3-boxinside-a.jpg)
+![Boxinside – hero with dashboard cards](../assets/research/website/website-3-boxinside-a.jpg)
 
-![Boxinside – features](images/website-3-boxinside-b.jpg)
+![Boxinside – features](../assets/research/website/website-3-boxinside-b.jpg)
 
-![Boxinside – footer](images/website-3-boxinside-c.jpg)
+![Boxinside – footer](../assets/research/website/website-3-boxinside-c.jpg)
 
 What makes this example stand out is the way it mixes a website with dashboard elements. The right side uses a "bento"
 grid of small cards with a chart, a circular progress indicator and data numbers, which is very close to what our app
@@ -60,7 +60,7 @@ small preview of the dashboard directly on our home page.
 
 ## First concept (Sprint 1) – Paramedik website
 
-![Paramedik website concept](images/website-4-paramedik-concept.jpg)
+![Paramedik website concept](../assets/research/website/website-4-paramedik-concept.jpg)
 
 We chose this style because it looks calm, professional and a little different from typical medical websites. The dark
 navy and cream colours are easy on the eyes and give the product a serious, trustworthy feel, which is important for a

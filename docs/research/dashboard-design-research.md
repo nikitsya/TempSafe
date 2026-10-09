@@ -14,7 +14,7 @@
 
 *Source: "FATHOM — Understand the Depth" by Cuih on Dribbble*
 
-![FATHOM dashboard](images/dashboard-1-fathom.jpg)
+![FATHOM dashboard](../assets/research/dashboard/dashboard-1-fathom.jpg)
 
 This dashboard caught our interest because it shows location and sensor data in a simple and elegant way. The coordinate
 grid, the data annotations (location, temperature, depth) and the contour map are similar to what our app needs to show
@@ -25,7 +25,7 @@ clearly without looking too busy.
 
 *Source: "Kemetra – Transportation Management Dashboard UI" by Wavespace – UI/UX Design Agency on Dribbble*
 
-![Kemetra dashboard](images/dashboard-2-kemetra.jpg)
+![Kemetra dashboard](../assets/research/dashboard/dashboard-2-kemetra.jpg)
 
 This dashboard is interesting to us because it combines a live map with real-time sensor data on one screen. The map
 with a location marker, the large live numbers with small charts, and the list of events and alerts are very similar to
@@ -36,7 +36,7 @@ with a side menu, because it is easy to read and use quickly.
 
 *Source: "Server & Hosting Management Dashboard UI/UX Design" by Shakuro on Dribbble*
 
-![Shakuro server dashboard](images/dashboard-3-shakuro.jpg)
+![Shakuro server dashboard](../assets/research/dashboard/dashboard-3-shakuro.jpg)
 
 This dashboard is interesting to us because it shows how to monitor several devices at the same time. The list on the
 left (active and shutdown servers) could work for our app if a team has more than one paramedic bag, with each bag
@@ -47,7 +47,7 @@ could be used to show temperature and humidity changes in a clear and simple way
 
 ## First concept (Sprint 1) – Paramedik sensor dashboard
 
-![Paramedik sensor dashboard concept](images/dashboard-4-paramedik-concept.jpg)
+![Paramedik sensor dashboard concept](../assets/research/dashboard/dashboard-4-paramedik-concept.jpg)
 
 We chose the **Fathom** design because, like our project, it presents a smart product with sensors and data. It shows
 each product clearly, with short labels that explain what it does (for example, *Track | Learn | Evolve*). The navy and

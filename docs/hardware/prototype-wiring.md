@@ -1,6 +1,6 @@
 # Prototype wiring — Raspberry Pi 400 and Adafruit SCD-41
 
-![Proposed prototype wiring](assets/prototype-wiring.png)
+![Proposed prototype wiring](../assets/hardware/prototype-wiring.png)
 
 ## Sensor connections
 
@@ -33,4 +33,4 @@
 
 ## Editable diagram
 
-[SVG source](assets/prototype-wiring.svg).
+[SVG source](../assets/hardware/prototype-wiring.svg).

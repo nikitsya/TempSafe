@@ -98,6 +98,7 @@ margin. These colours belong to the application; the physical LED does not need 
 
 Documentation is organised by purpose and uses lower-case, hyphen-separated filenames:
 
+- [Shared assets](docs/assets/): organised into `presentation/`, `hardware/` and `research/` (with `website/` and `dashboard/` references).
 - `docs/project/`: project scope, delivery schedule and milestones.
 - `docs/requirements/`: user needs, required system behaviour and acceptance criteria.
 - `docs/hardware/`: prototype components and hardware documentation.
