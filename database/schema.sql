@@ -7,8 +7,8 @@ CREATE TABLE boxes
 
 CREATE TABLE app_users
 (
-    user_id      BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    auth_subject VARCHAR(191) NOT NULL UNIQUE,
+    user_id       BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    auth_subject  VARCHAR(191) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL
 ) ENGINE=InnoDB;
 
