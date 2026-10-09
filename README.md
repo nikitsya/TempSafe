@@ -94,14 +94,14 @@ margin. These colours belong to the application; the physical LED does not need 
 
 ## Repository Structure
 
-| Directory   | Intended contents                                            | Current state                                                 |
-|-------------|--------------------------------------------------------------|---------------------------------------------------------------|
-| `docs/`     | Planning, requirements, hardware and research documentation. | Documentation available.                                      |
-| `device/`   | Raspberry Pi sampling, local warnings and offline queue.     | Empty; implementation planned.                                |
-| `backend/`  | API, authentication and data validation.                     | Empty; implementation planned.                                |
-| `database/` | Schema, migrations and database scripts.                     | Empty; example SQL is in the database research document.      |
-| `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                |
-| `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document. |
+| Directory   | Intended contents                                            | Current state                                                   |
+|-------------|--------------------------------------------------------------|-----------------------------------------------------------------|
+| `docs/`     | Planning, requirements, hardware and research documentation. | Documentation available.                                        |
+| `device/`   | Raspberry Pi sampling, local warnings and offline queue.     | Empty; implementation planned.                                  |
+| `backend/`  | API, authentication and data validation.                     | Empty; implementation planned.                                  |
+| `database/` | Schema, migrations and database scripts.                     | Proposed schema in `schema.sql`; database execution is planned. |
+| `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                  |
+| `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document.   |
 
 ## Project Documentation
 
