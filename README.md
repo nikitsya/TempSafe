@@ -4,7 +4,7 @@
 
 **Team Size:** 3 members
 
-**Documentation last updated:** 9 October 2026
+**Documentation last updated:** 10 October 2026
 
 ## Team Members
 
@@ -94,14 +94,15 @@ margin. These colours belong to the application; the physical LED does not need 
 
 ## Repository Structure
 
-| Directory   | Intended contents                                            | Current state                                                   |
-|-------------|--------------------------------------------------------------|-----------------------------------------------------------------|
-| `docs/`     | Planning, requirements, hardware and research documentation. | Documentation available.                                        |
-| `device/`   | Raspberry Pi sampling, local warnings and offline queue.     | Empty; implementation planned.                                  |
-| `backend/`  | API, authentication and data validation.                     | Empty; implementation planned.                                  |
-| `database/` | Schema, migrations and database scripts.                     | Proposed schema in `schema.sql`; database execution is planned. |
-| `frontend/` | Web dashboard and accessible history views.                  | Empty; implementation planned.                                  |
-| `tests/`    | Device, API, data recovery and interface tests.              | Empty; test evidence is planned in the requirements document.   |
+| Directory    | Intended contents                                                       | Current state                                                   |
+|--------------|-------------------------------------------------------------------------|-----------------------------------------------------------------|
+| `docs/`      | Planning, requirements, hardware and research documentation.            | Documentation available.                                        |
+| `device/`    | Raspberry Pi sampling, local warnings and offline queue.                | Empty; implementation planned.                                  |
+| `backend/`   | API, authentication and data validation.                                | Empty; implementation planned.                                  |
+| `database/`  | Schema, migrations and database scripts.                                | Proposed schema in `schema.sql`; database execution is planned. |
+| `prototype/` | Clickable UI prototype with synthetic data and automated browser tests. | HTML/CSS/JS prototype and Playwright tests in `prototype/ui`.   |
+| `frontend/`  | Web dashboard and accessible history views.                             | Empty; implementation planned.                                  |
+| `tests/`     | Device, API, data recovery and interface tests.                         | Empty; test evidence is planned in the requirements document.   |
 
 ## Project Documentation
 
@@ -110,10 +111,11 @@ The editable [Fritzing prototype diagram](docs/hardware/fritzing/prototype_wirin
 
 Documentation is organised by purpose and uses lower-case, hyphen-separated filenames:
 
-- [Shared assets](docs/assets/): organised into `presentation/`, `hardware/` and `research/` (with `website/` and
-  `dashboard/` references).
+- [Shared assets](docs/assets/): organised into `presentation/`, `hardware/`, `research/` (with `website/` and
+  `dashboard/` references), `design/` (UI mock-ups) and `testing/` (test evidence).
 - `docs/project/`: project scope, delivery schedule and milestones.
 - `docs/requirements/`: user needs, required system behaviour and acceptance criteria.
+- `docs/design/`: UI design, mock-ups, wording, style and accessibility documentation.
 - `docs/hardware/`: prototype components and hardware documentation.
 - `docs/research/`: evidence, technology comparisons and proposed technical decisions.
 - `docs/testing/`: initial test plans and, when available, execution evidence.
@@ -128,9 +130,21 @@ Documentation is organised by purpose and uses lower-case, hyphen-separated file
 | [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.                                   |
 | [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.                                       |
 | [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                                              |
+| [UI design and mock-ups](docs/design/ui-design.md)                                    | Sign-in, current status, history and error-state mock-ups with captions.                                |
+| [UI user stories](docs/design/ui-user-stories.md)                                     | Interface user stories linked to the functional requirements.                                           |
+| [Accessibility acceptance criteria](docs/design/accessibility-criteria.md)            | Universal Design and WCAG-based checks for each screen.                                                 |
+| [Browser test plan](docs/testing/browser-test-plan.md)                                | Automated Playwright UI tests and the first test run record.                                            |
 
 The [Initial Test Plan](docs/testing/initial-test-plan.md) covers functional behaviour, faults, recovery, notifications
-and Universal Design checks. Tests have not yet been executed.
+and Universal Design checks. These tests have not yet been executed. The automated browser tests for the UI prototype
+have been run; results are recorded in the [Browser test plan](docs/testing/browser-test-plan.md).
+
+## UI Prototype
+
+A clickable prototype of the TempSafe web interface uses synthetic data and does not connect to the backend:
+https://nikitsya.github.io/Smart-Box/prototype/ui/login.html
+
+Test account: `paramedic` / `demo`. Source code and automated browser tests are in [`prototype/ui`](prototype/ui).
 
 ## Licence
 
