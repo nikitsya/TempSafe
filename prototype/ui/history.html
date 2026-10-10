@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Temperature history – TempSafe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wide">
+  <div class="top"><h1 class="brand">Temperature history</h1><a href="dashboard.html">← Back to current status</a></div>
+  <p class="sub">Prototype box TS-01 · Profile Demo v1 (Lower 15°C · Warning 24°C · Upper 25°C) · synthetic data</p>
+  <form id="filter" class="filters" novalidate>
+    <div><label for="from">From</label><input id="from" type="time" value="14:00"></div>
+    <div><label for="to">To</label><input id="to" type="time" value="14:40"></div>
+    <button class="btn" type="submit">Apply</button>
+    <span class="note">Gaps = no valid data. Times are original observation times.</span>
+  </form>
+  <div id="message" role="alert"></div>
+  <div class="chart"><svg id="chart" width="1040" height="300" role="img" aria-label="Temperature graph. The same data is in the table below."></svg></div>
+  <h2 style="font-size:16px">Readings table (same data as the graph)</h2>
+  <table>
+    <thead><tr><th>Observation time</th><th>Temperature</th><th>Quality</th><th>Status</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+<script>
+  // Synthetic readings every 30 s from 14:00 to 14:40, with an offline gap and one sensor error.
+  const LOWER = 15, WARNING = 24, UPPER = 25;
+  const readings = [];
+  for (let i = 0; i <= 80; i++) {
+    const minute = i / 2;
+    const time = `14:${String(Math.floor(minute)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`;
+    let quality = 'Valid';
+    let temp = 22.4 + 3.6 * Math.exp(-(((minute - 13) / 6) ** 2)) + 0.5 * Math.exp(-(((minute - 30) / 3) ** 2));
+    if (minute > 26 && minute < 29.5) quality = 'Missing (device offline)';
+    if (i === 67) quality = 'Sensor error';
+    readings.push({ minute, time, temp: quality === 'Valid' ? Math.round(temp * 10) / 10 : null, quality });
+  }
+
+  function status(r) {
+    if (r.temp === null) return r.quality === 'Sensor error' ? ['unknown', '⚠ Error'] : ['unknown', '— No data'];
+    if (r.temp < LOWER || r.temp > UPPER) return ['alert', '✕ Alert'];
+    if (r.temp >= WARNING) return ['warning', '! Warning'];
+    return ['normal', '✓ Normal'];
+  }
+
+  function toMinutes(value) { const [h, m] = value.split(':').map(Number); return (h - 14) * 60 + m; }
+
+  function draw(rows) {
+    const W = 1040, H = 300, L = 50, R = 130, T = 20, B = 35, x0 = rows[0].minute, x1 = rows[rows.length - 1].minute || 1;
+    const x = (m) => L + (m - x0) / Math.max(x1 - x0, 1) * (W - L - R);
+    const y = (v) => T + (27 - v) / 6 * (H - T - B);
+    let svg = '';
+    for (const v of [22, 24, 26]) svg += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#ececf4"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end" font-size="12">${v}</text>`;
+    svg += `<line x1="${L}" x2="${W - R}" y1="${y(UPPER)}" y2="${y(UPPER)}" stroke="#a3222b" stroke-dasharray="8 6" stroke-width="2"/><text x="${W - R + 6}" y="${y(UPPER) + 4}" font-size="12" fill="#a3222b">Upper limit 25°C</text>`;
+    svg += `<line x1="${L}" x2="${W - R}" y1="${y(WARNING)}" y2="${y(WARNING)}" stroke="#c89211" stroke-dasharray="3 5" stroke-width="2"/><text x="${W - R + 6}" y="${y(WARNING) + 4}" font-size="12" fill="#7a5600">Warning 24°C</text>`;
+    let segment = [];
+    const flush = () => { if (segment.length > 1) svg += `<polyline fill="none" stroke="#16298a" stroke-width="3" points="${segment.join(' ')}"/>`; segment = []; };
+    for (const r of rows) {
+      if (r.temp === null) { flush(); continue; }
+      segment.push(`${x(r.minute)},${y(r.temp)}`);
+      if (r.temp > UPPER) svg += `<circle cx="${x(r.minute)}" cy="${y(r.temp)}" r="3.5" fill="#a3222b"/>`;
+    }
+    flush();
+    document.getElementById('chart').innerHTML = svg;
+  }
+
+  function show(rows) {
+    document.getElementById('rows').innerHTML = rows.map((r) => {
+      const [cls, label] = status(r);
+      return `<tr><td>${r.time}</td><td>${r.temp === null ? '—' : r.temp.toFixed(1) + '°C'}</td><td>${r.quality}</td><td><span class="tag ${cls}">${label}</span></td></tr>`;
+    }).join('');
+    if (rows.length) draw(rows); else document.getElementById('chart').innerHTML = '';
+  }
+
+  document.getElementById('filter').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const message = document.getElementById('message');
+    const from = toMinutes(document.getElementById('from').value);
+    const to = toMinutes(document.getElementById('to').value);
+    message.innerHTML = '';
+    if (from >= to) {
+      message.innerHTML = '<div class="banner error">The start time must be before the end time.</div>';
+      return;
+    }
+    const rows = readings.filter((r) => r.minute >= from && r.minute <= to);
+    if (!rows.length) message.innerHTML = '<div class="banner info">No observations found for this period.</div>';
+    show(rows);
+  });
+
+  show(readings);
+</script>
+</body>
+</html>
