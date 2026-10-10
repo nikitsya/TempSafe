@@ -1,0 +1,52 @@
+/* TempSafe UI prototype styles - values from docs/design/ui-style-guide.md */
+:root {
+  --navy: #16298a; --ink: #1d2433; --muted: #5d6475; --line: #dcdcec; --bg: #f5f5fa;
+  --green: #1e6b34; --green-bg: #e5f3e8;
+  --amber: #7a5600; --amber-bg: #fff3d1; --amber-border: #c89211;
+  --red: #a3222b; --red-bg: #fbe4e6;
+  --grey: #4c5363; --grey-bg: #eceef3; --grey-border: #8a90a0;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+main { max-width: 420px; margin: 0 auto; padding: 24px 20px; }
+main.wide { max-width: 1100px; }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.brand { font-size: 26px; font-weight: 800; color: var(--navy); margin: 0; }
+.sub { font-size: 13px; color: var(--muted); }
+.card { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+.status { border: 2.5px solid; border-radius: 22px; padding: 16px 18px; margin-bottom: 12px; }
+.status .row { display: flex; gap: 12px; align-items: center; }
+.icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 22px; font-weight: 800; flex: none; }
+.status h2 { font-size: 26px; font-weight: 800; margin: 0; }
+.status p { margin: 4px 0 0; font-size: 14px; }
+.value { font-size: 56px; font-weight: 800; margin-top: 10px; line-height: 1; }
+.meta { color: var(--ink); font-size: 13px; margin-top: 8px; }
+.normal { background: var(--green-bg); border-color: var(--green); color: var(--green); } .normal .icon { background: var(--green); }
+.warning { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); } .warning .icon { background: var(--amber-border); }
+.alert { background: var(--red-bg); border-color: var(--red); color: var(--red); } .alert .icon { background: var(--red); }
+.unknown { background: var(--grey-bg); border-color: var(--grey-border); color: var(--grey); } .unknown .icon { background: var(--grey); }
+dl.kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; font-size: 14px; margin: 0; }
+dl.kv dt { color: var(--muted); font-weight: 600; } dl.kv dd { margin: 0; }
+.btn, .btn-secondary { display: block; width: 100%; min-height: 48px; text-align: center; font: inherit; font-weight: 700;
+  font-size: 17px; padding: 13px; border-radius: 16px; margin-bottom: 10px; cursor: pointer; text-decoration: none; }
+.btn { background: var(--navy); color: #fff; border: 2px solid var(--navy); }
+.btn-secondary { background: #fff; color: var(--navy); border: 2px solid var(--navy); }
+.banner { border-radius: 14px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+.banner.info { background: #e8ecfb; color: #1f2f7a; border: 1.5px solid #b9c3ef; }
+.banner.error { background: var(--red-bg); color: var(--red); border: 1.5px solid #e5a9ae; }
+label { display: block; font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+input { width: 100%; font: inherit; font-size: 16px; padding: 12px 14px; border: 2px solid #b8bccb; border-radius: 12px; margin-bottom: 14px; }
+.empty { text-align: center; padding-top: 30px; }
+.empty .icon { width: 88px; height: 88px; font-size: 40px; margin: 0 auto 18px; background: var(--grey-bg); color: var(--grey); }
+.filters { display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; margin: 16px 0; }
+.filters input { margin: 0; width: auto; }
+.filters .btn { width: auto; margin: 0; padding: 10px 22px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; }
+th { text-align: left; font-size: 12px; text-transform: uppercase; color: var(--muted); padding: 9px 10px; border-bottom: 2px solid var(--line); }
+td { padding: 9px 10px; border-bottom: 1px solid #ececf4; }
+.tag { font-weight: 700; font-size: 12.5px; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+.tag.normal { border: 0; } .tag.warning, .tag.alert, .tag.unknown { border: 0; }
+.chart { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 10px; overflow-x: auto; }
+.note { font-size: 13px; color: var(--muted); }
