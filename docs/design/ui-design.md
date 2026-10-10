@@ -31,15 +31,15 @@ requests are authorised by the backend; hiding a button is not access control.
 
 **Figure 2.** Current status screen for Warning (C), Normal with phone notifications denied (D) and Alert (E). Each state uses a colour, a symbol (! ✓ ✕) and a text label, so the state does not depend on colour alone. The screen shows the temperature in °C, the observation time and its age, a "Live" freshness label, the last device contact and the profile limits. The Alert wording is "Above configured upper limit"; it is not a clinical assessment. When Web Push permission is denied (D), a banner explains that phone alerts are unavailable while monitoring on the screen continues.
 
-## Required states
-![Error and empty state mock-ups](../assets/design/ui-states.png)
-
-**Figure 3.** Error and empty states. F: Data stale. No new reading for longer than 90 s; the last value is labelled historical and "current conditions unknown". G: Sensor error. The failed sample is never shown as 0°C or Normal. H: Not reporting. No device contact for more than 180 s; last contact and last reading are shown separately. I: Network/API failure. Data is visibly dated and a Retry button is offered. J: No observations yet. K: Denied access. An account without an assigned box sees no data from any other box.
-
 ## Temperature history
 ![Temperature history mock-up](../assets/design/ui-history.png)
 
-**Figure 4.** History screen. A From/To filter selects the time range. The graph shows the Upper limit and Warning lines with labels. Samples above the upper limit are marked. A period with no data is drawn as a gap, and a sensor-error attempt is marked separately, not joined to the line. A readable table below the graph gives the same data (observation time, temperature, quality, status, profile) for screen-reader and keyboard users. An empty range shows "No observations found"; an invalid range (From after To) shows an error message.
+**Figure 3.** History screen. A From/To filter selects the time range. The graph shows the Upper limit and Warning lines with labels. Samples above the upper limit are marked. A period with no data is drawn as a gap, and a sensor-error attempt is marked separately, not joined to the line. A readable table below the graph gives the same data (observation time, temperature, quality, status, profile) for screen-reader and keyboard users. An empty range shows "No observations found"; an invalid range (From after To) shows an error message.
+
+## Required states
+![Error and empty state mock-ups](../assets/design/ui-states.png)
+
+**Figure 4.** Error and empty states. F: Data stale. No new reading for longer than 90 s; the last value is labelled historical and "current conditions unknown". G: Sensor error. The failed sample is never shown as 0°C or Normal. H: Not reporting. No device contact for more than 180 s; last contact and last reading are shown separately. I: Network/API failure. Data is visibly dated and a Retry button is offered. J: No observations yet. K: Denied access. An account without an assigned box sees no data from any other box.
 
 ## Accessibility checks applied to all mock-ups
 - Status is shown by text + symbol + colour (not colour alone).
