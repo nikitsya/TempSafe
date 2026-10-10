@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Current status – TempSafe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <div class="top"><h1 class="brand">TempSafe</h1><span class="sub" id="box">Prototype box TS-01</span></div>
+  <div id="content"></div>
+  <a class="btn" id="history" href="history.html">View temperature history</a>
+  <a class="btn-secondary" href="login.html">Sign out</a>
+  <p class="note">Prototype states: <span id="links"></span></p>
+</main>
+<script>
+  // Synthetic data for each UI state shown in docs/assets/design/ui-dashboard.png and ui-states.png.
+  const PROFILE = 'Demo v1 · Lower 15°C · Warning 24°C · Upper 25°C';
+  const STATES = {
+    normal:  { cls: 'normal',  icon: '✓', title: 'NORMAL',  text: 'Within configured limits (15–24°C)', value: '21.8°C', time: 'Observed 14:20:00 · 8 s ago', contact: '14:20:05 (device reporting)', push: 'denied' },
+    warning: { cls: 'warning', icon: '!', title: 'WARNING', text: 'At or above early-warning threshold (24°C)', value: '24.6°C', time: 'Observed 14:17:30 · 12 s ago', contact: '14:17:42 (device reporting)', push: 'on' },
+    alert:   { cls: 'alert',   icon: '✕', title: 'ALERT',   text: 'Above configured upper limit (25°C)', value: '25.9°C', time: 'Observed 14:31:00 · 5 s ago', contact: '14:31:02 (device reporting)', push: 'sent 14:31:04', role: 'alert' },
+    stale:   { cls: 'unknown', icon: '⏱', title: 'DATA STALE', text: 'Current conditions unknown', detail: 'No new reading for 5 min (limit 90 s).', last: '22.8°C recorded 14:12:05 (historical – not proof of current conditions)', contact: '14:16:50 (device reporting, sensor not sending)' },
+    sensor:  { cls: 'alert',   icon: '⚠', title: 'SENSOR ERROR', text: 'Latest reading failed at 14:17:30', detail: 'Temperature is unknown. The failed reading is not shown as 0°C or Normal.', last: '22.9°C recorded 14:16:30 (historical)', role: 'alert' },
+    offline: { cls: 'unknown', icon: '⦸', title: 'NOT REPORTING', text: 'No contact from the device for 4 min', detail: 'Device may be offline or without power. Local LED warnings on the box keep working.', last: '22.7°C recorded 14:13:00 (historical)', contact: '14:13:10', role: 'alert' }
+  };
+  const state = new URLSearchParams(location.search).get('state') || 'warning';
+  const content = document.getElementById('content');
+
+  function statusCard(s, extra = '') {
+    return `<section class="status ${s.cls}" role="${s.role || 'status'}">
+      <div class="row"><span class="icon" aria-hidden="true">${s.icon}</span>
+      <div><h2>${s.title}</h2><p>${s.text}</p></div></div>${extra}</section>`;
+  }
+
+  function render() {
+    const s = STATES[state];
+    if (state === 'denied') return emptyPage('🔒', 'No assigned box available',
+      'Your account is not assigned to a box, so no temperature data can be shown. Ask your administrator to give you access.');
+    if (state === 'empty') return emptyPage('—', 'No observations yet',
+      'This box has not sent any readings. Current conditions are unknown. Check that the device is powered on and connected.');
+    if (state === 'network') {
+      content.innerHTML = `<div class="banner error" role="alert"><b>Unable to refresh.</b> Check your internet connection. Information below is from 14:22:10.</div>
+        ${statusCard({ cls: 'normal', icon: '✓', title: 'NORMAL', text: 'at 14:22:10 – may have changed' }, '<div class="value">22.1°C</div><div class="meta">Last updated 3 min ago</div>')}
+        <button class="btn" type="button" onclick="location.reload()">Retry</button>`;
+      return;
+    }
+    if (s.value) {
+      const pushRow = s.push === 'denied'
+        ? ''
+        : `<dt>Phone alerts</dt><dd>${s.push === 'on' ? 'On (Web Push)' : 'Sent ' + s.push.replace('sent ', '')}</dd>`;
+      const banner = s.push === 'denied'
+        ? '<div class="banner info"><b>Phone notifications unavailable.</b> Permission is blocked in this browser. Monitoring on this screen still works.</div>'
+        : '';
+      content.innerHTML = statusCard(s, `<div class="value">${s.value}</div><div class="meta">${s.time} · Live</div>`) + banner +
+        `<div class="card"><dl class="kv"><dt>Last contact</dt><dd>${s.contact}</dd><dt>Profile</dt><dd>${PROFILE}</dd>${pushRow}</dl></div>`;
+    } else {
+      content.innerHTML = statusCard(s, `<div class="meta">${s.detail}</div>`) +
+        `<div class="card"><dl class="kv"><dt>Last valid reading</dt><dd>${s.last}</dd>${s.contact ? `<dt>Last contact</dt><dd>${s.contact}</dd>` : ''}</dl></div>`;
+    }
+  }
+
+  function emptyPage(icon, title, text) {
+    document.getElementById('history').hidden = state === 'denied';
+    content.innerHTML = `<section class="empty"><div class="icon" aria-hidden="true">${icon}</div><h2>${title}</h2><p class="note">${text}</p></section>`;
+  }
+
+  render();
+  document.getElementById('links').innerHTML = ['normal', 'warning', 'alert', 'stale', 'sensor', 'offline', 'network', 'empty', 'denied']
+    .map((name) => `<a href="?state=${name}">${name}</a>`).join(' · ');
+</script>
+</body>
+</html>
