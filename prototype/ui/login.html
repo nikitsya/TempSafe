@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in – TempSafe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <div class="top"><h1 class="brand">TempSafe</h1><span class="sub">Secure sign-in</span></div>
+  <p class="note">Sign in to view the temperature of the box assigned to you.</p>
+  <div id="error" class="banner error" role="alert" hidden></div>
+  <form id="signin" novalidate>
+    <label for="username">Email or username</label>
+    <input id="username" name="username" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+  <p class="note" style="text-align:center">Prototype only: use <b>paramedic</b> / <b>demo</b>, or <b>nobox</b> / <b>demo</b> for an account without a box.</p>
+</main>
+<script>
+  // Prototype sign-in. The real application checks credentials on the FastAPI server.
+  const form = document.getElementById('signin');
+  const error = document.getElementById('error');
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const user = form.username.value.trim();
+    const pass = form.password.value;
+    if (!user) return showError('Enter your email or username.', form.username);
+    if (!pass) return showError('Enter your password.', form.password);
+    if (pass === 'demo' && user === 'paramedic') { location.href = 'dashboard.html?state=warning'; return; }
+    if (pass === 'demo' && user === 'nobox') { location.href = 'dashboard.html?state=denied'; return; }
+    // Same message for wrong username or wrong password, so accounts are not revealed.
+    form.password.value = '';
+    showError('Sign-in failed. The email/username or password is incorrect. Please try again.', form.password);
+  });
+  function showError(message, field) {
+    error.textContent = message;
+    error.hidden = false;
+    field.focus();
+  }
+</script>
+</body>
+</html>
