@@ -18,6 +18,7 @@ starting point of the real application that will use the FastAPI backend in `bac
 | `css/main.css`         | Shared styles: colour tokens, typography, layout and components  |
 | `js/api.js`            | Small helper for calls to the backend API (`/api/...`)           |
 | `js/main.js`           | Page start-up code, including the API connection check           |
+| `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)    |
 | `assets/icons/`        | Icons and images used by the interface                           |
 
 ## How to open
