@@ -4,7 +4,7 @@
 
 **Team Size:** 3 members
 
-**Documentation last updated:** 10 October 2026
+**Documentation last updated:** 18 October 2026
 
 ## Team Members
 
@@ -98,11 +98,54 @@ margin. These colours belong to the application; the physical LED does not need 
 |--------------|-------------------------------------------------------------------------|-----------------------------------------------------------------|
 | `docs/`      | Planning, requirements, hardware and research documentation.            | Documentation available.                                        |
 | `device/`    | Raspberry Pi sampling, local warnings and offline queue.                | Empty; implementation planned.                                  |
-| `backend/`   | API, authentication and data validation.                                | Empty; implementation planned.                                  |
+| `backend/`   | API, authentication and data validation.                                | FastAPI skeleton with an application health endpoint.           |
 | `database/`  | Schema, migrations and database scripts.                                | Proposed schema in `schema.sql`; database execution is planned. |
 | `prototype/` | Clickable UI prototype with synthetic data and automated browser tests. | HTML/CSS/JS prototype and Playwright tests in `prototype/ui`.   |
 | `frontend/`  | Web dashboard and accessible history views.                             | Empty; implementation planned.                                  |
-| `tests/`     | Device, API, data recovery and interface tests.                         | Empty; test evidence is planned in the requirements document.   |
+| `tests/`     | Device, API, data recovery and interface tests.                         | Backend health and OpenAPI smoke tests in `tests/backend`.      |
+
+## Backend Development
+
+The TEMSAFE backend requires Python 3.11 or later. Run these commands from the repository root:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev]'
+python -m uvicorn temsafe.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+On Windows, use `py -3.11 -m venv .venv` and activate it with
+`.venv\Scripts\Activate.ps1` in PowerShell. Select `.venv` as the Python interpreter in your editor.
+The virtual environment, Python caches and local `.env` files are excluded from Git.
+
+Open the interactive API documentation at <http://127.0.0.1:8000/docs>.
+Check the application from a second terminal:
+
+```sh
+curl http://127.0.0.1:8000/api/health
+```
+
+Expected result: HTTP `200 OK` with `{"status":"ok"}`. This is an application liveness check;
+it does not check a database, sensor or MQTT connection. Those integrations and authentication
+are not implemented yet. Stop the development server with `Ctrl+C`.
+If port 8000 is already in use, pass `--port 8001` instead and use port 8001 in the URLs above.
+
+Activate the environment and run the automated backend checks from the repository root:
+
+```sh
+python -m pytest
+python -m pip check
+```
+
+The backend is organised as follows:
+
+```text
+pyproject.toml                 Python package, dependencies and test configuration
+backend/temsafe/main.py         FastAPI application entry point
+backend/temsafe/api/health.py   Health route and response model
+tests/backend/test_health.py   Health and generated OpenAPI smoke tests
+```
 
 ## Project Documentation
 
