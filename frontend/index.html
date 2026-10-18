@@ -14,7 +14,8 @@
   </div>
   <p class="muted">Sign in to view the temperature of the box assigned to you.</p>
 
-  <form id="signin" class="card" novalidate>
+  <div id="signin-message" class="banner" role="alert" hidden></div>
+  <form id="signin" class="card" method="post" novalidate>
     <label for="username">Email or username</label>
     <input id="username" name="username" autocomplete="username" required>
     <label for="password">Password</label>
@@ -29,5 +30,6 @@
 </main>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
+<script src="js/signin.js"></script>
 </body>
 </html>
