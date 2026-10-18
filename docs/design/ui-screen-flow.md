@@ -2,7 +2,8 @@
 
 Author: Maryna Hordiienko
 
-This diagram shows how a user moves between TempSafe screens. Every box and history request is checked by the backend; hiding a button is not access control.
+This diagram shows how a user moves between TempSafe screens. Every box and history request is checked by the backend;
+hiding a button is not access control.
 
 ```mermaid
 flowchart TD
@@ -32,9 +33,9 @@ flowchart TD
 
 ## Screens
 
-| Screen | Purpose | Mock-up |
-|---|---|---|
-| Sign in | Authenticate the user | `ui-signin.png` (A, B) |
-| Current status | Show the latest temperature, status and freshness | `ui-dashboard.png` (C, D, E) |
-| Error and empty states | Explain stale, failed, offline and missing data | `ui-states.png` (F–K) |
-| History | Review earlier readings by date range | `ui-history.png` |
+| Screen                 | Purpose                                           | Mock-up                      |
+|------------------------|---------------------------------------------------|------------------------------|
+| Sign in                | Authenticate the user                             | `ui-signin.png` (A, B)       |
+| Current status         | Show the latest temperature, status and freshness | `ui-dashboard.png` (C, D, E) |
+| Error and empty states | Explain stale, failed, offline and missing data   | `ui-states.png` (F–K)        |
+| History                | Review earlier readings by date range             | `ui-history.png`             |

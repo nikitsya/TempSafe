@@ -59,14 +59,16 @@ connectivity and permission; the buzzer is Should Have.
 
 ## 4. User feedback devices
 
-LED and buzzer are not sensors. They are output devices that give the Advanced Paramedic immediate feedback without requiring the user to open the web application.
+LED and buzzer are not sensors. They are output devices that give the Advanced Paramedic immediate feedback without
+requiring the user to open the web application.
 
-| Output device | Purpose | Advantages | Limitations |
-| --- | --- | --- | --- |
+| Output device     | Purpose                                                                                 | Advantages                                                              | Limitations                                                                                                 |
+|-------------------|-----------------------------------------------------------------------------------------|-------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------|
 | Single-colour LED | Off for Normal; steadily lit for Warning or Alert; distinct blinking for sensor failure | Visible without opening the app; local feedback continues without Wi-Fi | Does not distinguish Warning from Alert; an unlit LED does not prove working power or acceptable conditions |
-| Buzzer | Provides an audible alert when urgent attention is required | Can attract attention even when the user is not looking at the box | Should only be used for important alerts to avoid unnecessary distraction |
+| Buzzer            | Provides an audible alert when urgent attention is required                             | Can attract attention even when the user is not looking at the box      | Should only be used for important alerts to avoid unnecessary distraction                                   |
 
-The system will combine colour with clear text in the web application. This supports usability and avoids relying on colour alone.
+The system will combine colour with clear text in the web application. This supports usability and avoids relying on
+colour alone.
 
 ## 5. Proposed system behaviour
 
@@ -86,11 +88,19 @@ The system will combine colour with clear text in the web application. This supp
 
 ## 8. The web application allows the user to review the current status and historical excursion data.
 
-On sensor failure, the LED uses a distinct blink pattern: two short flashes followed by a pause. A failed reading is not Normal. Green, amber and red status colours are used only in the application, alongside text and symbols.
+On sensor failure, the LED uses a distinct blink pattern: two short flashes followed by a pause. A failed reading is not
+Normal. Green, amber and red status colours are used only in the application, alongside text and symbols.
 
 ## 6. Short use-case summary
 
-TempSafe uses a SCD-41 sensor connected to a Raspberry Pi to monitor the temperature inside a Controlled Drug Box over time. The Advanced Paramedic does not need to perform regular manual checks while conditions are normal. The single-colour LED is off for Normal, steadily lit for Warning or Alert, and blinks distinctly on sensor failure. An unlit LED alone does not prove acceptable conditions or working power. When connected and notification permission is granted, the system sends an early warning as the temperature approaches the configured upper limit and an alert when it exceeds 25°C or falls below the configured lower limit. The optional buzzer sounds on Alert if implemented. The application distinguishes Normal, Warning and Alert using text, symbols and green, amber and red colours. The prototype records observations for review; it does not cool the box automatically.
+TempSafe uses a SCD-41 sensor connected to a Raspberry Pi to monitor the temperature inside a Controlled Drug Box over
+time. The Advanced Paramedic does not need to perform regular manual checks while conditions are normal. The
+single-colour LED is off for Normal, steadily lit for Warning or Alert, and blinks distinctly on sensor failure. An
+unlit LED alone does not prove acceptable conditions or working power. When connected and notification permission is
+granted, the system sends an early warning as the temperature approaches the configured upper limit and an alert when it
+exceeds 25°C or falls below the configured lower limit. The optional buzzer sounds on Alert if implemented. The
+application distinguishes Normal, Warning and Alert using text, symbols and green, amber and red colours. The prototype
+records observations for review; it does not cool the box automatically.
 
 ## 7. Prototype limitations
 
@@ -103,6 +113,7 @@ The project will not integrate directly with NAS clinical or ePCR systems.
 The prototype is for demonstration and testing and is not intended for clinical deployment.
 
 The LED and buzzer provide local feedback but do not replace official clinical or medication-storage procedures.
+
 ## 7. Research sources
 
 - National Ambulance Service (NAS), *NASCG006 – Management and Requisition of Controlled Drugs*, Appendix 11:

@@ -5,16 +5,18 @@ Author: Maryna Hordiienko
 **Live prototype:** https://nikitsya.github.io/Smart-Box/prototype/ui/login.html
 (test account `paramedic` / `demo`; synthetic data only)
 
-A clickable HTML/CSS/JavaScript prototype of the TempSafe web application. It uses synthetic data only and does not connect to the backend. It is used to check the UI design and to run automated browser tests before the FastAPI application exists.
+A clickable HTML/CSS/JavaScript prototype of the TempSafe web application. It uses synthetic data only and does not
+connect to the backend. It is used to check the UI design and to run automated browser tests before the FastAPI
+application exists.
 
 ## Pages
 
-| File | Screen |
-|---|---|
-| `login.html` | Sign in (test account `paramedic` / `demo`; `nobox` / `demo` shows denied access) |
+| File                       | Screen                                                                                                           |
+|----------------------------|------------------------------------------------------------------------------------------------------------------|
+| `login.html`               | Sign in (test account `paramedic` / `demo`; `nobox` / `demo` shows denied access)                                |
 | `dashboard.html?state=...` | Current status. States: `normal`, `warning`, `alert`, `stale`, `sensor`, `offline`, `network`, `empty`, `denied` |
-| `history.html` | History with time filter, graph, gaps and readings table |
-| `style.css` | Shared styles from [`ui-style-guide.md`](../../docs/design/ui-style-guide.md) |
+| `history.html`             | History with time filter, graph, gaps and readings table                                                         |
+| `style.css`                | Shared styles from [`ui-style-guide.md`](../../docs/design/ui-style-guide.md)                                    |
 
 ## How to open
 

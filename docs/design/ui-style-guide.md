@@ -6,27 +6,27 @@ All mock-ups and the HTML prototype use the values below, so the screens look co
 
 ## Colours
 
-| Token | Hex | Use |
-|---|---|---|
-| `--navy` | `#16298A` | Brand, headings, primary buttons |
-| `--ink` | `#1D2433` | Body text |
-| `--muted` | `#5D6475` | Secondary text and labels |
-| `--bg` | `#F5F5FA` | App background |
-| `--green` / `--green-bg` | `#1E6B34` / `#E5F3E8` | Normal |
-| `--amber` / `--amber-bg` | `#7A5600` / `#FFF3D1` | Warning |
-| `--red` / `--red-bg` | `#A3222B` / `#FBE4E6` | Alert, sensor error, sign-in error |
-| `--grey` / `--grey-bg` | `#4C5363` / `#ECEEF3` | Stale, not reporting, no data |
+| Token                    | Hex                   | Use                                |
+|--------------------------|-----------------------|------------------------------------|
+| `--navy`                 | `#16298A`             | Brand, headings, primary buttons   |
+| `--ink`                  | `#1D2433`             | Body text                          |
+| `--muted`                | `#5D6475`             | Secondary text and labels          |
+| `--bg`                   | `#F5F5FA`             | App background                     |
+| `--green` / `--green-bg` | `#1E6B34` / `#E5F3E8` | Normal                             |
+| `--amber` / `--amber-bg` | `#7A5600` / `#FFF3D1` | Warning                            |
+| `--red` / `--red-bg`     | `#A3222B` / `#FBE4E6` | Alert, sensor error, sign-in error |
+| `--grey` / `--grey-bg`   | `#4C5363` / `#ECEEF3` | Stale, not reporting, no data      |
 
 Colour is never the only signal: each status also has a symbol and a text label.
 
-| Status | Symbol |
-|---|---|
-| Normal | ✓ |
-| Warning | ! |
-| Alert | ✕ |
-| Sensor error | ⚠ |
-| Stale | ⏱ |
-| Not reporting | ⦸ |
+| Status        | Symbol |
+|---------------|--------|
+| Normal        | ✓     |
+| Warning       | !      |
+| Alert         | ✕     |
+| Sensor error  | ⚠     |
+| Stale         | ⏱      |
+| Not reporting | ⦸      |
 
 ## Typography
 
