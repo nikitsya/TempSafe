@@ -141,10 +141,10 @@ python -m pip check
 The backend is organised as follows:
 
 ```text
-pyproject.toml                 Python package, dependencies and test configuration
+pyproject.toml                  Python package, dependencies and test configuration
 backend/temsafe/main.py         FastAPI application entry point
 backend/temsafe/api/health.py   Health route and response model
-tests/backend/test_health.py   Health and generated OpenAPI smoke tests
+tests/backend/test_health.py    Health and generated OpenAPI smoke tests
 ```
 
 ## Project Documentation
