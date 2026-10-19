@@ -103,6 +103,11 @@ Readings recorded on **19 October 2026**:
 - ![SCD41 wiring photograph](../assets/testing/scd41/scd41_wiring.jpg)
 - - [Python test script](../../device/scd41_basic_readings.py)
 
+CSV output was used only to retain evidence for this standalone hardware test.
+The planned application will buffer readings locally in SQLite and transmit
+them via MQTT to the backend for storage in MySQL.
+Database integration was outside the scope of this test.
+
 ## 10. Issues and actions
 
 | Issue | Action | Outcome |
