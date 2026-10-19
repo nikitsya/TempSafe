@@ -255,8 +255,6 @@ have been executed for the application yet.
 | UI/users/testing (20%)        | Wireframes, persona, user stories and functional/automated/end-user test proposals.                                                                                                                                                                                                    |
 | Version control (10%)         | Accessible repository and genuine incremental contributions; verify before submission.                                                                                                                                                                                                 |
 
-See the [submission checklist](iot-gca1-submission-checklist.md) for critical items
-
 ## 10. References
 
 Access date for web references: 9 October 2026.
