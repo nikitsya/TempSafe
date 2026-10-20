@@ -1,10 +1,8 @@
 """FastAPI application entry point."""
 
-from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
+from pathlib import Path
 from temsafe.api.health import router as health_router
 
 app = FastAPI(

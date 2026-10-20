@@ -1,9 +1,8 @@
 """Application liveness endpoint."""
 
-from typing import Literal
-
 from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import Literal
 
 router = APIRouter(tags=["Health"])
 

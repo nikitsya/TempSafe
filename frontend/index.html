@@ -1,32 +1,32 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sign in – TEMSAFE</title>
-  <link rel="stylesheet" href="css/main.css">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Sign in – TEMSAFE</title>
+    <link href="css/main.css" rel="stylesheet">
 </head>
 <body>
 <main>
-  <div class="top">
-    <h1 class="brand">TEMSAFE</h1>
-    <span class="muted">Secure sign-in</span>
-  </div>
-  <p class="muted">Sign in to view the temperature of the box assigned to you.</p>
+    <div class="top">
+        <h1 class="brand">TEMSAFE</h1>
+        <span class="muted">Secure sign-in</span>
+    </div>
+    <p class="muted">Sign in to view the temperature of the box assigned to you.</p>
 
-  <div id="signin-message" class="banner" role="alert" hidden></div>
-  <form id="signin" class="card" method="post" novalidate>
-    <label for="username">Email or username</label>
-    <input id="username" name="username" autocomplete="username" required>
-    <label for="password">Password</label>
-    <input id="password" name="password" type="password" autocomplete="current-password" required>
-    <button class="btn" type="submit">Sign in</button>
-  </form>
+    <div class="banner" hidden id="signin-message" role="alert"></div>
+    <form class="card" id="signin" method="post" novalidate>
+        <label for="username">Email or username</label>
+        <input autocomplete="username" id="username" name="username" required>
+        <label for="password">Password</label>
+        <input autocomplete="current-password" id="password" name="password" required type="password">
+        <button class="btn" type="submit">Sign in</button>
+    </form>
 
-  <p><span id="api-status" class="api-status down" role="status">Checking API…</span></p>
-  <p class="muted">Sign-in is not connected yet. Pages:
-    <a href="pages/dashboard.html">dashboard</a> ·
-    <a href="pages/history.html">history</a></p>
+    <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
+    <p class="muted">Sign-in is not connected yet. Pages:
+        <a href="pages/dashboard.html">dashboard</a> ·
+        <a href="pages/history.html">history</a></p>
 </main>
 <script src="js/api.js"></script>
 <script src="js/main.js"></script>
