@@ -6,32 +6,38 @@ The web interface of TEMSAFE, built with plain HTML, CSS and JavaScript (no buil
 It follows the revised mock-ups in [`docs/design/ui-design.md`](../docs/design/ui-design.md)
 and the values in [`docs/design/ui-style-guide.md`](../docs/design/ui-style-guide.md).
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
-starting point of the real application that will use the FastAPI backend in `backend/temsafe`.
+real application, served by the FastAPI backend in `backend/temsafe`.
 
 ## Structure
 
-| Path                   | Purpose                                                         |
-|------------------------|-----------------------------------------------------------------|
-| `index.html`           | Sign-in page (entry point)                                      |
-| `pages/dashboard.html` | Current status of the assigned box                              |
-| `pages/history.html`   | Temperature history with date filter, graph and table           |
-| `css/main.css`         | Shared styles: colour tokens, typography, layout and components |
-| `js/api.js`            | Small helper for calls to the backend API (`/api/...`)          |
-| `js/main.js`           | Page start-up code, including the API connection check          |
-| `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)   |
-| `assets/icons/`        | Icons and images used by the interface                          |
+| Path                   | Purpose                                                          |
+|------------------------|------------------------------------------------------------------|
+| `index.html`           | Sign-in page (entry point)                                       |
+| `pages/dashboard.html` | Current status of the assigned box (sample data, `?state=...`)   |
+| `pages/history.html`   | Temperature history                                              |
+| `css/main.css`         | Shared styles: colour tokens, typography, layout and components  |
+| `js/api.js`            | Small helper for calls to the backend API (`/api/...`)           |
+| `js/main.js`           | Page start-up code, including the API connection check           |
+| `js/sample-data.js`    | Sample readings for each dashboard state until the API is ready  |
+| `js/dashboard.js`      | Draws the dashboard status card, details and warning messages    |
+| `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)    |
+| `assets/icons/`        | Icons and images used by the interface                           |
 
-## How to open
+## How to run
 
-- **Without the backend:** open `index.html` in a browser. The page shows
-  "API not reachable", which is expected.
-- **With the backend:** the status line shows "API connected" when `GET /api/health`
-  returns `{"status": "ok"}`. This works once the frontend is served by FastAPI (next step),
-  because a page opened directly from disk is blocked by the browser's CORS rules.
+From the repository root:
 
-## Next steps
+```bash
+python -m pip install --user fastapi uvicorn
+python -m uvicorn temsafe.main:app --reload --app-dir backend
+```
 
-1. Implement sign-in against the backend authentication endpoint.
-2. Load the latest reading and freshness state on the dashboard.
-3. Load history data and draw the graph and table.
-4. Serve the frontend from FastAPI so that it uses the same HTTPS origin as the API.
+Then open http://127.0.0.1:8000 in a browser. The status line shows "API connected"
+when `GET /api/health` returns `{"status": "ok"}`.
+
+The dashboard uses sample data. Choose a state with the URL, for example
+http://127.0.0.1:8000/pages/dashboard.html?state=alert
+(`normal`, `warning`, `alert`, `stale`, `sensor_error`, `not_reporting`, `no_data`).
+
+Opening `index.html` directly from disk also works, but the status line then shows
+"API not reachable", because the browser blocks requests from a local file to the API.
