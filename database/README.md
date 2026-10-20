@@ -4,7 +4,63 @@ The initial central database contains six InnoDB tables. Use MySQL 8.4 or later
 with strict SQL mode enabled and foreign-key and CHECK enforcement left enabled.
 SQLite remains the device's separate offline queue.
 
-## Initialise an empty database
+## Run with Docker Compose
+
+Install and start Docker Desktop. From the repository root, prepare the local
+configuration once:
+
+```sh
+cp -n .env.example .env
+```
+
+Set separate `MYSQL_ROOT_PASSWORD` and `MYSQL_PASSWORD` values in `.env` before
+the first start. This file is ignored by Git. If `.env` already exists, add any
+missing settings without replacing its existing contents.
+
+Start the database and wait for the schema to become available:
+
+```sh
+docker compose up -d --wait mysql
+docker compose ps
+```
+
+The official MySQL 8.4 image creates `temsafe`, a local development user named
+`temsafe`, and all six tables automatically on the first start with an empty
+volume. See the [official image documentation](https://hub.docker.com/_/mysql).
+The health check verifies an authenticated connection and the final schema table.
+The development user has full privileges within `temsafe`; it is not the
+restricted runtime account described below.
+
+Connect without installing MySQL on the host:
+
+```sh
+docker compose exec mysql mysql -u temsafe -p temsafe
+```
+
+Enter `MYSQL_PASSWORD` from `.env`, then run `SHOW TABLES;`. For MySQL Workbench
+or a backend running on the host, use `127.0.0.1`, port `3307`, database `temsafe`
+and user `temsafe`. This port avoids the usual local MySQL port `3306`; change
+`MYSQL_PORT` in `.env` if needed. Administrative access inside the container uses
+`docker compose exec mysql mysql -u root -p` and `MYSQL_ROOT_PASSWORD`.
+
+Routine commands:
+
+```sh
+docker compose stop mysql
+docker compose up -d --wait mysql
+docker compose logs --tail=50 mysql
+```
+
+Data persists in the named volume across stops, restarts and `docker compose down`.
+Do not use `docker compose down -v` unless you intend to delete the database.
+The restart policy starts the container again when Docker starts, unless you
+explicitly stopped it. Enable Docker Desktop startup at login if desired.
+
+The image only imports the schema and sets credentials when the data volume is
+empty. Editing `schema.sql` or passwords in `.env` does not update an existing
+database; use migrations or an explicit password change instead.
+
+## Initialise an empty database without Docker
 
 From the repository root, using an account allowed to create databases and tables:
 
