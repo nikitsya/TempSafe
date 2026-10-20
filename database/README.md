@@ -152,6 +152,16 @@ valid data and rejected writes, then drops only that temporary database. The
 account therefore needs CREATE/DROP privileges. Do not use `--force`, which would
 mask SQL errors. Connection options such as `--socket` may also be passed.
 
-Validation on 20 October 2026: all 18 database checks passed against an isolated
-MySQL 9.4.0 instance; both existing backend smoke tests also passed. MySQL 8.4
-was not available for a separate compatibility run.
+## Validation results — 20 October 2026
+
+The full integrity suite was run on MySQL 9.4.0. Validation on Docker MySQL 8.4.11
+covered initialisation, table creation and connectivity; the full suite was not
+rerun on that version. FastAPI database integration remains pending.
+
+### Connection and table evidence
+
+The screenshot records the successful IDE connection and the tables `app_users`,
+`box_access`, `boxes`, `sample_reviews`, `temperature_samples` and
+`threshold_profiles`. The password is hidden.
+
+![Successful TEMSAFE MySQL connection and six initial tables](../docs/assets/testing/temsafe-mysql-connection.png)
