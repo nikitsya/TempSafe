@@ -94,15 +94,15 @@ margin. These colours belong to the application; the physical LED does not need 
 
 ## Repository Structure
 
-| Directory    | Intended contents                                                       | Current state                                                   |
-|--------------|-------------------------------------------------------------------------|-----------------------------------------------------------------|
-| `docs/`      | Planning, requirements, hardware and research documentation.            | Documentation available.                                        |
-| `device/`    | Raspberry Pi sampling, local warnings and offline queue.                | Empty; implementation planned.                                  |
-| `backend/`   | API, authentication and data validation.                                | FastAPI skeleton with an application health endpoint.           |
-| `database/`  | Schema, migrations and database scripts.                                | Proposed schema in `schema.sql`; database execution is planned. |
-| `prototype/` | Clickable UI prototype with synthetic data and automated browser tests. | HTML/CSS/JS prototype and Playwright tests in `prototype/ui`.   |
-| `frontend/`  | Web dashboard and accessible history views.                             | Empty; implementation planned.                                  |
-| `tests/`     | Device, API, data recovery and interface tests.                         | Backend health and OpenAPI smoke tests in `tests/backend`.      |
+| Directory    | Intended contents                                                       | Current state                                                        |
+|--------------|-------------------------------------------------------------------------|----------------------------------------------------------------------|
+| `docs/`      | Planning, requirements, hardware and research documentation.            | Documentation available.                                             |
+| `device/`    | Raspberry Pi sampling, local warnings and offline queue.                | Empty; implementation planned.                                       |
+| `backend/`   | API, authentication and data validation.                                | FastAPI skeleton with an application health endpoint.                |
+| `database/`  | Schema, migrations and database scripts.                                | Initial MySQL schema and integrity checks; see `database/README.md`. |
+| `prototype/` | Clickable UI prototype with synthetic data and automated browser tests. | HTML/CSS/JS prototype and Playwright tests in `prototype/ui`.        |
+| `frontend/`  | Web dashboard and accessible history views.                             | Empty; implementation planned.                                       |
+| `tests/`     | Device, API, data recovery and interface tests.                         | Backend health and OpenAPI smoke tests in `tests/backend`.           |
 
 ## Backend Development
 
@@ -146,6 +146,13 @@ backend/temsafe/main.py         FastAPI application entry point
 backend/temsafe/api/health.py   Health route and response model
 tests/backend/test_health.py    Health and generated OpenAPI smoke tests
 ```
+
+## Database Setup
+
+The initial TEMSAFE MySQL structure is in [`database/schema.sql`](database/schema.sql).
+See the [database setup and schema review](database/README.md) for initialisation,
+table relationships, integrity checks and remaining application responsibilities.
+Database integration with FastAPI is not implemented yet.
 
 ## Project Documentation
 
