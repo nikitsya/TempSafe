@@ -135,9 +135,11 @@ Validate topic identity against the payload box, types, schema version, size, se
 ownership. Preserve observation and receipt times separately.
 
 The [database research](../research/database-research.md) supplies relational tables, foreign keys and parameterised
-queries; [schema.sql](../../database/schema.sql) extracts that proposed schema for review.
+queries; [schema.sql](../../database/schema.sql) contains the initial executable core structure.
 `auth_subject` is the login identifier; `password_hash` stores the Argon2id hash for the proposed local-account design.
-This is a core schema proposal, not a tested migration. Session storage, device certificate registration, notification
+See the [database guide](../../database/README.md) for initialisation and integrity checks.
+This baseline is not an upgrade migration for existing databases. Session storage, device certificate registration,
+notification
 subscriptions/outbox and job-run records require additional tables during implementation.
 Boxes link to users through `box_access`; each sample links to the profile for that box. Optional review records do not
 alter measurements. Local SQLite stores pending messages and the persistent next sequence atomically.
