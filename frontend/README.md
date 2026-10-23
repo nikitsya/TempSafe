@@ -10,18 +10,18 @@ real application, served by the FastAPI backend in `backend/temsafe`.
 
 ## Structure
 
-| Path                   | Purpose                                                          |
-|------------------------|------------------------------------------------------------------|
-| `index.html`           | Sign-in page (entry point)                                       |
-| `pages/dashboard.html` | Current status of the assigned box (sample data, `?state=...`)   |
-| `pages/history.html`   | Temperature history                                              |
-| `css/main.css`         | Shared styles: colour tokens, typography, layout and components  |
-| `js/api.js`            | Small helper for calls to the backend API (`/api/...`)           |
-| `js/main.js`           | Page start-up code, including the API connection check           |
-| `js/sample-data.js`    | Sample readings for each dashboard state until the API is ready  |
-| `js/dashboard.js`      | Draws the dashboard status card, details and warning messages    |
-| `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)    |
-| `assets/icons/`        | Icons and images used by the interface                           |
+| Path                   | Purpose                                                         |
+|------------------------|-----------------------------------------------------------------|
+| `index.html`           | Sign-in page (entry point)                                      |
+| `pages/dashboard.html` | Current status of the assigned box (sample data, `?state=...`)  |
+| `pages/history.html`   | Temperature history                                             |
+| `css/main.css`         | Shared styles: colour tokens, typography, layout and components |
+| `js/api.js`            | Small helper for calls to the backend API (`/api/...`)          |
+| `js/main.js`           | Page start-up code, including the API connection check          |
+| `js/sample-data.js`    | Sample readings for each dashboard state until the API is ready |
+| `js/dashboard.js`      | Draws the dashboard status card, details and warning messages   |
+| `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)   |
+| `assets/icons/`        | Icons and images used by the interface                          |
 
 ## How to run
 
