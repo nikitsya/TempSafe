@@ -1,32 +1,32 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Current status – TEMSAFE</title>
-  <link rel="stylesheet" href="../css/main.css">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Current status – TEMSAFE</title>
+    <link href="../css/main.css" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
-  <nav class="nav" aria-label="Main">
-    <span class="brand">TEMSAFE</span>
-    <a href="dashboard.html" aria-current="page">Current status</a>
-    <a href="history.html">History</a>
-    <a href="../index.html">Sign out</a>
-  </nav>
+    <nav aria-label="Main" class="nav">
+        <span class="brand">TEMSAFE</span>
+        <a aria-current="page" href="dashboard.html">Current status</a>
+        <a href="history.html">History</a>
+        <a href="../index.html">Sign out</a>
+    </nav>
 </header>
 <main>
-  <div class="top">
-    <h1 class="page-title">Current status</h1>
-    <span class="muted">Prototype box TS-01</span>
-  </div>
+    <div class="top">
+        <h1 class="page-title">Current status</h1>
+        <span class="muted">Prototype box TS-01</span>
+    </div>
 
-  <div id="dashboard"></div>
+    <div id="dashboard"></div>
 
-  <a class="btn" href="history.html">View temperature history</a>
+    <a class="btn" href="history.html">View temperature history</a>
 
-  <p><span id="api-status" class="api-status down" role="status">Checking API…</span></p>
-  <p class="muted">Sample data (backend endpoints not ready yet). States: <span id="sample-states"></span></p>
+    <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
+    <p class="muted">Sample data (backend endpoints not ready yet). States: <span id="sample-states"></span></p>
 </main>
 <script src="../js/api.js"></script>
 <script src="../js/main.js"></script>
