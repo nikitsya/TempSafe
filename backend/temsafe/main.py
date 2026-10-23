@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from temsafe.api.health import router as health_router
+from temsafe.pages import router as pages_router
 
 app = FastAPI(
     title="TEMSAFE API",
@@ -11,8 +12,8 @@ app = FastAPI(
     version="0.1.0",
 )
 app.include_router(health_router, prefix="/api")
+app.include_router(pages_router)
 
-# Serve the HTML, CSS and JavaScript frontend from the same address as the API.
-# Mounted after the API routes so that /api/... requests still reach the API.
 FRONTEND_DIR = Path(__file__).resolve().parents[2] / "frontend"
-app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+app.mount("/css", StaticFiles(directory=FRONTEND_DIR / "css"), name="css")
+app.mount("/js", StaticFiles(directory=FRONTEND_DIR / "js"), name="js")
