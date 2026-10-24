@@ -152,7 +152,8 @@ tests/backend/test_health.py    Health and generated OpenAPI smoke tests
 The initial TEMSAFE MySQL structure is in [`database/schema.sql`](database/schema.sql).
 See the [database setup and schema review](database/README.md) for initialisation,
 table relationships, integrity checks and remaining application responsibilities.
-Database integration with FastAPI is not implemented yet.
+The backend connection and session dependency are defined in `backend/temsafe/database.py`
+using SQLAlchemy and MySQL Connector/Python. Routes and database models are not connected yet.
 
 ## Project Documentation
 

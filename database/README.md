@@ -60,6 +60,14 @@ The image only imports the schema and sets credentials when the data volume is
 empty. Editing `schema.sql` or passwords in `.env` does not update an existing
 database; use migrations or an explicit password change instead.
 
+## Backend connection
+
+Install the backend dependencies from the repository root:
+
+```sh
+python -m pip install -e '.[dev]'
+```
+
 ## Initialise an empty database without Docker
 
 From the repository root, using an account allowed to create databases and tables:
@@ -81,7 +89,7 @@ installed database require separate versioned migrations.
 No users, credentials, boxes or temperature limits are seeded. The lower limit
 has not yet been agreed. Provision a box, an Argon2id password hash, its access
 assignment and an approved profile before ingesting samples. The backend health
-endpoint still checks application liveness only; database integration is pending.
+endpoint still checks application liveness only; database-backed routes are pending.
 
 ## Tables and review decisions
 
@@ -156,7 +164,7 @@ mask SQL errors. Connection options such as `--socket` may also be passed.
 
 The full integrity suite was run on MySQL 9.4.0. Validation on Docker MySQL 8.4.11
 covered initialisation, table creation and connectivity; the full suite was not
-rerun on that version. FastAPI database integration remains pending.
+rerun on that version. FastAPI database-backed routes remain pending.
 
 ### Connection and table evidence
 
