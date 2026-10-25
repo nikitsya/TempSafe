@@ -1,15 +1,14 @@
 """Classify temperatures using the profile applied to a measurement."""
 
 from decimal import Decimal
-from typing import Literal
-
 from temsafe.models import ThresholdProfile
+from typing import Literal
 
 
 def classify_temperature(
-    temperature_c: Decimal | None,
-    quality: str,
-    profile: ThresholdProfile,
+        temperature_c: Decimal | None,
+        quality: str,
+        profile: ThresholdProfile,
 ) -> Literal["Normal", "Warning", "Alert", "Unknown"]:
     """Return the temperature state without reading or changing the database."""
     # A failed or missing measurement must never be treated as a normal temperature.

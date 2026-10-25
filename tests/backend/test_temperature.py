@@ -1,9 +1,7 @@
 """Check temperature classification without connecting to MySQL."""
 
-from decimal import Decimal
-
 import pytest
-
+from decimal import Decimal
 from temsafe.models import ThresholdProfile
 from temsafe.temperature import classify_temperature
 

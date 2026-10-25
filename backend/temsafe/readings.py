@@ -26,7 +26,7 @@ def _find_existing(db: Session, values: dict):
 def _matching_retry(existing: list[TemperatureSample], values: dict):
     """Accept only an identical payload, including its original sample ID."""
     if len(existing) == 1 and all(
-        getattr(existing[0], field) == value for field, value in values.items()
+            getattr(existing[0], field) == value for field, value in values.items()
     ):
         return existing[0]
 

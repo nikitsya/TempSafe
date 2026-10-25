@@ -1,18 +1,16 @@
 """Check incoming validation and storage against the existing MySQL schema."""
 
-from datetime import datetime
-from uuid import uuid4
-
 import pytest
+from datetime import datetime
 from mysql.connector.errors import IntegrityError as MySQLIntegrityError
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
-
 from temsafe.database import SessionLocal
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
 from temsafe.readings import save_reading
 from temsafe.schemas import ReadingCreate
+from uuid import uuid4
 
 
 @pytest.fixture
