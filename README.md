@@ -153,7 +153,9 @@ The initial TEMSAFE MySQL structure is in [`database/schema.sql`](database/schem
 See the [database setup and schema review](database/README.md) for initialisation,
 table relationships, integrity checks and remaining application responsibilities.
 The backend connection and session dependency are defined in `backend/temsafe/database.py`
-using SQLAlchemy and MySQL Connector/Python. Routes and database models are not connected yet.
+using SQLAlchemy and MySQL Connector/Python. Models for boxes, profiles and temperature
+samples map the existing tables. A pytest test checks writing and reading one measurement;
+database-backed routes are not connected yet.
 
 ## Project Documentation
 
