@@ -27,6 +27,10 @@ python -m uvicorn temsafe.main:app --reload
 
 ## Open in your browser
 
+`GET /api/readings` returns up to 20 samples, ordered by receipt time (newest
+first). Use `/api/readings?limit=5` to change the number, from 1 to 100. An empty
+database returns `[]`. These prototype reading routes do not yet check user access.
+
 - [Website](http://127.0.0.1:8000) — the frontend.
 - [API documentation](http://127.0.0.1:8000/docs) — choose an endpoint, click **Try it out**, enter any required values
   and click **Execute**.
