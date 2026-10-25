@@ -1,5 +1,18 @@
 # Run the backend locally
 
+## Temperature classification
+
+`temperature.py` provides `classify_temperature(temperature_c, quality, profile)`.
+Pass the profile associated with the measurement. The function uses its stored
+limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
+is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
+temperatures and sensor errors return `Unknown`.
+
+This function is tested separately and does not yet add a status field to API
+responses. It does not query the database or assess whether a reading is stale.
+
+## Setup
+
 First, complete the [backend setup](../../README.md#backend-development).
 
 ## In PyCharm
