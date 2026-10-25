@@ -33,12 +33,14 @@ At 14:00, the first recorded temperature above 25°C is 26.2°C, triggering a hi
 ## Main flow
 
 1. At 14:00, the system records 26.2°C and changes the temperature status to Alert. The single-colour LED is lit.
-2. Shannon's phone receives the notification: "TempSafe — High temperature alert. Controlled Drug Box: 26.2°C. Recorded at 14:00."
+2. Shannon's phone receives the notification: "TempSafe — High temperature alert. Controlled Drug Box: 26.2°C. Recorded
+   at 14:00."
 3. Shannon continues treating the patient. The system continues recording readings above 25°C through 14:19:30,
    reaching a maximum of 28.1°C at 14:10.
 4. At 14:20, the system records 23.8°C, the first reading back below the upper limit. The excursion is marked Ended,
    the current status becomes Normal, and the LED turns off. The event remains in history.
-5. At 14:25, Shannon opens the earlier notification. The application opens the Controlled Drug Box dashboard with current data.
+5. At 14:25, Shannon opens the earlier notification. The application opens the Controlled Drug Box dashboard with
+   current data.
 6. The dashboard displays 23.5°C, Normal, and "Latest reading: 14:25". A visible card says
    "High-temperature event recorded" and provides a "View event" button.
 7. Shannon selects "View event". The details screen shows Ended, start time 14:00, end time 14:20,

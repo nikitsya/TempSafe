@@ -1,9 +1,8 @@
 """Configure SQLAlchemy sessions for the TEMSAFE MySQL database."""
 
 import os
-from pathlib import Path
-
 from dotenv import load_dotenv
+from pathlib import Path
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
