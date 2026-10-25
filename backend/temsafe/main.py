@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from temsafe.api.health import router as health_router
 from temsafe.api.boxes import router as boxes_router
+from temsafe.api.health import router as health_router
 from temsafe.api.readings import router as readings_router
 from temsafe.pages import router as pages_router
 

@@ -167,7 +167,7 @@ WHERE a.user_id = %s
   AND s.box_id = %s
   AND s.quality = 'valid'
   AND (s.temperature_c
-  <= p.lower_c
+    <= p.lower_c
    OR s.temperature_c
     > p.upper_c)
 ORDER BY s.sequence_no DESC;
