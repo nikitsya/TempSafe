@@ -6,6 +6,17 @@ from pydantic import BaseModel, ConfigDict
 from typing import Literal
 
 
+class BoxResponse(BaseModel):
+    """Return a box's identity and last recorded contact time."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    box_id: str
+    name: str
+    # A box may not have contacted the server yet.
+    last_seen_at: datetime | None
+
+
 class ReadingResponse(BaseModel):
     """Return a stored sample, including missing values after a sensor error."""
 

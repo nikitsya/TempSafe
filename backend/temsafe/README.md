@@ -27,6 +27,10 @@ python -m uvicorn temsafe.main:app --reload
 
 ## Open in your browser
 
+`GET /api/boxes/{box_id}` returns a box's ID, name and last contact time, or
+`404` if it does not exist. Try it in `/docs` with an existing `box_id`.
+This prototype endpoint does not yet check user access.
+
 `GET /api/readings` returns up to 20 samples, ordered by receipt time (newest
 first). Use `/api/readings?limit=5` to change the number, from 1 to 100. An empty
 database returns `[]`. These prototype reading routes do not yet check user access.
