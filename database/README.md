@@ -58,6 +58,24 @@ MYSQL_PASSWORD=replace-with-your-own-password
 Use your server's actual host and port. `MYSQL_ROOT_PASSWORD` is only needed for
 our Docker setup. Keep `.env` out of Git.
 
+## Add the prototype box
+
+Database changes live in `database/migrations` as numbered SQL files. We apply
+them manually in order; no extra migration tool is needed for this step.
+
+1. Connect to your MySQL server in your SQL client and select `temsafe`.
+2. After the tables exist, open and run
+   [`001_add_prototype_box.sql`](migrations/001_add_prototype_box.sql).
+3. Click **Commit** if auto-commit is off.
+
+This adds `TS-01`, named `Prototype box TS-01`. Its `last_seen_at` is `NULL`
+until the device contacts the server. Running this file again preserves an
+existing box without creating a duplicate. If you already added TS-01, keep it.
+These steps work with or without Docker; do not re-run `schema.sql`.
+
+With the backend running, open
+[`/api/boxes/TS-01`](http://127.0.0.1:8000/api/boxes/TS-01) to see the box through the API.
+
 ## Check it works
 
 In your SQL client, select `temsafe` and run:
@@ -74,6 +92,7 @@ Then follow the short [backend test instructions](../tests/backend/README.md).
 The tests check the connection and save a measurement, read it back and remove
 their test records. They also check the reading endpoint. The expected result is **3 passed**.
 
-The schema creates empty tables; it does not add application users or real boxes.
+The schema creates empty tables; the migration above adds the prototype box.
+It does not add users, temperature profiles or measurements.
 For the design and data rules, see the
 [database research](../docs/research/database-research.md).
