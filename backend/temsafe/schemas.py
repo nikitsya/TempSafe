@@ -2,9 +2,8 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict
+from typing import Literal
 
 
 class ReadingResponse(BaseModel):

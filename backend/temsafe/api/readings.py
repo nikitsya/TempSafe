@@ -1,22 +1,20 @@
 """Routes for retrieving temperature readings."""
 
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from temsafe import models
 from temsafe.database import get_db
 from temsafe.schemas import ReadingResponse
+from typing import Annotated
 
 router = APIRouter(tags=["Readings"])
 
 
 @router.get("/readings", response_model=list[ReadingResponse])
 def get_readings(
-    db: Annotated[Session, Depends(get_db)],
-    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+        db: Annotated[Session, Depends(get_db)],
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
     """Return the most recently received samples, with a maximum of 100 records."""
     # Sort by receipt time; delayed uploads may have older observation times.
