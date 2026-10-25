@@ -1,3 +1,5 @@
+"""SQLAlchemy models for the six existing TEMSAFE database tables."""
+
 from datetime import datetime
 from decimal import Decimal
 
@@ -16,6 +18,29 @@ class Box(Base):
     box_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     last_seen_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+
+
+class AppUser(Base):
+    """Represent an application user and their stored password hash."""
+
+    __tablename__ = "app_users"
+
+    # MySQL assigns the ID when a new user is saved.
+    user_id: Mapped[int] = mapped_column(
+        BIGINT(unsigned=True), primary_key=True, autoincrement=True
+    )
+    auth_subject: Mapped[str] = mapped_column(String(191), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+
+
+class BoxAccess(Base):
+    """Record which users are assigned to which boxes."""
+
+    __tablename__ = "box_access"
+
+    # Together these fields identify one assignment, matching the SQL primary key.
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id"), primary_key=True)
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"), primary_key=True)
 
 
 class ThresholdProfile(Base):
@@ -60,4 +85,18 @@ class TemperatureSample(Base):
     temperature_c: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     quality: Mapped[str] = mapped_column(ENUM("valid", "sensor_error"))
 
-# Do not call Base.metadata.create_all() to initialise or migrate this schema.
+
+class SampleReview(Base):
+    """Store the latest acknowledgement of a sample and the user who reviewed it."""
+
+    __tablename__ = "sample_reviews"
+
+    sample_id: Mapped[str] = mapped_column(
+        ForeignKey("temperature_samples.sample_id"), primary_key=True
+    )
+    reviewed_by: Mapped[int] = mapped_column(ForeignKey("app_users.user_id"))
+    reviewed_at: Mapped[datetime] = mapped_column(
+        DATETIME(fsp=6), server_default=text("CURRENT_TIMESTAMP(6)")
+    )
+
+# Create tables using database/schema.sql; these models map the existing tables.
