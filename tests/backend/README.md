@@ -1,7 +1,8 @@
 # Backend tests
 
 These pytest tests check the MySQL connection and save one test measurement,
-read it back, then remove the records created by the test.
+read it back through SQLAlchemy and the API, then remove the test records.
+They also check that an unknown sample ID returns HTTP 404.
 
 ## Before you start
 
@@ -39,7 +40,8 @@ project root as its working directory.
 ```text
 test_database_connection PASSED
 test_measurement_is_written_and_read_back PASSED
+test_missing_reading_returns_404 PASSED
 ```
 
-The summary should show **2 passed**. If a test fails, check that MySQL is running,
+The summary should show **3 passed**. If a test fails, check that MySQL is running,
 the `.env` settings are correct and your editor uses the project’s `.venv`.

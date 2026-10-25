@@ -127,9 +127,16 @@ curl http://127.0.0.1:8000/api/health
 ```
 
 Expected result: HTTP `200 OK` with `{"status":"ok"}`. This is an application liveness check;
-it does not check a database, sensor or MQTT connection. Those integrations and authentication
-are not implemented yet. Stop the development server with `Ctrl+C`.
+it does not check a database, sensor or MQTT connection. Sensor and MQTT integration
+and authentication are not implemented yet. Stop the development server with `Ctrl+C`.
 If port 8000 is already in use, pass `--port 8001` instead and use port 8001 in the URLs above.
+
+`GET /api/readings/{sample_id}` returns one stored measurement from MySQL, or
+HTTP `404` if the ID does not exist. In `/docs`, open this endpoint, select **Try it out**, enter an existing
+`sample_id` and select **Execute**. Decimal
+temperatures are returned as JSON strings, such as `"5.25"`; a sensor error can
+have a `null` temperature. The endpoint is for local prototype development;
+authentication and box access checks are not implemented yet.
 
 Activate the environment and run the automated backend checks from the repository root:
 
@@ -144,7 +151,9 @@ The backend is organised as follows:
 pyproject.toml                  Python package, dependencies and test configuration
 backend/temsafe/main.py         FastAPI application entry point
 backend/temsafe/api/health.py   Health route and response model
-tests/backend/test_health.py    Health and generated OpenAPI smoke tests
+backend/temsafe/api/readings.py Reading lookup route
+backend/temsafe/schemas.py      API response schemas
+tests/backend/test_database.py  Database and reading endpoint tests
 ```
 
 ## Database Setup
@@ -153,9 +162,9 @@ The initial TEMSAFE MySQL structure is in [`database/schema.sql`](database/schem
 See the [database setup and schema review](database/README.md) for initialisation,
 table relationships, integrity checks and remaining application responsibilities.
 The backend connection and session dependency are defined in `backend/temsafe/database.py`
-using SQLAlchemy and MySQL Connector/Python. Models for boxes, profiles and temperature
-samples map the existing tables. A pytest test checks writing and reading one measurement;
-database-backed routes are not connected yet.
+using SQLAlchemy and MySQL Connector/Python. Models map all six existing tables.
+The reading endpoint retrieves one measurement by ID; pytest checks database storage
+and the endpoint's success and not-found responses.
 
 ## Project Documentation
 

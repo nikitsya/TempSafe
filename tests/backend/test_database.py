@@ -5,8 +5,10 @@ Start the configured MySQL server before running this test.
 
 from datetime import datetime
 from decimal import Decimal
+from fastapi.testclient import TestClient
 from sqlalchemy import select, text
 from temsafe.database import SessionLocal, get_db
+from temsafe.main import app
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
 from uuid import uuid4
 
@@ -86,6 +88,22 @@ def test_measurement_is_written_and_read_back():
             assert saved_measurement.clock_reliable is True
             assert saved_measurement.quality == "valid"
 
+        # Check the same committed measurement through the HTTP endpoint.
+        with TestClient(app) as client:
+            response = client.get(f"/api/readings/{sample_id}")
+        assert response.status_code == 200
+        assert response.json() == {
+            "sample_id": sample_id,
+            "box_id": box_id,
+            "sequence_no": 1,
+            "profile_id": profile_id,
+            "observed_at": observed_at.isoformat(),
+            "clock_reliable": True,
+            "received_at": saved_measurement.received_at.isoformat(),
+            "temperature_c": "5.25",
+            "quality": "valid",
+        }
+
     finally:
         # Remove only this run's records, children first to respect foreign keys.
         # This also runs if an assertion fails after the transaction was committed.
@@ -100,3 +118,11 @@ def test_measurement_is_written_and_read_back():
                     db.delete(record)
                     db.flush()
             db.commit()
+
+
+def test_missing_reading_returns_404():
+    """Return a clear HTTP error when the requested sample does not exist."""
+    with TestClient(app) as client:
+        response = client.get(f"/api/readings/{uuid4()}")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Temperature reading not found"}

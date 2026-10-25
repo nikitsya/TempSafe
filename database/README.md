@@ -72,7 +72,7 @@ You should see `app_users`, `box_access`, `boxes`, `sample_reviews`,
 
 Then follow the short [backend test instructions](../tests/backend/README.md).
 The tests check the connection and save a measurement, read it back and remove
-their test records. The expected result is **2 passed**.
+their test records. They also check the reading endpoint. The expected result is **3 passed**.
 
 The schema creates empty tables; it does not add application users or real boxes.
 For the design and data rules, see the

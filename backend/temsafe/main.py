@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 from temsafe.api.health import router as health_router
+from temsafe.api.readings import router as readings_router
 from temsafe.pages import router as pages_router
 
 # Create the application and set the information shown in the API documentation.
@@ -13,8 +14,9 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# Add /api to the health route; page routes keep their existing frontend URLs.
+# Add /api to API routes; page routes keep their existing frontend URLs.
 app.include_router(health_router, prefix="/api")
+app.include_router(readings_router, prefix="/api")
 app.include_router(pages_router)
 
 # Locate the frontend relative to this file, regardless of the working directory.
