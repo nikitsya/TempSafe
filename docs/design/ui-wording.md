@@ -13,10 +13,10 @@ The paramedic must understand each message quickly, often under time pressure. E
 
 | State           | Heading                   | Supporting text                                                                   |
 |-----------------|---------------------------|-----------------------------------------------------------------------------------|
-| Normal          | NORMAL                    | Within configured limits (15–24°C)                                                |
-| Warning         | WARNING                   | At or above early-warning threshold (24°C)                                        |
+| Normal          | NORMAL                    | Above 0°C and below 24°C                                                          |
+| Warning         | WARNING                   | From 24°C through 25°C                                                            |
 | Alert (high)    | ALERT                     | Above configured upper limit (25°C)                                               |
-| Alert (low)     | ALERT                     | Below configured lower limit (15°C)                                               |
+| Alert (low)     | ALERT                     | At or below configured lower threshold (0°C)                                      |
 | Stale           | DATA STALE                | Current conditions unknown. No new reading for {time} (limit 90 s).               |
 | Sensor failure  | SENSOR ERROR              | Latest reading failed at {time}. Temperature is unknown.                          |
 | No contact      | NOT REPORTING             | No contact from the device for {time}.                                            |

@@ -32,7 +32,7 @@ A separate native mobile application is likely to follow the web application, su
 | FR-02 | Restrict access to the assigned prototype box        | Must     | Multiple authorised users can access the same prototype box; UI and API deny access to unassigned users; unknown box IDs expose no data                                                                                                                                                                        |
 | FR-03 | Measure and record internal temperature              | Must     | Each sample attempt has a unique ID, box ID, persistent sequence number, UTC observation time (or explicit unreliable-clock status), profile ID and quality status; valid readings are recorded in degrees Celsius                                                                                             |
 | FR-04 | Show the latest temperature and its freshness        | Must     | Show value, unit, observation time and last device contact separately; show unknown before any reading and stale when readings are old; a newer sensor error is visible even if the last valid value remains in history                                                                                        |
-| FR-05 | Classify valid samples against a configured profile  | Must     | With limits L < W < U: T < L or T > U is Alert; W <= T <= U is Warning; L <= T < W is Normal. W is the configured early-warning threshold; invalid samples are unknown, never Normal; preserve the applied profile                                                                                             |
+| FR-05 | Classify valid samples against a configured profile  | Must     | With limits L < W < U: T <= L or T > U is Alert; W <= T <= U is Warning; L < T < W is Normal. W is the configured early-warning threshold; invalid samples are unknown, never Normal; preserve the applied profile                                                                                             |
 | FR-06 | Provide a local LED warning                          | Must     | A single-colour LED lights by the next completed Warning or Alert sample, including without Wi-Fi; Normal turns it off; an invalid read uses a distinct blink pattern; off is not proof of acceptable conditions or working power                                                                              |
 | FR-07 | Display temperature history and out-of-range records | Must     | Filter by box and time; provide graph plus readable table; show thresholds, gaps and quality issues; use observation times, not upload times                                                                                                                                                                   |
 | FR-08 | Identify loss of device contact                      | Must     | After the contact timeout show not reporting and the last contact time; never-connected devices have a separate state; contact alone does not make buffered readings fresh                                                                                                                                     |
@@ -46,8 +46,9 @@ A separate native mobile application is likely to follow the web application, su
 
 ## 3. Proposed prototype settings
 
-For the existing demo profile, the early-warning threshold is 24°C and the upper limit is 25°C; the lower limit remains
-to be selected. Boundary tests cover L, W and U, including exact equality. These settings do not define a universal
+The agreed demo profile uses L = 0.00°C, W = 24.00°C and U = 25.00°C. A reading exactly
+at 0°C is Alert; readings exactly at 24°C or 25°C are Warning. Boundary tests cover all three limits. These settings do
+not define a universal
 medicine storage range.
 
 | Setting            | Proposal                                                                                                                                              |

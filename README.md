@@ -87,10 +87,11 @@ The prototype is intended for bench demonstration and testing with no real medic
 cooling, GPS tracking, box-opening detection, patient records or integration with ambulance-service clinical systems.
 It will not replace official controlled-drug records or be deployed in a clinical environment.
 
-Temperature limits will be configured through versioned profiles. The sensor research describes a proposed 25°C upper
-limit and a project-defined 24°C early warning; these are prototype research settings, not a universal medicine storage
-range. The functional requirements define Normal, Warning and Alert states using configured limits and an early-warning
-margin. These colours belong to the application; the physical LED does not need to change colour.
+Temperature limits will be configured through versioned profiles. The agreed prototype profile uses a 0.00°C lower
+threshold, a 24.00°C warning threshold and a 25.00°C upper limit; these are prototype research settings, not a universal
+medicine storage
+range. For valid readings, T <= 0°C or T > 25°C is Alert, 24°C <= T <= 25°C is Warning,
+and 0°C < T < 24°C is Normal. These colours belong to the application; the physical LED does not need to change colour.
 
 ## Repository Structure
 

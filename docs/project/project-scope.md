@@ -22,7 +22,7 @@ A separate native mobile application is likely to follow the web application, su
 - Monitoring temperature over time through timestamped readings and accessible history. Estimated excursion timing and
   maximum-temperature summaries are Should Have.
 - Classification against versioned lower/upper limits: demonstration Warning begins at 24°C; Alert is above 25°C or
-  below the configured lower limit.
+  at or below the agreed 0.00°C lower threshold.
 - A single-colour LED lights for Warning or Alert and uses a distinct blink pattern for sensor failure. Normal leaves it
   off; an unlit LED does not prove acceptable temperature or working power.
 - The application shows Normal, Warning and Alert using green, amber and red, together with text and symbols.

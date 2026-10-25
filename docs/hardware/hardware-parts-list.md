@@ -28,8 +28,8 @@ enhancement, subject to component availability and testing.
   Sound the buzzer if implemented.
 - **Sensor failure:** distinct LED blinking and an explicit application error, never Normal.
 
-For the existing demo example, Warning starts at 24°C and high-temperature Alert starts above 25°C. Configured
-lower-limit violations also produce Alert.
+For the agreed demo profile, Warning applies from 24°C through 25°C. Alert applies above 25°C
+or at or below the 0°C lower threshold.
 
 The LED and buzzer are **output / feedback devices**, not sensors. The SCD-41 remains the main sensor used to collect
 environmental data.

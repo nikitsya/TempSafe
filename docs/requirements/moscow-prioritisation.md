@@ -84,8 +84,9 @@ PWA support for home-screen access is planned.
   is considered complete.
 - The buzzer is Should Have; select the part, sound pattern and silence control if implemented.
 - Humidity and CO₂ reporting are outside this release, even though the SCD-41 can measure both.
-- Demo upper-temperature settings use 24°C for Warning and above 25°C for Alert; the profile also needs a configured
-  lower limit. These are prototype settings, not a universal medicine storage range.
+- The agreed demo profile uses a 0.00°C lower threshold, 24.00°C warning threshold and 25.00°C upper limit.
+  Alert applies at or below 0°C and above 25°C; Warning applies from 24°C through 25°C. These are prototype settings,
+  not a universal medicine storage range.
 - Record the clarified priorities and any subsequent group decisions in Scrumwise. This document does not claim that a
   group meeting or approval has occurred.
 

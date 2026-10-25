@@ -116,7 +116,7 @@ SELECT s.sample_id,
        b.last_seen_at,
        CASE
            WHEN s.quality <> 'valid' THEN 'unknown'
-           WHEN s.temperature_c < p.lower_c OR s.temperature_c > p.upper_c THEN 'Alert'
+           WHEN s.temperature_c <= p.lower_c OR s.temperature_c > p.upper_c THEN 'Alert'
            WHEN s.temperature_c >= p.warning_c THEN 'Warning'
            ELSE 'Normal' END AS recorded_band
 FROM temperature_samples s
@@ -167,7 +167,7 @@ WHERE a.user_id = %s
   AND s.box_id = %s
   AND s.quality = 'valid'
   AND (s.temperature_c
-    < p.lower_c
+  <= p.lower_c
    OR s.temperature_c
     > p.upper_c)
 ORDER BY s.sequence_no DESC;

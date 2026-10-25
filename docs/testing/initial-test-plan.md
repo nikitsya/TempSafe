@@ -28,7 +28,7 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 | Heartbeat interval       | 60 seconds                                                                                                                                                                                       |
 | Device-contact timeout   | 3 minutes                                                                                                                                                                                        |
 | Offline capacity         | At least 24 hours: 2,880 attempts at 30-second intervals                                                                                                                                         |
-| Profile                  | L < W < U. Demo W = 24°C; U = 25°C. Lower limit L remains to be agreed.                                                                                                                          |
+| Profile                  | L < W < U. Agreed demo L = 0.00°C; W = 24.00°C; U = 25.00°C. Equality at L is Alert.                                                                                                             |
 | Stale-reading threshold  | Proposed 90 seconds; agree and test independently of the 180-second contact timeout.                                                                                                             |
 | Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                                                                                                       |
 | Notifications            | Proposed Web Push; verify browser/platform support, home-screen installation where required, permission, authorised recipients, unchanged-state suppression and 60-second online receipt target. |
@@ -67,9 +67,9 @@ results separately.
 
 | Input             | Expected state                        |
 |-------------------|---------------------------------------|
-| L−0.1             | Alert                                 |
-| L, L+0.1          | Normal, provided L+0.1 < W            |
-| W−0.1             | Normal, provided W−0.1 >= L           |
+| L−0.1, L          | Alert                                 |
+| L+0.1             | Normal, provided L+0.1 < W            |
+| W−0.1             | Normal, provided W−0.1 > L            |
 | W, W+0.1          | Warning, provided W+0.1 <= U          |
 | U−0.1, U          | Warning, provided U−0.1 >= W          |
 | U+0.1             | Alert                                 |

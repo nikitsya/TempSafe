@@ -144,8 +144,10 @@ subscriptions/outbox and job-run records require additional tables during implem
 Boxes link to users through `box_access`; each sample links to the profile for that box. Optional review records do not
 alter measurements. Local SQLite stores pending messages and the persistent next sequence atomically.
 
-Let L < W < U. A valid temperature below L or above U is Alert; W through U is Warning; L through values below W is
-Normal. Demonstration W = 24°C and U = 25°C; L must be agreed before tests. The LED is off for Normal and steadily lit
+Let L < W < U. A valid temperature at or below L or above U is Alert; W through U is Warning; values strictly between L
+and W are
+Normal. The agreed prototype profile is L = 0.00°C, W = 24.00°C and U = 25.00°C. The LED is off for Normal and steadily
+lit
 for Warning/Alert. Proposed sensor-error feedback is two short flashes followed by a pause. Application colour is
 supplemented by words and symbols. The buzzer remains Should Have.
 

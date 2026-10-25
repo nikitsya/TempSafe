@@ -30,9 +30,9 @@ threshold.
 
 **Prototype threshold logic:**
 
-- For valid readings within the configured lower limit: below 24°C = `Normal`
+- For valid readings: above 0°C and below 24°C = `Normal`
 - 24–25°C = `Warning`
-- Above 25°C = `Alert`
+- At or below 0°C, or above 25°C = `Alert`
 
 The 24°C warning level is a project-defined early warning, not a clinical storage requirement.
 
@@ -78,11 +78,11 @@ colour alone.
 
 ## 3. The system calculates the current status and tracks temperature over time.
 
-## 4. For a valid reading at or above the configured lower limit and below 24°C, the LED is off (Normal).
+## 4. For a valid reading above the agreed 0°C lower threshold and below 24°C, the LED is off (Normal).
 
 ## 5. From 24°C through 25°C, the single-colour LED is steadily lit (Warning); the system sends an early phone warning when connected and permission is granted.
 
-## 6. Above 25°C or below the configured lower limit, the LED remains steadily lit (Alert); the optional buzzer sounds if implemented, and a phone alert is sent when connected and permitted.
+## 6. Above 25°C or at or below the agreed 0°C lower threshold, the LED remains steadily lit (Alert); the optional buzzer sounds if implemented, and a phone alert is sent when connected and permitted.
 
 ## 7. The system records the start time, maximum temperature and duration of the temperature excursion.
 
@@ -98,7 +98,8 @@ time. The Advanced Paramedic does not need to perform regular manual checks whil
 single-colour LED is off for Normal, steadily lit for Warning or Alert, and blinks distinctly on sensor failure. An
 unlit LED alone does not prove acceptable conditions or working power. When connected and notification permission is
 granted, the system sends an early warning as the temperature approaches the configured upper limit and an alert when it
-exceeds 25°C or falls below the configured lower limit. The optional buzzer sounds on Alert if implemented. The
+exceeds 25°C or falls to or below the agreed 0°C lower threshold. The optional buzzer sounds on Alert if implemented.
+The
 application distinguishes Normal, Warning and Alert using text, symbols and green, amber and red colours. The prototype
 records observations for review; it does not cool the box automatically.
 

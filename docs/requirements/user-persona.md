@@ -169,12 +169,12 @@ The TempSafe system includes:
 
 ## Temperature and Feedback Logic
 
-For valid readings within the agreed lower limit, the demonstration uses the following upper-temperature feedback logic.
-Values below the configured lower limit also produce Alert; sensor failure is an error state with distinct LED blinking:
+For valid readings, the demonstration uses the agreed 0.00°C, 24.00°C and 25.00°C profile.
+Sensor failure is an error state with distinct LED blinking:
 
-- **Below 24°C – Normal:** physical LED off; application Normal;
+- **Above 0°C and below 24°C – Normal:** physical LED off; application Normal;
 - **24°C to 25°C – Warning:** physical LED on and early phone warning when connected;
-- **Above 25°C – Temperature excursion:** physical LED on, optional buzzer and phone alert when connected.
+- **At or below 0°C, or above 25°C – Alert:** physical LED on, optional buzzer and phone alert when connected.
 
 The **24°C threshold** is a project-defined early warning. The **25°C threshold** is a demonstration upper limit drawn
 from the project research; it is not a universal medicine storage range.
