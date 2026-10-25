@@ -12,6 +12,25 @@ The latest-reading endpoint loads the sample's recorded profile and uses this
 function to add `temperature_state` to its response. This state describes the
 recorded temperature; it does not assess whether the reading is stale.
 
+## Saving incoming readings
+
+`ReadingCreate` in `schemas.py` validates the incoming fields. Use
+`save_reading(db, reading)` from `temsafe.readings` with a validated `ReadingCreate`
+and a dedicated `SessionLocal()` session. The function checks the box and profile,
+then uses `add()`, `commit()` and `refresh()` to save the sample.
+
+Observation times must include a timezone and are stored as UTC. Receipt time is
+set by the backend. Valid temperatures must be between -40 and 80°C with at most
+two decimal places; sensor errors require `null`. An unreliable clock requires
+`observed_at: null`. Sample and profile IDs must be UUIDs.
+
+An identical retry returns the existing sample without changing its receipt time.
+Reusing its ID or box sequence with different data raises `ValueError`. Missing
+boxes and profiles also raise `ValueError`; invalid payloads fail Pydantic validation.
+The function commits its session, so keep unrelated changes in another session.
+
+This is an internal function, not a new HTTP endpoint or MQTT handler.
+
 ## Setup
 
 First, complete the [backend setup](../../README.md#backend-development).

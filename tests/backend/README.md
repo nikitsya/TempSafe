@@ -2,7 +2,7 @@
 
 To run all backend tests, use `tests/backend` instead of
 `tests/backend/test_database.py` in the commands below. The full suite currently
-has **43 tests**, including reading lists, invalid limits and box responses.
+has **74 tests**, including reading lists, invalid limits and box responses.
 The latest-reading and box-history tests use MySQL to check delayed uploads,
 measurement order, limits, box isolation, sensor errors and missing data.
 Their temporary records are rolled back.
@@ -11,6 +11,10 @@ including when another profile has since been added for that box.
 
 `test_temperature.py` checks classification boundaries and sensor errors without
 connecting to MySQL. Run it in the same way by selecting that file instead.
+
+`test_save_reading.py` checks incoming validation, committed storage, identical
+retries, conflicting IDs/sequences and competing inserts. Its MySQL test records
+are deleted afterwards; validation-only cases do not connect to the database.
 
 These pytest tests check the MySQL connection and save one test measurement,
 read it back through SQLAlchemy and the API, then remove the test records.
