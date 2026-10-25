@@ -76,6 +76,21 @@ These steps work with or without Docker; do not re-run `schema.sql`.
 With the backend running, open
 [`/api/boxes/TS-01`](http://127.0.0.1:8000/api/boxes/TS-01) to see the box through the API.
 
+## Add the temperature profile
+
+After the box exists, run
+[`002_add_prototype_temperature_profile.sql`](migrations/002_add_prototype_temperature_profile.sql)
+in the same database and click **Commit** if auto-commit is off.
+
+This adds the agreed demo profile for `TS-01`: lower threshold `0.00°C`, Warning
+`24.00°C` and upper limit `25.00°C`. For valid samples, Alert means `T <= 0` or
+`T > 25`; Warning means `24 <= T <= 25`; Normal means `0 < T < 24`.
+
+The profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548` and `is_demo` is true.
+Re-running the file preserves the existing profile. Future changes to the limits
+must use a new profile ID so older measurements keep their original settings.
+This stores the settings only; automatic classification is a separate backend step.
+
 ## Check it works
 
 In your SQL client, select `temsafe` and run:
@@ -92,7 +107,7 @@ Then follow the short [backend test instructions](../tests/backend/README.md).
 The tests check the connection and save a measurement, read it back and remove
 their test records. They also check the reading endpoint. The expected result is **3 passed**.
 
-The schema creates empty tables; the migration above adds the prototype box.
-It does not add users, temperature profiles or measurements.
+The schema creates empty tables; the migrations above add the prototype box and
+its temperature profile. They do not add users or measurements.
 For the design and data rules, see the
 [database research](../docs/research/database-research.md).
