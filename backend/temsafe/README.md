@@ -8,8 +8,9 @@ limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
 is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
 temperatures and sensor errors return `Unknown`.
 
-This function is tested separately and does not yet add a status field to API
-responses. It does not query the database or assess whether a reading is stale.
+The latest-reading endpoint loads the sample's recorded profile and uses this
+function to add `temperature_state` to its response. This state describes the
+recorded temperature; it does not assess whether the reading is stale.
 
 ## Setup
 
@@ -50,11 +51,25 @@ returns `200 OK` with `[]`; an unknown box returns `404` with
 `GET /api/boxes/{box_id}/readings/latest` returns the sample with the highest
 `sequence_no` for that box, even if an older sample was uploaded later. For our
 prototype, use `/api/boxes/TS-01/readings/latest`. The response is one reading
-object with the fields shown below. A latest sensor error is returned with a
+object with the fields shown below plus `temperature_state`: `Normal`, `Warning`,
+`Alert` or `Unknown`. A latest sensor error is returned with a
 `null` temperature rather than replaced with an older valid reading.
 HTTP `404` returns `{"detail":"No readings available for this box"}` for an empty
 box, or `{"detail":"Box not found"}` for an unknown ID. User access checks are
 not implemented yet.
+
+For example, `GET /api/boxes/TS-01/readings/latest` with a valid 24.50°C sample
+using the agreed profile includes these fields (the other reading fields remain):
+
+```json
+{
+  "temperature_c": "24.50",
+  "quality": "valid",
+  "temperature_state": "Warning"
+}
+```
+
+History and individual-reading endpoints still use the original response format.
 
 `GET /api/boxes/{box_id}` returns a box's ID, name and last contact time, or
 `404` if it does not exist. Try it in `/docs` with an existing `box_id`.

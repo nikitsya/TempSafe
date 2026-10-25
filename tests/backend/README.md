@@ -2,10 +2,12 @@
 
 To run all backend tests, use `tests/backend` instead of
 `tests/backend/test_database.py` in the commands below. The full suite currently
-has **38 tests**, including reading lists, invalid limits and box responses.
+has **43 tests**, including reading lists, invalid limits and box responses.
 The latest-reading and box-history tests use MySQL to check delayed uploads,
 measurement order, limits, box isolation, sensor errors and missing data.
 Their temporary records are rolled back.
+Latest-reading responses are also checked against the sample's recorded profile,
+including when another profile has since been added for that box.
 
 `test_temperature.py` checks classification boundaries and sensor errors without
 connecting to MySQL. Run it in the same way by selecting that file instead.

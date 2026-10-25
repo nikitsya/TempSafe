@@ -32,3 +32,9 @@ class ReadingResponse(BaseModel):
     received_at: datetime
     temperature_c: Decimal | None
     quality: Literal["valid", "sensor_error"]
+
+
+class LatestReadingResponse(ReadingResponse):
+    """Include the calculated temperature state alongside all reading fields."""
+
+    temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]

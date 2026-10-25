@@ -78,6 +78,50 @@ def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
     assert reading["sequence_no"] == 101
     assert reading["quality"] == quality
     assert reading["temperature_c"] == ("5.25" if quality == "valid" else None)
+    assert reading["temperature_state"] == ("Normal" if quality == "valid" else "Unknown")
+
+
+@pytest.mark.parametrize("temperature, expected", [
+    ("2.00", "Alert"),
+    ("5.00", "Normal"),
+    ("7.00", "Warning"),
+    ("8.00", "Warning"),
+    ("8.01", "Alert"),
+])
+def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, expected):
+    """Keep using the sample's 2/7/8 test profile after a different profile is added."""
+    client, db, box_ids, profile_ids = latest_reading_data
+    sample_id = str(uuid4())
+    db.add(TemperatureSample(
+        sample_id=sample_id, box_id=box_ids[0], profile_id=profile_ids[0],
+        sequence_no=1, observed_at=datetime(2026, 1, 1, 12),
+        received_at=datetime(2026, 1, 1, 12, 1), clock_reliable=True,
+        quality="valid", temperature_c=Decimal(temperature),
+    ))
+    db.flush()
+    # Adding another profile must not reinterpret an existing measurement.
+    db.add(ThresholdProfile(
+        profile_id=str(uuid4()), box_id=box_ids[0],
+        lower_c=Decimal("0.00"), warning_c=Decimal("24.00"),
+        upper_c=Decimal("25.00"), is_demo=True,
+        source_note="Alternative profile for the API test only.",
+    ))
+    db.flush()
+
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+    assert response.status_code == 200
+    assert response.json() == {
+        "sample_id": sample_id,
+        "box_id": box_ids[0],
+        "sequence_no": 1,
+        "profile_id": profile_ids[0],
+        "observed_at": "2026-01-01T12:00:00",
+        "clock_reliable": True,
+        "received_at": "2026-01-01T12:01:00",
+        "temperature_c": temperature,
+        "quality": "valid",
+        "temperature_state": expected,
+    }
 
 
 def test_latest_reading_without_samples(latest_reading_data):

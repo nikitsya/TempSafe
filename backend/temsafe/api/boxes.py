@@ -5,7 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from temsafe import models
 from temsafe.database import get_db
-from temsafe.schemas import BoxResponse, ReadingResponse
+from temsafe.schemas import BoxResponse, LatestReadingResponse, ReadingResponse
+from temsafe.temperature import classify_temperature
 from typing import Annotated
 
 router = APIRouter(tags=["Boxes"])
@@ -34,7 +35,7 @@ def get_box_readings(
     return result.scalars().all()
 
 
-@router.get("/boxes/{box_id}/readings/latest", response_model=ReadingResponse)
+@router.get("/boxes/{box_id}/readings/latest", response_model=LatestReadingResponse)
 def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
     """Return the last sample taken by this box, including sensor errors."""
     result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
@@ -57,7 +58,21 @@ def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
             detail="No readings available for this box",
         )
 
-    return reading
+    # Use the profile recorded with this sample, even if the box has a newer profile.
+    result = db.execute(
+        select(models.ThresholdProfile).where(
+            models.ThresholdProfile.profile_id == reading.profile_id,
+            models.ThresholdProfile.box_id == reading.box_id,
+        )
+    )
+    profile = result.scalars().one()
+    temperature_state = classify_temperature(reading.temperature_c, reading.quality, profile)
+
+    # Build the API response without adding a calculated field to the database model.
+    return LatestReadingResponse(
+        **ReadingResponse.model_validate(reading).model_dump(),
+        temperature_state=temperature_state,
+    )
 
 
 @router.get("/boxes/{box_id}", response_model=BoxResponse)
