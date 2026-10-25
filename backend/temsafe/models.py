@@ -60,5 +60,4 @@ class TemperatureSample(Base):
     temperature_c: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
     quality: Mapped[str] = mapped_column(ENUM("valid", "sensor_error"))
 
-
 # Do not call Base.metadata.create_all() to initialise or migrate this schema.
