@@ -27,6 +27,15 @@ python -m uvicorn temsafe.main:app --reload
 
 ## Open in your browser
 
+`GET /api/boxes/{box_id}/readings/latest` returns the sample with the highest
+`sequence_no` for that box, even if an older sample was uploaded later. For our
+prototype, use `/api/boxes/TS-01/readings/latest`. The response is one reading
+object with the fields shown below. A latest sensor error is returned with a
+`null` temperature rather than replaced with an older valid reading.
+HTTP `404` returns `{"detail":"No readings available for this box"}` for an empty
+box, or `{"detail":"Box not found"}` for an unknown ID. User access checks are
+not implemented yet.
+
 `GET /api/boxes/{box_id}` returns a box's ID, name and last contact time, or
 `404` if it does not exist. Try it in `/docs` with an existing `box_id`.
 This prototype endpoint does not yet check user access.

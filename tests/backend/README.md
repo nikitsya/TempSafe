@@ -2,7 +2,9 @@
 
 To run all backend tests, use `tests/backend` instead of
 `tests/backend/test_database.py` in the commands below. The full suite currently
-has **11 tests**, including reading lists, invalid limits and box responses.
+has **15 tests**, including reading lists, invalid limits and box responses.
+The latest-reading tests use MySQL to check delayed uploads, box isolation,
+sensor errors and missing data. Their temporary records are rolled back.
 
 These pytest tests check the MySQL connection and save one test measurement,
 read it back through SQLAlchemy and the API, then remove the test records.

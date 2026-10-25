@@ -1,16 +1,40 @@
 """Routes for retrieving box information."""
 
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-
 from temsafe import models
 from temsafe.database import get_db
-from temsafe.schemas import BoxResponse
+from temsafe.schemas import BoxResponse, ReadingResponse
+from typing import Annotated
 
 router = APIRouter(tags=["Boxes"])
+
+
+@router.get("/boxes/{box_id}/readings/latest", response_model=ReadingResponse)
+def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
+    """Return the last sample taken by this box, including sensor errors."""
+    result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
+    if result.scalars().first() is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Box not found")
+
+    # Sequence numbers describe measurement order within one box, not upload order.
+    result = db.execute(
+        select(models.TemperatureSample)
+        .where(models.TemperatureSample.box_id == box_id)
+        .order_by(models.TemperatureSample.sequence_no.desc())
+        .limit(1)
+    )
+
+    reading = result.scalars().first()
+
+    if reading is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No readings available for this box",
+        )
+
+    return reading
 
 
 @router.get("/boxes/{box_id}", response_model=BoxResponse)
