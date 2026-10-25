@@ -27,6 +27,13 @@ python -m uvicorn temsafe.main:app --reload
 
 ## Open in your browser
 
+`GET /api/boxes/{box_id}/readings?limit=20` returns that box's history, ordered
+by `sequence_no` from newest to oldest. The default limit is 20; values from
+1 to 100 are allowed. Try `/api/boxes/TS-01/readings?limit=5`. The response is
+a list of reading objects, including sensor errors. A known box without readings
+returns `200 OK` with `[]`; an unknown box returns `404` with
+`{"detail":"Box not found"}`. User access checks are not implemented yet.
+
 `GET /api/boxes/{box_id}/readings/latest` returns the sample with the highest
 `sequence_no` for that box, even if an older sample was uploaded later. For our
 prototype, use `/api/boxes/TS-01/readings/latest`. The response is one reading

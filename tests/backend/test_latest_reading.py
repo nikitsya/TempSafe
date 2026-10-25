@@ -1,15 +1,13 @@
-"""Check measurement ordering against MySQL using temporary test records."""
-
-from datetime import datetime
-from decimal import Decimal
-from uuid import uuid4
+"""Check latest readings and box history against MySQL using temporary records."""
 
 import pytest
+from datetime import datetime
+from decimal import Decimal
 from fastapi.testclient import TestClient
-
 from temsafe.database import SessionLocal, get_db
 from temsafe.main import app
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
+from uuid import uuid4
 
 
 @pytest.fixture
@@ -98,3 +96,70 @@ def test_latest_reading_for_missing_box(latest_reading_data):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Box not found"}
+
+
+@pytest.mark.parametrize("query, expected_sequences", [
+    ("", [102, 101, 100]),
+    ("?limit=2", [102, 101]),
+])
+def test_box_history_order_and_limit(latest_reading_data, query, expected_sequences):
+    """Return only this box's readings in measurement order, including errors."""
+    client, db, box_ids, profile_ids = latest_reading_data
+
+    # Insert out of sequence and give the oldest measurement the latest receipt time.
+    for sequence, minute in [(101, 1), (102, 2), (100, 10)]:
+        is_error = sequence == 102
+        db.add(TemperatureSample(
+            sample_id=str(uuid4()), box_id=box_ids[0], profile_id=profile_ids[0],
+            sequence_no=sequence,
+            observed_at=None if is_error else datetime(2026, 1, 1, 12, sequence - 100),
+            received_at=datetime(2026, 1, 1, 12, minute),
+            clock_reliable=not is_error,
+            quality="sensor_error" if is_error else "valid",
+            temperature_c=None if is_error else Decimal("5.25"),
+        ))
+
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=box_ids[1], profile_id=profile_ids[1],
+        sequence_no=999, observed_at=datetime(2026, 1, 1, 12, 20),
+        received_at=datetime(2026, 1, 1, 12, 20), clock_reliable=True,
+        quality="valid", temperature_c=Decimal("6.00"),
+    ))
+    db.flush()
+
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings{query}")
+    assert response.status_code == 200
+
+    readings = response.json()
+    assert [row["sequence_no"] for row in readings] == expected_sequences
+    assert all(row["box_id"] == box_ids[0] for row in readings)
+    assert readings[0]["quality"] == "sensor_error"
+    assert readings[0]["temperature_c"] is None
+    assert readings[0]["observed_at"] is None
+
+
+def test_box_history_without_samples(latest_reading_data):
+    """A known box without measurements has an empty history, not a 404."""
+    client, _, box_ids, _ = latest_reading_data
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_box_history_for_missing_box(latest_reading_data):
+    """An unknown box returns the same error as the box details route."""
+    client, _, _, _ = latest_reading_data
+    response = client.get(f"/api/boxes/pytest-{uuid4()}/readings")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Box not found"}
+
+
+@pytest.mark.parametrize("limit", ["0", "101", "invalid"])
+def test_box_history_rejects_invalid_limit(latest_reading_data, limit):
+    """Accept only integer limits between 1 and 100."""
+    client, _, box_ids, _ = latest_reading_data
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings?limit={limit}")
+
+    assert response.status_code == 422

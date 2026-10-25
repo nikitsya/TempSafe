@@ -1,6 +1,6 @@
 """Routes for retrieving box information."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from temsafe import models
@@ -9,6 +9,29 @@ from temsafe.schemas import BoxResponse, ReadingResponse
 from typing import Annotated
 
 router = APIRouter(tags=["Boxes"])
+
+
+@router.get("/boxes/{box_id}/readings", response_model=list[ReadingResponse])
+def get_box_readings(
+        box_id: str,
+        db: Annotated[Session, Depends(get_db)],
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
+):
+    """Return this box's history in descending measurement order."""
+    result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
+
+    if result.scalars().first() is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Box not found")
+
+    # Keep sensor errors in the history and exclude readings from other boxes.
+    result = db.execute(
+        select(models.TemperatureSample)
+        .where(models.TemperatureSample.box_id == box_id)
+        .order_by(models.TemperatureSample.sequence_no.desc())
+        .limit(limit)
+    )
+
+    return result.scalars().all()
 
 
 @router.get("/boxes/{box_id}/readings/latest", response_model=ReadingResponse)
