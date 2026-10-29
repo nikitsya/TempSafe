@@ -40,6 +40,7 @@ resistor.
 - Python 3.
 - GPIO Zero library.
 - Test script: `led_test.py` on the Raspberry Pi.
+- Repository copy: [Python LED test script](../../device/led_test.py).
 - Editor: Vim.
 
 Run command:
