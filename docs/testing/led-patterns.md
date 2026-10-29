@@ -5,7 +5,7 @@
 | Item | Details |
 |---|---|
 | Test ID | HW-02 |
-| Test date | [Enter the test date] |
+| Test date | 29.10.2026 |
 | Tested by | Hanna Bokariuk |
 | Project | TempSafe |
 | Related requirement | FR-06 — Provide a local LED warning |
@@ -72,7 +72,7 @@ measured.
 
 ## 8. Evidence
 
-*[Add a photograph of the wiring with the LED lit.]*
+![White LED connected through a 220-ohm resistor](../assets/testing/led/LED-testing.jpg)
 
 **Figure 1.** White LED connected to Raspberry Pi GPIO18 through a 220 Ω resistor, steadily lit during the Warning/Alert
 test.
