@@ -1,214 +1,81 @@
-# Smart Box
+# Smart Box — TempSafe
 
-**Class Group:** SD3a-G2
+TempSafe is an IoT project for monitoring temperature inside a prototype medication box. It combines a
+Raspberry Pi and SCD-41 sensor, local LED feedback and a web interface for viewing readings and temperature history.
+The prototype is for bench testing without real medicines; it does not determine whether medicines are suitable for use.
 
-**Team Size:** 3 members
+## Team
 
-**Documentation last updated:** 25 October
+**Class group:** SD3a-G2
 
-## Team Members
+| Name              | Responsibilities                                 |
+|-------------------|--------------------------------------------------|
+| Nikita Smiichyk   | Backend development, database and testing        |
+| Hanna Bokariuk    | Hardware, UI/UX and Universal Design             |
+| Maryna Hordiienko | Frontend development, UI/UX and Universal Design |
 
-| Name              | Responsibilities                                     |
-|-------------------|------------------------------------------------------|
-| Nikita Smiichyk   | Backend Development, Database, Testing               |
-| Hanna Bokariuk    | UI/UX Design, Universal Design, Hardware             |
-| Maryna Hordiienko | Frontend Development, UI/UX Design, Universal Design |
+The Scrum Master role rotates among team members. Sprint planning is maintained in Scrumwise.
 
-*The Scrum Master role rotates among team members.*
+## Current progress
 
-## Project Idea
+- **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
+  classification.
+- **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
+- **Hardware:** separate sensor-reading and LED-pattern tests completed; combined operation remains to be implemented.
+- **Frontend:** dashboard with sample data, a sign-in form and a history placeholder. Live data integration remains
+  planned.
+- **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
 
-Smart Box is a project designed to help paramedics monitor the temperature inside a portable box used to carry
-medicines. It gives staff a clearer view of the conditions inside the box during a shift and highlights when the
-temperature moves outside the range set for its contents.
+Device-to-backend communication, offline queuing, authentication and phone notifications remain planned.
+See the [functional requirements](docs/requirements/functional-requirements.md) and
+[MoSCoW priorities](docs/requirements/moscow-prioritisation.md) for the target system.
 
-## The Problem
+## Try the UI prototype
 
-Medicines have specific storage requirements. A portable medication box can move between a station, a vehicle and the
-place where a patient needs help. Conditions around the box can change during this journey.
+[Open the clickable prototype](https://nikitsya.github.io/Smart-Box/prototype/ui/login.html).
+Test account: `paramedic` / `demo`. This prototype uses synthetic data and does not connect to the backend.
 
-Knowing the temperature at one moment does not show what happened earlier. Staff may need to review whether the box
-experienced a temperature change and when it occurred.
+See the [prototype guide](prototype/ui/README.md) for its pages and browser tests.
 
-## Our Solution
+## Backend development
 
-The planned prototype will monitor the temperature inside the box, keep a history of sample attempts and warn when a
-valid reading falls outside a configured temperature profile. Staff will be able to check the latest information and
-review earlier changes.
-
-For example, if the temperature rises above the set limit during a shift, the system highlights the change. The
-responsible person can check the box and follow their service's procedures. The recorded history remains available for
-later review.
-
-## Planned Features
-
-- One physical prototype box with its own box ID; multiple authorised users may be assigned to the same box.
-- User sign-in and access restricted to the assigned prototype box.
-- One internal temperature sensor, with proposed sampling every 30 seconds.
-- Current temperature, observation time and device contact time shown separately, with explicit unknown, stale and
-  sensor-error states.
-- Proposed Web Push notifications, subject to browser support, permission and delivery testing.
-- Configured, versioned lower and upper temperature limits retained with each observation.
-- A single-colour LED that lights when the temperature reaches the warning range or falls outside the configured limits,
-  including during a network outage; a distinct blink pattern indicates sensor failure.
-- Phone notifications for temperature warnings and alerts when connectivity is available.
-- A buzzer as a Should Have enhancement for audible alerts.
-- Temperature history presented as a graph and readable table, including gaps and out-of-range observations.
-- A durable local queue for at least 24 hours of sample attempts, with retries that do not create duplicate records.
-- Accessible controls and warnings that use text and symbols as well as colour.
-
-## Proposed Architecture
-
-| Component             | Proposed technology      | Purpose                                                                       |
-|-----------------------|--------------------------|-------------------------------------------------------------------------------|
-| Sensor and controller | SCD-41 and Raspberry Pi  | Measure the internal temperature and operate the local warning LED.           |
-| Device software       | Python                   | Record sample attempts, apply the temperature profile and upload data.        |
-| Offline storage       | SQLite                   | Retain pending observations until the backend acknowledges receipt.           |
-| Backend               | Python with FastAPI      | Authenticate users and devices, validate uploads and enforce box permissions. |
-| Central storage       | MySQL with InnoDB        | Store boxes, profiles, access permissions and temperature history.            |
-| Web application       | HTML, CSS and JavaScript | Display temperature, freshness, warnings and history.                         |
-| Communication         | MQTT over TLS; HTTPS     | Publish device data through a broker; serve the browser through HTTPS.        |
-
-The Raspberry Pi will sample and queue data locally before publishing it to the cloud MQTT broker for backend ingestion.
-The web application will retrieve
-data through the backend. Delayed uploads will retain their original observation times and enrich history without
-replacing a newer current state.
-
-## Web application and phone access
-
-TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
-Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
-in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
-A separate native mobile application is likely to follow the web application, subject to a final team decision.
-
-## Prototype Boundaries
-
-The prototype is intended for bench demonstration and testing with no real medicines. It will not provide automatic
-cooling, GPS tracking, box-opening detection, patient records or integration with ambulance-service clinical systems.
-It will not replace official controlled-drug records or be deployed in a clinical environment.
-
-Temperature limits will be configured through versioned profiles. The agreed prototype profile uses a 0.00°C lower
-threshold, a 24.00°C warning threshold and a 25.00°C upper limit; these are prototype research settings, not a universal
-medicine storage
-range. For valid readings, T <= 0°C or T > 25°C is Alert, 24°C <= T <= 25°C is Warning,
-and 0°C < T < 24°C is Normal. These colours belong to the application; the physical LED does not need to change colour.
-
-## Repository Structure
-
-| Directory    | Intended contents                                                       | Current state                                                        |
-|--------------|-------------------------------------------------------------------------|----------------------------------------------------------------------|
-| `docs/`      | Planning, requirements, hardware and research documentation.            | Documentation available.                                             |
-| `device/`    | Raspberry Pi sampling, local warnings and offline queue.                | Empty; implementation planned.                                       |
-| `backend/`   | API, authentication and data validation.                                | FastAPI skeleton with an application health endpoint.                |
-| `database/`  | Schema, migrations and database scripts.                                | Initial MySQL schema and integrity checks; see `database/README.md`. |
-| `prototype/` | Clickable UI prototype with synthetic data and automated browser tests. | HTML/CSS/JS prototype and Playwright tests in `prototype/ui`.        |
-| `frontend/`  | Web dashboard and accessible history views.                             | Empty; implementation planned.                                       |
-| `tests/`     | Device, API, data recovery and interface tests.                         | Backend health and OpenAPI smoke tests in `tests/backend`.           |
-
-## Backend Development
-
-The TEMSAFE backend requires Python 3.11 or later. Run these commands from the repository root:
+Use Python 3.11 or later. From the project root:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
-python -m uvicorn temsafe.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-On Windows, use `py -3.11 -m venv .venv` and activate it with
-`.venv\Scripts\Activate.ps1` in PowerShell. Select `.venv` as the Python interpreter in your editor.
-The virtual environment, Python caches and local `.env` files are excluded from Git.
+On Windows, create the environment with `py -3.11 -m venv .venv` and activate it with
+`.venv\Scripts\Activate.ps1` in PowerShell.
 
-Open the interactive API documentation at <http://127.0.0.1:8000/docs>.
-Check the application from a second terminal:
+Follow the [database setup guide](database/README.md) to configure `.env`, create the tables and add the prototype box
+and profile. Then follow the [backend guide](backend/temsafe/README.md) to start the server and try the API.
 
-```sh
-curl http://127.0.0.1:8000/api/health
-```
+## Code and development guides
 
-Expected result: HTTP `200 OK` with `{"status":"ok"}`. This is an application liveness check;
-it does not check a database, sensor or MQTT connection. Sensor and MQTT integration
-and authentication are not implemented yet. Stop the development server with `Ctrl+C`.
-If port 8000 is already in use, pass `--port 8001` instead and use port 8001 in the URLs above.
+| Area                | Location / guide                             |
+|---------------------|----------------------------------------------|
+| Device scripts      | [device/](device/)                           |
+| Backend and API     | [Backend guide](backend/temsafe/README.md)   |
+| Database            | [Database setup](database/README.md)         |
+| Web interface       | [Frontend guide](frontend/README.md)         |
+| Clickable prototype | [Prototype guide](prototype/ui/README.md)    |
+| Backend tests       | [Test instructions](tests/backend/README.md) |
 
-`GET /api/readings/{sample_id}` returns one stored measurement from MySQL, or
-HTTP `404` if the ID does not exist. In `/docs`, open this endpoint, select **Try it out**, enter an existing
-`sample_id` and select **Execute**. Decimal
-temperatures are returned as JSON strings, such as `"5.25"`; a sensor error can
-have a `null` temperature. The endpoint is for local prototype development;
-authentication and box access checks are not implemented yet.
+## Project documentation
 
-Activate the environment and run the automated backend checks from the repository root:
-
-```sh
-python -m pytest
-python -m pip check
-```
-
-The backend is organised as follows:
-
-```text
-pyproject.toml                  Python package, dependencies and test configuration
-backend/temsafe/main.py         FastAPI application entry point
-backend/temsafe/api/health.py   Health route and response model
-backend/temsafe/api/readings.py Reading lookup route
-backend/temsafe/schemas.py      API response schemas
-tests/backend/test_database.py  Database and reading endpoint tests
-```
-
-## Database Setup
-
-The initial TEMSAFE MySQL structure is in [`database/schema.sql`](database/schema.sql).
-See the [database setup and schema review](database/README.md) for initialisation,
-table relationships, integrity checks and remaining application responsibilities.
-The backend connection and session dependency are defined in `backend/temsafe/database.py`
-using SQLAlchemy and MySQL Connector/Python. Models map all six existing tables.
-The reading endpoint retrieves one measurement by ID; pytest checks database storage
-and the endpoint's success and not-found responses.
-
-## Project Documentation
-
-The editable [Fritzing prototype diagram](docs/hardware/fritzing/prototype_wiring.fzz) is available with a
-[connection review and R1 correction](docs/hardware/prototype-wiring.md#fritzing-review--9-october-2026).
-
-Documentation is organised by purpose and uses lower-case, hyphen-separated filenames:
-
-- [Shared assets](docs/assets/): organised into `presentation/`, `hardware/`, `research/` (with `website/` and
-  `dashboard/` references), `design/` (UI mock-ups) and `testing/` (test evidence).
-- `docs/project/`: project scope, delivery schedule and milestones.
-- `docs/requirements/`: user needs, required system behaviour and acceptance criteria.
-- `docs/design/`: UI design, mock-ups, wording, style and accessibility documentation.
-- `docs/hardware/`: prototype components and hardware documentation.
-- `docs/research/`: evidence, technology comparisons and proposed technical decisions.
-- `docs/testing/`: initial test plans and, when available, execution evidence.
-
-| Document                                                                              | Contents                                                                                                |
-|---------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| [Project scope](docs/project/project-scope.md)                                        | What the prototype includes and excludes.                                                               |
-| [Functional requirements and use cases](docs/requirements/functional-requirements.md) | Required system behaviour, priorities, acceptance criteria and use cases.                               |
-| [MoSCoW prioritisation](docs/requirements/moscow-prioritisation.md)                   | Feature priorities, user and Universal Design justification, exclusions and decisions for group review. |
-| [User persona](docs/requirements/user-persona.md)                                     | The intended user's goals, tasks and working environment.                                               |
-| [Hardware parts list](docs/hardware/hardware-parts-list.md)                           | Prototype components, their purpose and estimated costs.                                                |
-| [Sensor research](docs/research/sensor-research.md)                                   | Monitoring context, sensor comparison and proposed temperature logic.                                   |
-| [Database research](docs/research/database-research.md)                               | Storage options, the proposed database choice and example schema.                                       |
-| [Project schedule](docs/project/project-schedule.md)                                  | Sprint activities, deliverables and assessment milestones.                                              |
-| [UI design and mock-ups](docs/design/ui-design.md)                                    | Sign-in, current status, history and error-state mock-ups with captions.                                |
-| [UI user stories](docs/design/ui-user-stories.md)                                     | Interface user stories linked to the functional requirements.                                           |
-| [Accessibility acceptance criteria](docs/design/accessibility-criteria.md)            | Universal Design and WCAG-based checks for each screen.                                                 |
-| [Browser test plan](docs/testing/browser-test-plan.md)                                | Automated Playwright UI tests and the first test run record.                                            |
-
-The [Initial Test Plan](docs/testing/initial-test-plan.md) covers functional behaviour, faults, recovery, notifications
-and Universal Design checks. These tests have not yet been executed. The automated browser tests for the UI prototype
-have been run; results are recorded in the [Browser test plan](docs/testing/browser-test-plan.md).
-
-## UI Prototype
-
-A clickable prototype of the TempSafe web interface uses synthetic data and does not connect to the backend:
-https://nikitsya.github.io/Smart-Box/prototype/ui/login.html
-
-Test account: `paramedic` / `demo`. Source code and automated browser tests are in [`prototype/ui`](prototype/ui).
+| Topic                          | Documents                                                                                                                                                                                                          |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Scope and requirements         | [Project scope](docs/project/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                           |
+| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                 |
+| Interface and accessibility    | [UI design](docs/design/ui-design.md) · [Core scenario mock-ups](docs/design/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility-criteria.md)                                           |
+| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                              |
+| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                     |
+| Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) |
+| Assessment and project records | [IoT G-CA1 design](docs/project/iot-gca1-design.md) · [Presentation materials](docs/presentation/) · [AI chat log](AI_Chat_Log.md)                                                                                 |
 
 ## Licence
 
-This project is distributed under the [MIT licence](LICENSE).
+[MIT licence](LICENSE).
