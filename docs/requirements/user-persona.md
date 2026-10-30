@@ -1,6 +1,6 @@
 # Persona – TempSafe
 
-<img src="../assets/persona/Persona2.jpg"
+<img src="../assets/persona/persona-2.jpg"
 alt="Advanced Paramedic"
 width="220"
 align="right">
