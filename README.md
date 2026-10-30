@@ -74,7 +74,7 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 | Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                              |
 | Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                     |
 | Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) |
-| Assessment and project records | [IoT G-CA1 design](docs/project/iot-gca1-design.md) · [Presentation materials](docs/presentation/) · [AI chat log](AI_Chat_Log.md)                                                                                 |
+| Assessment and project records | [IoT G-CA1 design](docs/project/iot-gca1-design.md) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                            |
 
 ## Licence
 
