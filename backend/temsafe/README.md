@@ -29,7 +29,27 @@ Reusing its ID or box sequence with different data raises `ValueError`. Missing
 boxes and profiles also raise `ValueError`; invalid payloads fail Pydantic validation.
 The function commits its session, so keep unrelated changes in another session.
 
-This is an internal function, not a new HTTP endpoint or MQTT handler.
+`POST /api/readings` accepts a JSON `ReadingCreate` payload and calls this function.
+It returns the stored reading with `200 OK`, both for a new sample and an identical
+retry. The response includes the server's `received_at` value. Unknown boxes or
+profiles (including a profile belonging to another box) return `404`; conflicting
+sample IDs or box sequence numbers return `409`; invalid payloads return `422`.
+
+Example request body for `/docs` or an HTTP client:
+
+```json
+{
+  "schema_version": 1,
+  "sample_id": "3f927b1e-8261-4ad8-a45e-2ba89a016d14",
+  "box_id": "TS-01",
+  "sequence_no": 1,
+  "profile_id": "ce9ea688-1a91-41aa-b765-5bc0e8af1f16",
+  "observed_at": "2026-01-01T12:00:00Z",
+  "clock_reliable": true,
+  "temperature_c": "24.50",
+  "quality": "valid"
+}
+```
 
 ## Setup
 

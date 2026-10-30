@@ -2,11 +2,13 @@
 
 import pytest
 from datetime import datetime
+from fastapi.testclient import TestClient
 from mysql.connector.errors import IntegrityError as MySQLIntegrityError
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from temsafe.database import SessionLocal
+from temsafe.main import app
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
 from temsafe.readings import save_reading
 from temsafe.schemas import ReadingCreate
@@ -187,3 +189,78 @@ def test_duplicate_insert_race(stored_box, monkeypatch, conflicting):
         assert db.scalar(select(func.count()).select_from(TemperatureSample).where(
             TemperatureSample.box_id == stored_box["box_id"]
         )) == 1
+
+
+def test_post_reading_and_retry(stored_box):
+    """Persist through HTTP and return the same sample for an equivalent retry."""
+    with TestClient(app) as client:
+        response = client.post("/api/readings", json=stored_box)
+        assert response.status_code == 200
+        saved = response.json()
+        assert saved["sample_id"] == stored_box["sample_id"]
+        assert saved["observed_at"] == "2026-01-01T12:00:00"
+        assert saved["temperature_c"] == "24.50"
+        assert saved["received_at"]
+        retry = stored_box | {"observed_at": "2026-01-01T12:00:00Z"}
+        response = client.post("/api/readings", json=retry)
+        assert response.status_code == 200
+        assert response.json() == saved
+        assert client.get(f"/api/readings/{saved['sample_id']}").json() == saved
+
+    with SessionLocal() as db:
+        assert db.scalar(select(func.count()).select_from(TemperatureSample).where(
+            TemperatureSample.box_id == stored_box["box_id"]
+        )) == 1
+
+
+@pytest.mark.parametrize("changes", [
+    {"temperature_c": "23.00"},
+    {"sample_id": "6ddf0f28-bec1-4d74-a320-51d095156dec"},
+])
+def test_post_conflicting_reading(stored_box, changes):
+    """Return 409 for reused identifiers and preserve the stored reading."""
+    with TestClient(app) as client:
+        original = client.post("/api/readings", json=stored_box)
+        assert original.status_code == 200
+        response = client.post("/api/readings", json=stored_box | changes)
+        assert response.status_code == 409
+        assert "conflicts" in response.json()["detail"]
+        assert client.get(f"/api/readings/{stored_box['sample_id']}").json() == original.json()
+
+
+@pytest.mark.parametrize("field, detail", [
+    ("box_id", "Box not found"),
+    ("profile_id", "Temperature profile not found for this box"),
+])
+def test_post_missing_reference(stored_box, field, detail):
+    """Return 404 when a required parent record is missing."""
+    with TestClient(app) as client:
+        response = client.post("/api/readings", json=stored_box | {field: str(uuid4())})
+        assert response.status_code == 404
+        assert response.json() == {"detail": detail}
+
+
+@pytest.mark.parametrize("changes", [
+    {"quality": "sensor_error", "temperature_c": None},
+    {"clock_reliable": False, "observed_at": None},
+])
+def test_post_missing_sensor_or_clock_data(stored_box, changes):
+    """Preserve explicitly missing measurements and unreliable clock data."""
+    with TestClient(app) as client:
+        response = client.post("/api/readings", json=stored_box | changes)
+        assert response.status_code == 200
+        for field, value in changes.items():
+            assert response.json()[field] == value
+
+
+@pytest.mark.parametrize("changes", [
+    {"temperature_c": None},
+    {"sample_id": "invalid"},
+    {"received_at": "2026-01-01T12:00:00Z"},
+    {"observed_at": "0999-01-01T12:00:00Z"},
+])
+def test_post_invalid_reading(payload, changes):
+    """Return 422 for invalid payloads, including unsupported database dates."""
+    with TestClient(app) as client:
+        response = client.post("/api/readings", json=payload | changes)
+        assert response.status_code == 422
