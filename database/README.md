@@ -30,12 +30,9 @@ Changing `.env` later does not change an existing database password. Avoid
 2. Connect with an administrator account in your SQL client and run:
 
 ```sql
-CREATE
-DATABASE temsafe CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
-CREATE
-USER 'temsafe'@'localhost' IDENTIFIED BY 'replace-with-your-own-password';
-GRANT ALL PRIVILEGES ON temsafe.* TO
-'temsafe'@'localhost';
+CREATE DATABASE temsafe CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
+CREATE USER 'temsafe'@'localhost' IDENTIFIED BY 'replace-with-your-own-password';
+GRANT ALL PRIVILEGES ON temsafe.* TO 'temsafe'@'localhost';
 ```
 
 This account is for local development. If the database or account already exists,
@@ -58,56 +55,35 @@ MYSQL_PASSWORD=replace-with-your-own-password
 Use your server's actual host and port. `MYSQL_ROOT_PASSWORD` is only needed for
 our Docker setup. Keep `.env` out of Git.
 
-## Add the prototype box
+## Apply migrations
 
-Database changes live in `database/migrations` as numbered SQL files. We apply
-them manually in order; no extra migration tool is needed for this step.
+For either setup, select `temsafe` in your SQL client after the tables exist.
+Run these files manually in order, then commit if auto-commit is off:
 
-1. Connect to your MySQL server in your SQL client and select `temsafe`.
-2. After the tables exist, open and run
-   [`001_add_prototype_box.sql`](migrations/001_add_prototype_box.sql).
-3. Click **Commit** if auto-commit is off.
+| File                                                                                              | Result                                                                                                  |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
+| [001_add_prototype_box.sql](migrations/001_add_prototype_box.sql)                                 | Adds `TS-01`, named `Prototype box TS-01`, with no recorded device contact.                             |
+| [002_add_prototype_temperature_profile.sql](migrations/002_add_prototype_temperature_profile.sql) | Adds its demo profile: lower threshold `0.00°C`, warning threshold `24.00°C` and upper limit `25.00°C`. |
 
-This adds `TS-01`, named `Prototype box TS-01`. Its `last_seen_at` is `NULL`
-until the device contacts the server. Running this file again preserves an
-existing box without creating a duplicate. If you already added TS-01, keep it.
-These steps work with or without Docker; do not re-run `schema.sql`.
+The profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548`. These migrations preserve
+existing records when run again; do not re-run `schema.sql`. They do not add users
+or measurements. Future threshold changes require a new profile ID to preserve
+historical settings.
 
-With the backend running, open
-[`/api/boxes/TS-01`](http://127.0.0.1:8000/api/boxes/TS-01) to see the box through the API.
+See the [backend guide](../backend/temsafe/README.md#temperature-classification)
+for temperature classification rules.
 
-## Add the temperature profile
+## Verify the setup
 
-After the box exists, run
-[`002_add_prototype_temperature_profile.sql`](migrations/002_add_prototype_temperature_profile.sql)
-in the same database and click **Commit** if auto-commit is off.
-
-This adds the agreed demo profile for `TS-01`: lower threshold `0.00°C`, Warning
-`24.00°C` and upper limit `25.00°C`. For valid samples, Alert means `T <= 0` or
-`T > 25`; Warning means `24 <= T <= 25`; Normal means `0 < T < 24`.
-
-The profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548` and `is_demo` is true.
-Re-running the file preserves the existing profile. Future changes to the limits
-must use a new profile ID so older measurements keep their original settings.
-This stores the settings only; automatic classification is a separate backend step.
-
-## Check it works
-
-In your SQL client, select `temsafe` and run:
+Select `temsafe` and run:
 
 ```sql
-SHOW
-TABLES;
+SHOW TABLES;
 ```
 
-You should see `app_users`, `box_access`, `boxes`, `sample_reviews`,
+Expected tables: `app_users`, `box_access`, `boxes`, `sample_reviews`,
 `temperature_samples` and `threshold_profiles`.
 
-Then follow the short [backend test instructions](../tests/backend/README.md).
-The tests check the connection and save a measurement, read it back and remove
-their test records. They also check the reading endpoint. The expected result is **3 passed**.
-
-The schema creates empty tables; the migrations above add the prototype box and
-its temperature profile. They do not add users or measurements.
-For the design and data rules, see the
+Follow the [backend test instructions](../tests/backend/README.md) to check database
+access and API behaviour. For the schema rationale, see the
 [database research](../docs/research/database-research.md).
