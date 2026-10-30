@@ -1,65 +1,40 @@
 # Backend tests
 
-To run all backend tests, use `tests/backend` instead of
-`tests/backend/test_database.py` in the commands below. The full suite currently
-includes reading lists, invalid limits and box responses.
-The latest-reading and box-history tests use MySQL to check delayed uploads,
-measurement order, limits, box isolation, sensor errors and missing data.
-Their temporary records are rolled back.
-Latest-reading responses are also checked against the sample's recorded profile,
-including when another profile has since been added for that box.
-
-`test_temperature.py` checks classification boundaries and sensor errors without
-connecting to MySQL. Run it in the same way by selecting that file instead.
-
-`test_save_reading.py` checks incoming validation, committed storage, identical
-retries, conflicting IDs/sequences and competing inserts. Its MySQL test records
-are deleted afterwards; validation-only cases do not connect to the database.
-It also checks `POST /api/readings`: persistence, identical retries, conflicts,
-missing references, invalid payloads, sensor errors and unreliable clocks.
-
-These pytest tests check the MySQL connection and save one test measurement,
-read it back through SQLAlchemy and the API, then remove the test records.
-They also check that an unknown sample ID returns HTTP 404.
+The pytest suite covers database access, API responses, temperature classification,
+payload validation and reading storage, including retries and conflicts.
 
 ## Before you start
 
-1. Complete the [backend setup](../../README.md#backend-development), including
-   the development dependencies in the project’s `.venv`.
-2. Set your database connection details in the project root `.env`, using
-   [`.env.example`](../../.env.example) as a reference.
-3. Start your MySQL server and ensure the project tables exist. See the
-   [database setup guide](../../database/README.md) if needed. Docker Desktop
-   is not required.
+Complete the [backend setup](../../README.md#backend-development) and
+[database setup](../../database/README.md). Use the project's `.venv` and configure
+`.env`. MySQL must be running for the full suite.
+
+Database tests create temporary records and remove them through rollback or explicit cleanup.
 
 ## Run the tests
 
-From the **Smart-Box project root**, use the command for your system:
-
-**macOS / Linux**
+From the project root, with `.venv` activated:
 
 ```sh
-.venv/bin/python -m pytest tests/backend/test_database.py -v
+python -m pytest tests/backend -v
 ```
 
-**Windows**
+To run one test file, specify its path instead:
 
-```text
-.venv\Scripts\python.exe -m pytest tests/backend/test_database.py -v
+```sh
+python -m pytest tests/backend/test_save_reading.py -v
 ```
 
-Alternatively, use your editor’s pytest runner with the project’s `.venv`
-interpreter and select `test_database.py`. In PyCharm, a Python run configuration
-can use module `pytest`, parameters `tests/backend/test_database.py -v` and the
-project root as its working directory.
+## Test files
 
-## Expected result
+| File                     | Coverage                                                               |
+|--------------------------|------------------------------------------------------------------------|
+| `test_database.py`       | Database connection, stored reading retrieval and missing readings.    |
+| `test_boxes.py`          | Box responses and unknown boxes.                                       |
+| `test_readings.py`       | Reading lists and limit validation.                                    |
+| `test_latest_reading.py` | Latest readings, recorded profiles, box history and measurement order. |
+| `test_save_reading.py`   | Input validation, storage, retries, conflicts and POST responses.      |
+| `test_temperature.py`    | Temperature thresholds and sensor errors.                              |
 
-```text
-test_database_connection PASSED
-test_measurement_is_written_and_read_back PASSED
-test_missing_reading_returns_404 PASSED
-```
-
-The summary should show **3 passed**. If a test fails, check that MySQL is running,
-the `.env` settings are correct and your editor uses the project’s `.venv`.
+A successful run has no failures or errors. If a test fails, inspect the error and
+check the database connection, table setup and selected Python environment.
