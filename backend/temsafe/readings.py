@@ -10,6 +10,14 @@ from temsafe.models import Box, TemperatureSample, ThresholdProfile
 from temsafe.schemas import ReadingCreate
 
 
+class ReadingReferenceNotFound(ValueError):
+    """The box or its temperature profile does not exist."""
+
+
+class ReadingConflict(ValueError):
+    """An existing sample uses the supplied identifiers with different data."""
+
+
 def _find_existing(db: Session, values: dict):
     """Look for either of the two unique identifiers used by the SQL schema."""
     result = db.execute(select(TemperatureSample).where(or_(
@@ -30,7 +38,7 @@ def _matching_retry(existing: list[TemperatureSample], values: dict):
     ):
         return existing[0]
 
-    raise ValueError("Sample ID or box sequence number conflicts with an existing reading")
+    raise ReadingConflict("Sample ID or box sequence number conflicts with an existing reading")
 
 
 def save_reading(db: Session, reading: ReadingCreate) -> TemperatureSample:
@@ -52,14 +60,14 @@ def save_reading(db: Session, reading: ReadingCreate) -> TemperatureSample:
 
     result = db.execute(select(Box).where(Box.box_id == reading.box_id))
     if result.scalars().first() is None:
-        raise ValueError("Box not found")
+        raise ReadingReferenceNotFound("Box not found")
 
     result = db.execute(select(ThresholdProfile).where(
         ThresholdProfile.profile_id == values["profile_id"],
         ThresholdProfile.box_id == reading.box_id,
     ))
     if result.scalars().first() is None:
-        raise ValueError("Temperature profile not found for this box")
+        raise ReadingReferenceNotFound("Temperature profile not found for this box")
 
     existing = _find_existing(db, values)
     if existing:

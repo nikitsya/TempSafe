@@ -1,14 +1,34 @@
-"""Routes for retrieving temperature readings."""
+"""Routes for storing and retrieving temperature readings."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from temsafe import models
 from temsafe.database import get_db
-from temsafe.schemas import ReadingResponse
+from temsafe.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
+from temsafe.schemas import ReadingCreate, ReadingResponse
 from typing import Annotated
 
 router = APIRouter(tags=["Readings"])
+
+
+@router.post("/readings", response_model=ReadingResponse, responses={
+    404: {"description": "Box or temperature profile not found"},
+    409: {"description": "Sample identifiers conflict with an existing reading"},
+})
+def post_reading(
+        reading: ReadingCreate,
+        db: Annotated[Session, Depends(get_db)],
+):
+    """Store a sample or return an identical retry without changing its receipt time."""
+    try:
+        return save_reading(db, reading)
+    except ReadingReferenceNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(error)) from error
+    except ReadingConflict as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(error)) from error
 
 
 @router.get("/readings", response_model=list[ReadingResponse])
