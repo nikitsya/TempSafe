@@ -2,14 +2,14 @@
 
 ## 1. Test information
 
-| Item | Details |
-|---|---|
-| Test ID | HW-02 |
-| Test date | 29.10.2026 |
-| Tested by | Hanna Bokariuk |
-| Project | TempSafe |
-| Related requirement | FR-06 — Provide a local LED warning |
-| Status | **PASS — all three patterns observed** |
+| Item                | Details                                |
+|---------------------|----------------------------------------|
+| Test ID             | HW-02                                  |
+| Test date           | 29.10.2026                             |
+| Tested by           | Hanna Bokariuk                         |
+| Project             | TempSafe                               |
+| Related requirement | FR-06 — Provide a local LED warning    |
+| Status              | **PASS — all three patterns observed** |
 
 ## 2. Objective
 
@@ -27,10 +27,10 @@ Temperature-triggered LED control is outside the scope of this test.
 
 ## 4. Wiring
 
-| Connection | Purpose |
-|---|---|
+| Connection               | Purpose                                             |
+|--------------------------|-----------------------------------------------------|
 | Physical pin 12 — GPIO18 | Connected through a 220 Ω resistor to the LED anode |
-| Physical pin 14 — GND | Connected to the LED cathode |
+| Physical pin 14 — GND    | Connected to the LED cathode                        |
 
 **Difference from the project wiring diagram:** GPIO18 and a 220 Ω resistor were used instead of GPIO17 and a 1 kΩ
 resistor.
@@ -60,12 +60,12 @@ python3 led_test.py
 
 ## 7. Results
 
-| Mode | Expected result | Observed result | Status |
-|---|---|---|---|
-| Normal | LED remains off for 5 seconds | LED remained off | PASS |
-| Warning / Alert | LED remains steadily lit for 5 seconds | Steady illumination was observed | PASS |
-| Sensor error | Two short flashes followed by a pause, repeated five times | Five cycles of double flashes with a pause were observed | PASS |
-| Test completion | LED switches off | LED switched off | PASS |
+| Mode            | Expected result                                            | Observed result                                          | Status |
+|-----------------|------------------------------------------------------------|----------------------------------------------------------|--------|
+| Normal          | LED remains off for 5 seconds                              | LED remained off                                         | PASS   |
+| Warning / Alert | LED remains steadily lit for 5 seconds                     | Steady illumination was observed                         | PASS   |
+| Sensor error    | Two short flashes followed by a pause, repeated five times | Five cycles of double flashes with a pause were observed | PASS   |
+| Test completion | LED switches off                                           | LED switched off                                         | PASS   |
 
 For the Sensor error pattern, the script sets each flash to 0.2 seconds, the gap between flashes to 0.2 seconds,
 and the pause after each pair to 1 second. These are programmed intervals; timing accuracy was not independently

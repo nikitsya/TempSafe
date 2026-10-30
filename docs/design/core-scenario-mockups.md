@@ -5,14 +5,14 @@ excursion after patient care. The values are synthetic demonstration data for us
 
 ## Screens
 
-| Screen | Purpose |
-|--------|---------|
-| 1. Notification | High-temperature Alert at 14:00, short enough to read at a glance. |
-| 2. Dashboard | Current status Normal (23.5°C) with a card for the recorded event and a "View event" button. |
+| Screen           | Purpose                                                                                               |
+|------------------|-------------------------------------------------------------------------------------------------------|
+| 1. Notification  | High-temperature Alert at 14:00, short enough to read at a glance.                                    |
+| 2. Dashboard     | Current status Normal (23.5°C) with a card for the recorded event and a "View event" button.          |
 | 3. Event details | Ended event: 14:00–14:20, estimated 20 minutes above 25°C, maximum 28.1°C, graph with the 25°C limit. |
 
-| 1. Notification | 2. Dashboard | 3. Event details |
-|:---:|:---:|:---:|
+|                         1. Notification                         |                       2. Dashboard                        |                         3. Event details                          |
+|:---------------------------------------------------------------:|:---------------------------------------------------------:|:-----------------------------------------------------------------:|
 | ![Notification mock-up](../assets/design/core-notification.png) | ![Dashboard mock-up](../assets/design/core-dashboard.png) | ![Event details mock-up](../assets/design/core-event-details.png) |
 
 ## Clickable prototype
@@ -40,11 +40,11 @@ Guided by Universal Design Principle 4 – Perceptible Information.
 
 ### Colour contrast (WCAG AA, minimum 4.5:1)
 
-| Text | Background | Ratio | Result |
-|------|------------|-------|--------|
-| Alert red `#B42318` | White `#FFFFFF` | 6.6:1 | Pass |
-| Alert red `#B42318` | Light red `#FEF3F2` | 6.1:1 | Pass |
-| Normal green `#067647` | White `#FFFFFF` | 5.7:1 | Pass |
-| Secondary grey `#6B7280` | White `#FFFFFF` | 4.8:1 | Pass |
-| Dark text `#1A1F36` | Light grey `#F5F7FA` | 15.1:1 | Pass |
-| White `#FFFFFF` on button | Dark `#1A1F36` | 16.2:1 | Pass |
+| Text                      | Background           | Ratio  | Result |
+|---------------------------|----------------------|--------|--------|
+| Alert red `#B42318`       | White `#FFFFFF`      | 6.6:1  | Pass   |
+| Alert red `#B42318`       | Light red `#FEF3F2`  | 6.1:1  | Pass   |
+| Normal green `#067647`    | White `#FFFFFF`      | 5.7:1  | Pass   |
+| Secondary grey `#6B7280`  | White `#FFFFFF`      | 4.8:1  | Pass   |
+| Dark text `#1A1F36`       | Light grey `#F5F7FA` | 15.1:1 | Pass   |
+| White `#FFFFFF` on button | Dark `#1A1F36`       | 16.2:1 | Pass   |
