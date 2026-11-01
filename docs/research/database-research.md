@@ -96,8 +96,7 @@ is the source of truth; the queries below illustrate the planned backend integra
 
 `auth_subject` stores the case-sensitive local login identifier and `password_hash` its Argon2id hash.
 Session, device-certificate, notification subscription/outbox and maintenance tables remain
-implementation work. [G-CA1 design](../project/iot-gca1-design.md) defines proposed cron jobs,
-90-second freshness, Web Push and retention settings.
+implementation work.
 
 ### Latest sample for an authorised user
 
@@ -188,8 +187,13 @@ retained locally so offline warnings still work.
   seconds when connected.
 - MQTT ingestion worker: enforce authenticated topic/box identity, validate and deduplicate, preserve historical times
   and profiles; acknowledge only after database commit. HTTPS serves user-facing API requests.
+  Reject replayed heartbeats using a fresh, single-use challenge; historical uploads must not refresh device contact.
 - Dashboard: show current freshness, raw history, threshold bands and flagged observations; do not rely on cron for the
   local warning.
+
+Planned cron jobs check device contact, rebuild optional summaries and create encrypted off-host backups.
+Prevent overlapping runs; delete expired records only after a successful backup. Agree schedules and retention periods
+before implementation and test restoration.
 
 ### Security
 

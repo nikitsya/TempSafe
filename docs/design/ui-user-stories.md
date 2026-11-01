@@ -1,7 +1,6 @@
 # UI user stories
 
-The design document (Section 1) has four main user stories. This file adds detailed UI stories for the persona Shannon
-Rice ([user-persona.md](../requirements/user-persona.md)). Each story is linked to a functional requirement
+UI stories for [Shannon Rice](../requirements/user-persona.md). Each story is linked to a functional requirement
 in [functional-requirements.md](../requirements/functional-requirements.md) and uses the same MoSCoW priority, so no new
 features are added here.
 
