@@ -34,7 +34,7 @@ def test_readings_list_returns_sample(reading_client):
     sample = TemperatureSample(
         sample_id="test-sample", box_id="test-box", sequence_no=1,
         profile_id="test-profile", observed_at=None, clock_reliable=False,
-        received_at=datetime(2026, 1, 1, 12), temperature_c=Decimal("5.25"),
+        received_at=datetime(2026, 1, 1, 12, microsecond=123456), temperature_c=Decimal("5.25"),
         quality="valid",
     )
     db.execute.return_value.scalars.return_value.all.return_value = [sample]
@@ -44,6 +44,7 @@ def test_readings_list_returns_sample(reading_client):
     assert response.json()[0]["sample_id"] == "test-sample"
     assert response.json()[0]["temperature_c"] == "5.25"
     assert response.json()[0]["observed_at"] is None
+    assert response.json()[0]["received_at"] == "2026-01-01T12:00:00.123456Z"
 
 
 def test_readings_list_can_be_empty(reading_client):

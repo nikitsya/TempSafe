@@ -98,9 +98,9 @@ def test_measurement_is_written_and_read_back():
             "box_id": box_id,
             "sequence_no": 1,
             "profile_id": profile_id,
-            "observed_at": observed_at.isoformat(),
+            "observed_at": observed_at.isoformat() + "Z",
             "clock_reliable": True,
-            "received_at": saved_measurement.received_at.isoformat(),
+            "received_at": saved_measurement.received_at.isoformat() + "Z",
             "temperature_c": "5.25",
             "quality": "valid",
         }
