@@ -199,9 +199,9 @@ def test_post_reading_and_retry(stored_box):
         assert response.status_code == 200
         saved = response.json()
         assert saved["sample_id"] == stored_box["sample_id"]
-        assert saved["observed_at"] == "2026-01-01T12:00:00"
+        assert saved["observed_at"] == "2026-01-01T12:00:00Z"
         assert saved["temperature_c"] == "24.50"
-        assert saved["received_at"]
+        assert saved["received_at"].endswith("Z")
         retry = stored_box | {"observed_at": "2026-01-01T12:00:00Z"}
         response = client.post("/api/readings", json=retry)
         assert response.status_code == 200

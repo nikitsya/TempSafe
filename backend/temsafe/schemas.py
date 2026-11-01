@@ -1,10 +1,20 @@
 """Define the data returned by the API."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
-from typing import Literal
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
+from typing import Annotated, Literal
 from uuid import UUID
+
+
+def as_utc(value: datetime) -> datetime:
+    """Interpret timezone-free database values as UTC and normalise aware values."""
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+UTCTimestamp = Annotated[datetime, AfterValidator(as_utc)]
 
 
 class ReadingCreate(BaseModel):
@@ -42,7 +52,7 @@ class BoxResponse(BaseModel):
     box_id: str
     name: str
     # A box may not have contacted the server yet.
-    last_seen_at: datetime | None
+    last_seen_at: UTCTimestamp | None
 
 
 class ReadingResponse(BaseModel):
@@ -55,9 +65,9 @@ class ReadingResponse(BaseModel):
     box_id: str
     sequence_no: int
     profile_id: str
-    observed_at: datetime | None
+    observed_at: UTCTimestamp | None
     clock_reliable: bool
-    received_at: datetime
+    received_at: UTCTimestamp
     temperature_c: Decimal | None
     quality: Literal["valid", "sensor_error"]
 

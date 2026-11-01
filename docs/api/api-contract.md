@@ -91,9 +91,9 @@ Latest valid reading — `200 OK` (synthetic data):
   "box_id": "TS-01",
   "sequence_no": 1,
   "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
-  "observed_at": "2026-11-01T12:00:00",
+  "observed_at": "2026-11-01T12:00:00Z",
   "clock_reliable": true,
-  "received_at": "2026-11-01T12:00:05",
+  "received_at": "2026-11-01T12:00:05Z",
   "temperature_c": "24.50",
   "quality": "valid",
   "temperature_state": "Warning",
@@ -114,9 +114,9 @@ Latest sensor error — `200 OK`; do not replace it with an older valid sample:
   "box_id": "TS-01",
   "sequence_no": 2,
   "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
-  "observed_at": "2026-11-01T12:00:30",
+  "observed_at": "2026-11-01T12:00:30Z",
   "clock_reliable": true,
-  "received_at": "2026-11-01T12:00:35",
+  "received_at": "2026-11-01T12:00:35Z",
   "temperature_c": null,
   "quality": "sensor_error",
   "temperature_state": "Unknown",
@@ -139,9 +139,8 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 
 ### Time, freshness and errors
 
-- Current responses contain UTC timestamps without a `Z` suffix, as shown above. Interpret these values as UTC before
-  formatting local time; append `Z` only when no timezone is present. Explicit UTC suffixes are a pending backend
-  change.
+- Responses use ISO 8601 UTC timestamps ending in `Z`, including `last_seen_at`. Fractional seconds may be present.
+  Parse the timezone directly and format local time for display; missing timestamps remain `null`.
 - Intended display rule: an observation older than 90 seconds is stale. A missing/unreliable or future observation time
   must not be labelled live. Preserve the recorded temperature state as historical information.
 - Intended contact rule: more than 180 seconds without authenticated contact means not reporting. Heartbeat updates
@@ -165,7 +164,7 @@ observations
 as `no_data`; `Unknown` must never become `normal`. Apply freshness separately. The current `apiGet()` helper must also
 preserve the error body so the two `404` cases can be distinguished.
 
-Still pending: explicit UTC suffixes, freshness/contact handling, authentication and box
+Still pending: freshness/contact handling, authentication and box
 access checks, phone-notification status, history date filters and frontend API integration. Sample fields such as
 `pushAlerts`, `lastValidC` and profile `name` are not supplied by the current API. A silence or acknowledgement action
 is not part of these read endpoints.

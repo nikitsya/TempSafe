@@ -1,7 +1,7 @@
 """Check box responses using a substituted database session."""
 
 import pytest
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
 from unittest.mock import Mock
 
@@ -27,8 +27,12 @@ def box_client():
         del app.dependency_overrides[get_db]
 
 
-@pytest.mark.parametrize("last_seen_at", [None, datetime(2026, 1, 1, 12)])
-def test_get_box_returns_details(box_client, last_seen_at):
+@pytest.mark.parametrize("last_seen_at, expected", [
+    (None, None),
+    (datetime(2026, 1, 1, 12), "2026-01-01T12:00:00Z"),
+    (datetime(2026, 1, 1, 13, tzinfo=timezone(timedelta(hours=1))), "2026-01-01T12:00:00Z"),
+])
+def test_get_box_returns_details(box_client, last_seen_at, expected):
     """Return both known and missing contact times in the expected JSON format."""
     client, db = box_client
     db.execute.return_value.scalars.return_value.first.return_value = Box(
@@ -39,7 +43,7 @@ def test_get_box_returns_details(box_client, last_seen_at):
     assert response.json() == {
         "box_id": "test-box",
         "name": "Test box",
-        "last_seen_at": last_seen_at.isoformat() if last_seen_at else None,
+        "last_seen_at": expected,
     }
 
 

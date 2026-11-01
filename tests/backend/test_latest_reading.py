@@ -124,9 +124,9 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         "box_id": box_ids[0],
         "sequence_no": 1,
         "profile_id": profile_ids[0],
-        "observed_at": "2026-01-01T12:00:00",
+        "observed_at": "2026-01-01T12:00:00Z",
         "clock_reliable": True,
-        "received_at": "2026-01-01T12:01:00",
+        "received_at": "2026-01-01T12:01:00Z",
         "temperature_c": temperature,
         "quality": "valid",
         "temperature_state": expected,
@@ -195,6 +195,8 @@ def test_box_history_order_and_limit(latest_reading_data, query, expected_sequen
     assert readings[0]["quality"] == "sensor_error"
     assert readings[0]["temperature_c"] is None
     assert readings[0]["observed_at"] is None
+    assert readings[0]["received_at"].endswith("Z")
+    assert readings[1]["observed_at"] == "2026-01-01T12:01:00Z"
 
 
 def test_box_history_without_samples(latest_reading_data):
