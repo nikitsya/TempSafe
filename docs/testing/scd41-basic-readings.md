@@ -129,3 +129,46 @@ and saved each reading with a timestamp to a CSV file. No reading errors were ob
 
 This result confirms basic wiring, communication, and data logging on the **Raspberry Pi 5**. This test provides partial
 evidence for FR-03; full sample metadata and application integration were not tested.
+
+
+## Additional Test — SQLite Storage and Sensor Error Recovery
+
+**Date:** 1 November 2026  
+**Tested by:** Hanna  
+**Result:** PASS — for the checks described below
+
+### Objective
+
+Verify that temperature readings and sensor read errors are saved
+to the local SQLite database using SQLAlchemy, and that normal
+readings can be recorded again after an error.
+
+### Procedure
+
+1. Ran `temperature_readings.py` and recorded a valid temperature reading.
+2. Temporarily inserted `raise RuntimeError("Simulated sensor error")`
+   inside the sensor-reading `try` block.
+3. Ran the script and confirmed that the simulated error was recorded.
+4. Removed the temporary error statement and restarted the script.
+5. Queried SQLite through SQLAlchemy to verify the saved records.
+
+### Results
+
+| Record ID | Temperature (°C) | Quality |
+|-----------|------------------|---------|
+| 53 | 21.4 | valid |
+| 54 | NULL | sensor_error |
+| 55 | 21.4 | valid |
+
+The database query confirmed that the simulated error was stored
+without a temperature value. A valid reading was saved after the
+temporary error statement was removed and the script restarted.
+
+### Limitations
+
+The sensor error was simulated in software; the sensor was not
+physically disconnected. Recovery was verified after restarting
+the script, not automatically during continuous operation.
+
+This test verified local SQLite storage only. MQTT transmission
+and server-side storage were not tested.
