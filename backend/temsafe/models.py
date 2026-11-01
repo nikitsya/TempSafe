@@ -2,7 +2,6 @@
 
 from datetime import datetime
 from decimal import Decimal
-
 from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, String, Text, text
 from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM
 from sqlalchemy.orm import Mapped, mapped_column

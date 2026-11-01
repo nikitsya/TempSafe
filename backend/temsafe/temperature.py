@@ -1,8 +1,9 @@
 """Classify temperatures using the profile applied to a measurement."""
 
 from decimal import Decimal
-from temsafe.models import ThresholdProfile
 from typing import Literal
+
+from temsafe.models import ThresholdProfile
 
 
 def classify_temperature(
