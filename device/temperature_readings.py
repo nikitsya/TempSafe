@@ -1,4 +1,4 @@
-from gpiozero import LED
+from gpiozero import LED, PWMOutputDevice
 from datetime import datetime, timezone
 import time
 import board
@@ -6,10 +6,38 @@ from database import Base, engine, SessionLocal
 from models import Reading
 import adafruit_scd4x
 from uuid import uuid4
+from threading import Event, Thread
 
 BOX_ID = "TS-01"
 PROFILE_ID = "e93a4368-e11a-4f27-8b31-d55d61392548"
 led = LED(18)
+buzzer = PWMOutputDevice(17, frequency=500, initial_value=0)
+
+buzzer_alert = Event()
+buzzer_shutdown = Event()
+
+
+def buzzer_worker():
+    try:
+        while not buzzer_shutdown.is_set():
+            if not buzzer_alert.wait(timeout=0.1):
+                continue
+
+            if buzzer_shutdown.is_set():
+                break
+
+            buzzer.value = 0.5
+            buzzer_shutdown.wait(1)
+            buzzer.off()
+            buzzer_shutdown.wait(2)
+    finally:
+        buzzer.off()
+
+
+buzzer_thread = Thread(target=buzzer_worker, daemon=True)
+buzzer_thread.start()
+
+
 def get_temperature_state(temperature):
     if temperature <= 0 or temperature > 25:
         return "Alert"
@@ -18,6 +46,7 @@ def get_temperature_state(temperature):
         return "Warning"
 
     return "Normal"
+
 
 def update_led(state):
     if state == "Normal":
@@ -57,30 +86,49 @@ def save_reading(temperature, quality):
 
     print(f"Saved: {observed_at} | {temperature} C | Quality: {quality}")
 
-while True:
-    try:
-        if not sensor.data_ready:
-            time.sleep(1)
-            continue
+try:
 
-        temperature = round(sensor.temperature, 2)
-        quality = "valid"
+    while True:
+        try:
+            if not sensor.data_ready:
+                time.sleep(1)
+                continue
 
-    except Exception as error:
-        print("Sensor error:", error)
-        temperature = None
-        quality = "sensor_error"
+            temperature = round(sensor.temperature, 2)
+            quality = "valid"
 
-    if quality == "sensor_error":
-        sensor_error_flash()
-    else:
-        state = get_temperature_state(temperature)
-        update_led(state)
-        print(f"State: {state}")
+        except Exception as error:
+            print("Sensor error:", error)
+            temperature = None
+            quality = "sensor_error"
 
-    try:
-        save_reading(temperature, quality)
-    except Exception as error:
-        print("Database error: reading was not saved:", error)
+        if quality == "sensor_error":
+            buzzer_alert.clear()
+            sensor_error_flash()
+        else:
+            state = get_temperature_state(temperature)
+            update_led(state)
+            
+            if state == "Alert":
+                buzzer_alert.set()
+            else:
+                buzzer_alert.clear()
 
-    time.sleep(30)
+            print(f"State: {state}")
+
+        try:
+            save_reading(temperature, quality)
+        except Exception as error:
+            print("Database error: reading was not saved:", error)
+
+        time.sleep(30)
+
+except KeyboardInterrupt:
+    print("Stopped by user.")
+finally:
+    buzzer_shutdown.set()
+    buzzer_thread.join()
+    buzzer.off()
+    buzzer.close()
+    led.off()
+    led.close()
