@@ -2,7 +2,8 @@
 
 ## Temperature classification
 
-[`temperature.py`](../../backend/temsafe/temperature.py) provides `classify_temperature(temperature_c, quality, profile)`.
+[`temperature.py`](../../backend/temsafe/temperature.py) provides
+`classify_temperature(temperature_c, quality, profile)`.
 Pass the profile associated with the measurement. The function uses its stored
 limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
 is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
@@ -157,10 +158,10 @@ is not part of these read endpoints.
 
 ## Other available endpoints
 
-| Endpoint | Response |
-|----------|----------|
-| `GET /api/readings?limit=20` | Samples across boxes, newest receipt time first; default limit 20, allowed 1–100. Empty result: `[]`. |
+| Endpoint                        | Response                                                                                                      |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------|
+| `GET /api/readings?limit=20`    | Samples across boxes, newest receipt time first; default limit 20, allowed 1–100. Empty result: `[]`.         |
 | `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`. |
-| `GET /api/health` | `200` with `{"status":"ok"}`; checks the application, not MySQL. |
+| `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
 
 Run the server using the [backend guide](../../backend/temsafe/README.md); inspect live schemas at `/docs`.

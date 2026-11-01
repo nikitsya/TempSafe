@@ -2,14 +2,14 @@
 
 ## Test information
 
-| Item | Details |
-| --- | --- |
-| Date | 1 November 2026 |
-| Tested by | Hanna |
-| Project | TempSafe |
-| Related requirements | FR-15 — audible buzzer alert; FR-06 — local LED warning |
-| Result | PASS for the observed high-temperature activation and recovery checks |
-| Script | `device/temperature_readings.py` |
+| Item                 | Details                                                               |
+|----------------------|-----------------------------------------------------------------------|
+| Date                 | 1 November 2026                                                       |
+| Tested by            | Hanna                                                                 |
+| Project              | TempSafe                                                              |
+| Related requirements | FR-15 — audible buzzer alert; FR-06 — local LED warning               |
+| Result               | PASS for the observed high-temperature activation and recovery checks |
+| Script               | `device/temperature_readings.py`                                      |
 
 ## Objective
 
@@ -53,14 +53,14 @@ describe the tested assembly, not a wiring recommendation for other buzzers.
 The following readings are transcribed from the terminal output supplied
 by the tester. Timestamps are UTC on 1 November 2026.
 
-| Time | Temperature (degrees C) | State |
-| --- | --- | --- |
-| 18:30:53 | 23.65 | Normal |
-| 18:31:23 | 29.03 | Alert |
-| 18:31:53 | 34.18 | Alert |
-| 18:32:23 | 32.48 | Alert |
-| 18:32:53 | 25.23 | Alert |
-| 18:33:23 | 17.41 | Normal |
+| Time     | Temperature (degrees C) | State  |
+|----------|-------------------------|--------|
+| 18:30:53 | 23.65                   | Normal |
+| 18:31:23 | 29.03                   | Alert  |
+| 18:31:53 | 34.18                   | Alert  |
+| 18:32:23 | 32.48                   | Alert  |
+| 18:32:53 | 25.23                   | Alert  |
+| 18:33:23 | 17.41                   | Normal |
 
 Each reading produced a `Saved:` message with `Quality: valid` after the
 database transaction committed. Consecutive timestamps were 30 seconds apart.

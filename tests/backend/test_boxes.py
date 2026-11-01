@@ -3,10 +3,11 @@
 import pytest
 from datetime import datetime
 from fastapi.testclient import TestClient
+from unittest.mock import Mock
+
 from temsafe.database import get_db
 from temsafe.main import app
 from temsafe.models import Box
-from unittest.mock import Mock
 
 
 @pytest.fixture

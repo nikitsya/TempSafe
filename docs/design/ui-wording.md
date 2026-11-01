@@ -40,10 +40,10 @@ The paramedic must understand each message quickly, often under time pressure. E
 
 ## Phone notifications (Web Push)
 
-| Event         | Notification text                                                     |
-|---------------|-----------------------------------------------------------------------|
-| Warning       | TempSafe: Box TS-01 WARNING – 24.6°C at 14:17. Open the app to check. |
-| Alert         | TempSafe: Box TS-01 ALERT – above upper limit, 25.9°C at 14:31.       |
+| Event   | Notification text                                                     |
+|---------|-----------------------------------------------------------------------|
+| Warning | TempSafe: Box TS-01 WARNING – 24.6°C at 14:17. Open the app to check. |
+| Alert   | TempSafe: Box TS-01 ALERT – above upper limit, 25.9°C at 14:31.       |
 
 Loss of contact is shown on the dashboard; a phone notification for it is not part of FR-14.
 Notification text contains no account details. Tapping it opens the signed-in dashboard.
