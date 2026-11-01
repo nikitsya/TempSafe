@@ -5,7 +5,7 @@ controlled drug box using a Raspberry Pi and SCD-41 sensor, with a single-colour
 enhancement, partially implemented with a passive buzzer; manual silencing remains outstanding.
 
 The project uses Raspberry Pi 5.
-See the [wiring record](prototype-wiring.md#tested-assembly) for the current connections.
+See the [wiring record](prototype-wiring.md) for the current connections.
 
 ## Parts List
 
