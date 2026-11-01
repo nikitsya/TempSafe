@@ -23,7 +23,8 @@ switch off when the measured temperature returns to Normal.
 - White single-colour LED controlled by BCM GPIO18 (physical pin 12).
 - Passive buzzer controlled by BCM GPIO17 (physical pin 11).
 - Two 220 ohm resistors in series in the buzzer circuit (440 ohms total).
-- Buzzer return connected to the shared ground circuit.
+- Buzzer return connected to shared GND at physical pin 14, through the
+  breadboard jumper E32 → E11 and the ground wire at A11.
 
 The buzzer model and electrical ratings were not recorded. These connections
 describe the tested assembly, not a wiring recommendation for other buzzers.

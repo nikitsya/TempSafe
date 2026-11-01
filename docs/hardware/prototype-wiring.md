@@ -1,4 +1,4 @@
-# Prototype wiring — Raspberry Pi 400 and Adafruit SCD-41
+# Prototype wiring — Raspberry Pi, SCD-41, LED and passive buzzer
 
 [Editable Fritzing diagram](fritzing/prototype_wiring.fzz) — open with **File → Open** in Fritzing.
 
@@ -11,12 +11,36 @@
 | 3                             | GPIO2 / SDA1 | SDA                                 |
 | 5                             | GPIO3 / SCL1 | SCL                                 |
 
-## Proposed LED connections
+## Tested LED connections
 
-Physical pin 11 (BCM GPIO17) → 1 kΩ series resistor → LED anode; LED cathode → physical pin 9 (GND). This matches the
-reference wiring diagram. Verify the actual LED ratings, polarity and brightness before powering the circuit. The
-resistor value
-is a proposal, not a measured result.
+Physical pin 12 (BCM GPIO18) → 220 Ω series resistor → LED anode;
+LED cathode → physical pin 14 (GND).
+
+| Component or wire | Breadboard connection |
+| --- | --- |
+| GPIO18 / physical pin 12 | A5 |
+| 220 Ω resistor | B5 → B10 |
+| LED long leg / anode (+) | C10 |
+| LED short leg / cathode (−) | C11 |
+| GND / physical pin 14 | A11 |
+
+## Tested passive buzzer connections
+
+Physical pin 11 (BCM GPIO17) → two 220 Ω resistors in series (440 Ω total)
+→ passive buzzer → shared ground at physical pin 14.
+
+| Component or wire | Breadboard connection |
+| --- | --- |
+| GPIO17 / physical pin 11 | A20 |
+| First 220 Ω resistor | B20 → B25 |
+| Second 220 Ω resistor | C25 → C30 |
+| First buzzer leg | E30 |
+| Second buzzer leg | E32 |
+| Shared ground jumper | E32 → E11 |
+
+The buzzer uses 500 Hz PWM with 50% duty cycle on Alert: one second on,
+two seconds off. Manual silencing is not implemented. The buzzer model and
+electrical ratings were not recorded; this describes the tested assembly.
 
 ## What each part does
 
@@ -38,22 +62,21 @@ is a proposal, not a measured result.
 - [Adafruit SCD-4x pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts)
 - [Raspberry Pi GPIO documentation and pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-and-the-40-pin-header)
 
-## Fritzing review — 9 October 2026
+## Current assembly — 1 November 2026
 
-The [Fritzing file](fritzing/prototype_wiring.fzz) includes the SCD-41 custom part. The Raspberry Pi 4B library part
-represents the Pi 400's equivalent 40-pin GPIO connections; it does not represent the Pi 400's physical enclosure.
+Hanna updated the [Fritzing file](fritzing/prototype_wiring.fzz) to reflect the
+LED and buzzer assembly. The confirmed connections above supersede the
+earlier LED design using GPIO17, a 1 kΩ resistor and ground pin 9.
 
-Inspection of the saved connections and the installed Fritzing part definitions confirms:
+Testing used a Raspberry Pi 5 instead of the originally planned Pi 400.
+The sensor physical pin mapping remains as listed above. Its current
+breadboard coordinates have not been confirmed, so the earlier sensor
+row assignments are not repeated here.
 
-- Physical pin 1 / 3.3 V → breadboard A20 → E20 → sensor VIN.
-- Physical pin 6 / GND → breadboard A22 → E22 → sensor GND.
-- Physical pin 3 / GPIO2 SDA → breadboard A24 → E24 → sensor SDA.
-- Physical pin 5 / GPIO3 SCL → breadboard A26 → E26 → sensor SCL.
-- GPIO17 / physical pin 11 → breadboard row 15 A–E → R1 → row 11 A–E → LED anode.
-- LED cathode → row 10 A–E → physical pin 9 / GND.
+Each numbered row connects A–E internally; F–J is a separate group across
+the centre gap. Row 11 provides the shared LED/buzzer ground through A11
+to physical pin 14. Sensor wiring must use separate junctions from the
+output circuits except for intentional shared ground connections.
 
-The Pi needs a separate compatible USB-C 5 V / 3 A supply and uses built-in Wi-Fi for internet access.
-
-Each numbered row connects A–E internally; F–J is a separate group across the centre gap. The sensor connections use
-rows 20, 22, 24 and 26 as four separate junctions, not the side power rails. R1 remains a 1 kΩ through-hole resistor.
-The updated saved connections match the supplied breadboard image.
+See the [LED test](../testing/led-patterns.md) and
+[buzzer test](../testing/buzzer-alert.md) for the recorded results.
