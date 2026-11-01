@@ -1,13 +1,13 @@
 # Raspberry Pi device scripts
 
 These scripts run on the Raspberry Pi connected to the SCD41 sensor and
-single-colour LED. They are separate from the FastAPI backend.
+single-colour LED and passive buzzer. They are separate from the FastAPI backend.
 
 ## Files
 
 | File | Purpose | Run directly? |
 | --- | --- | --- |
-| `temperature_readings.py` | Reads temperature, controls the LED and saves readings or sensor read errors to SQLite through SQLAlchemy. | Yes |
+| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy. | Yes |
 | `database.py` | Configures the SQLite connection and SQLAlchemy sessions. | No; imported by the other files. |
 | `models.py` | Defines the `readings` table for SQLAlchemy. | No; imported by the main script. |
 | `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds. | Yes |
@@ -22,6 +22,8 @@ directory when copying them to the Raspberry Pi.
 - Enable I2C and connect the SCD41 to the Pi's I2C pins.
 - The tested LED connection uses BCM GPIO18 (physical pin 12), a 220 ohm
   series resistor and GND (physical pin 14).
+- The tested passive buzzer uses BCM GPIO17 (physical pin 11), two 220 ohm
+  resistors in series (440 ohms total) and a shared ground connection.
 - Required Python packages are `gpiozero`, `adafruit-blinka` (provides
   `board`), `adafruit-circuitpython-scd4x` and SQLAlchemy 2.x.
   The hardware libraries also require the appropriate Raspberry Pi system
@@ -67,6 +69,14 @@ an exact fixed-rate scheduler.
 These are the prototype's configured thresholds, not a determination that
 medicines are suitable for use.
 
+On Alert, a background thread drives the passive buzzer at 500 Hz with
+50% PWM duty cycle: one second of sound followed by two seconds of silence.
+Normal, Warning and handled sensor read errors disable repetition; a tone
+already in progress can finish its remaining fraction of a second.
+Temperature changes are acted on when the next reading is processed.
+The buzzer runs locally without a network dependency. `Ctrl+C` during the
+measurement loop stops the thread and switches off and releases both outputs.
+
 Successful readings have `quality="valid"`. Handled sensor read errors are
 stored with `quality="sensor_error"` and a NULL temperature. Database errors
 are reported separately in the terminal. A `Saved:` message appears only
@@ -82,7 +92,8 @@ Current limitations:
   intended backend records before integration.
 - MQTT transmission is not implemented. Records remain `uploaded=0`;
   they are not yet sent to the backend MySQL database.
-- The buzzer is not implemented.
+- Manual buzzer silencing is not implemented, so FR-15 is only partially
+  implemented. Stopping the whole script is not a substitute for a silence control.
 
 Do not commit the generated database or backup database files to Git.
 
@@ -111,6 +122,7 @@ and releases it when the test finishes.
 
 - [SCD41 readings, SQLite storage and simulated sensor error test](../docs/testing/scd41-basic-readings.md)
 - [LED tests](../docs/testing/led-patterns.md)
+- [Temperature-triggered buzzer test](../docs/testing/buzzer-alert.md)
 
 The sensor error test used a temporary software exception. Normal readings
 were verified after removing that exception and restarting the script.
