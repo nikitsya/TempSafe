@@ -110,7 +110,7 @@ existing records when run again; do not re-run `schema.sql`. They do not add use
 or measurements. Future threshold changes require a new profile ID to preserve
 historical settings.
 
-See the [backend guide](../backend/temsafe/README.md#temperature-classification)
+See the [API contract](../docs/api/api-contract.md#temperature-classification)
 for temperature classification rules.
 
 ## Verify the setup
