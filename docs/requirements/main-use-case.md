@@ -18,6 +18,8 @@ application, the temperature has returned to Normal, but the completed excursion
 The values and times below are synthetic demonstration data for the Figma prototype and user testing. All displayed
 times refer to the same day and use local time.
 
+This scenario illustrates the Should Have excursion summary (FR-13), not completed implementation.
+
 ## Preconditions
 
 - The system records valid temperature readings every 30 seconds, with no missing samples during this scenario.

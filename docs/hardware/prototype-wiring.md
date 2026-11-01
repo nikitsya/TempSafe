@@ -1,22 +1,27 @@
-# Prototype wiring — Raspberry Pi 400 and Adafruit SCD-41
+# TempSafe prototype wiring — Raspberry Pi 5
 
 [Editable Fritzing diagram](fritzing/prototype_wiring.fzz) — open with **File → Open** in Fritzing.
 
+## Tested assembly
+
+The project uses Raspberry Pi 5: LED on GPIO18 with 220 Ω, passive buzzer on GPIO17 with 440 Ω.
+See the [device guide](../../device/README.md) for connections and limitations.
+The linked Fritzing diagram is outdated and does not represent the current assembly.
+
 ## Sensor connections
 
-| Raspberry Pi 400 physical pin | Function     | Adafruit SCD-41 breakout connection |
-|-------------------------------|--------------|-------------------------------------|
-| 1                             | 3.3 V power  | VIN                                 |
-| 6                             | Ground       | GND                                 |
-| 3                             | GPIO2 / SDA1 | SDA                                 |
-| 5                             | GPIO3 / SCL1 | SCL                                 |
+| Raspberry Pi 5 physical pin | Function     | Adafruit SCD-41 breakout connection |
+|-----------------------------|--------------|-------------------------------------|
+| 1                           | 3.3 V power  | VIN                                 |
+| 6                           | Ground       | GND                                 |
+| 3                           | GPIO2 / SDA1 | SDA                                 |
+| 5                           | GPIO3 / SCL1 | SCL                                 |
 
-## Proposed LED connections
+## LED and buzzer connections
 
-Physical pin 11 (BCM GPIO17) → 1 kΩ series resistor → LED anode; LED cathode → physical pin 9 (GND). This matches the
-reference wiring diagram. Verify the actual LED ratings, polarity and brightness before powering the circuit. The
-resistor value
-is a proposal, not a measured result.
+Physical pin 12 (BCM GPIO18) → 220 Ω series resistor → LED anode; LED cathode → physical pin 14 (GND).
+The passive buzzer uses GPIO17 (physical pin 11), two 220 Ω resistors in series and shared ground.
+See the [buzzer test](../testing/buzzer-alert.md) for component limitations.
 
 ## What each part does
 
@@ -24,36 +29,16 @@ is a proposal, not a measured result.
 |--------------------------|------------------------------------------------------------------------------------------------------------------------|
 | Plastic prototype box    | Holds the sensor; the container itself has no electrical connection.                                                   |
 | Adafruit SCD-41 breakout | Measures temperature inside the box; humidity and CO₂ reporting are outside this release.                              |
-| Raspberry Pi 400         | Reads the sensor, runs the monitoring software and controls the warning LED.                                           |
+| Raspberry Pi 5           | Reads the sensor, runs the monitoring software and controls the warning LED.                                           |
 | Solderless breadboard    | Provides temporary electrical connections without soldering; it has no processor or Wi-Fi.                             |
 | Jumper wires             | Carry power, ground and signals between components. Colours in the diagram are labels, not a required colour standard. |
 | Resistor                 | Limits current through the warning LED.                                                                                |
 | Single-colour LED        | Provides local visual feedback. It is an output device, not a sensor.                                                  |
-| USB-C power supply       | Powers the Pi 400 from mains; use a compatible 5 V / 3 A supply.                                                       |
-| Laptop                   | Provides remote access through Raspberry Pi Connect; no direct laptop-to-Pi cable is required.                         |
+| USB-C power supply       | Powers the Raspberry Pi 5 from mains; use a compatible supply.                                                         |
+| Laptop                   | Provides remote access via SSH; no direct laptop-to-Pi cable is required.                                              |
 
 ## Sources
 
 - [Adafruit SCD-4x Raspberry Pi wiring](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/python-circuitpython)
 - [Adafruit SCD-4x pinouts](https://learn.adafruit.com/adafruit-scd-40-and-scd-41/pinouts)
 - [Raspberry Pi GPIO documentation and pinout](https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#gpio-and-the-40-pin-header)
-
-## Fritzing review — 9 October 2026
-
-The [Fritzing file](fritzing/prototype_wiring.fzz) includes the SCD-41 custom part. The Raspberry Pi 4B library part
-represents the Pi 400's equivalent 40-pin GPIO connections; it does not represent the Pi 400's physical enclosure.
-
-Inspection of the saved connections and the installed Fritzing part definitions confirms:
-
-- Physical pin 1 / 3.3 V → breadboard A20 → E20 → sensor VIN.
-- Physical pin 6 / GND → breadboard A22 → E22 → sensor GND.
-- Physical pin 3 / GPIO2 SDA → breadboard A24 → E24 → sensor SDA.
-- Physical pin 5 / GPIO3 SCL → breadboard A26 → E26 → sensor SCL.
-- GPIO17 / physical pin 11 → breadboard row 15 A–E → R1 → row 11 A–E → LED anode.
-- LED cathode → row 10 A–E → physical pin 9 / GND.
-
-The Pi needs a separate compatible USB-C 5 V / 3 A supply and uses built-in Wi-Fi for internet access.
-
-Each numbered row connects A–E internally; F–J is a separate group across the centre gap. The sensor connections use
-rows 20, 22, 24 and 26 as four separate junctions, not the side power rails. R1 remains a 1 kΩ through-hole resistor.
-The updated saved connections match the supplied breadboard image.

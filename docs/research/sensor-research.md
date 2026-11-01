@@ -84,7 +84,7 @@ colour alone.
 
 ## 6. Above 25°C or at or below the agreed 0°C lower threshold, the LED remains steadily lit (Alert); the optional buzzer sounds if implemented, and a phone alert is sent when connected and permitted.
 
-## 7. The system records the start time, maximum temperature and duration of the temperature excursion.
+## 7. If FR-13 is implemented, the system estimates excursion start, duration and maximum temperature from recorded observations; gaps and errors break the summary.
 
 ## 8. The web application allows the user to review the current status and historical excursion data.
 

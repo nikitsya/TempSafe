@@ -1,4 +1,6 @@
-# Smart Box: user interface design
+# TempSafe: user interface design
+
+Target UI behaviour; see the [README](../../README.md#current-progress) for implementation status.
 
 ## Planned platform
 
@@ -42,7 +44,8 @@ permission is denied (D), a banner explains that phone alerts are unavailable wh
 
 ![Temperature history mock-up](../assets/design/ui-history.png)
 
-**Figure 3.** History screen. A From/To filter selects the time range. The graph shows the Upper limit and Warning lines
+**Figure 3.** History screen. A From/To filter selects the time range. The graph shows the upper-limit and
+warning-threshold lines
 with labels. Samples above the upper limit are marked. A period with no data is drawn as a gap, and a sensor-error
 attempt is marked separately, not joined to the line. A readable table below the graph gives the same data (observation
 time, temperature, quality, status, profile) for screen-reader and keyboard users. An empty range shows "No observations

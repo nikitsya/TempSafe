@@ -1,10 +1,4 @@
-# Smart Box — Functional Requirements and Use Cases
-
-**Date:** 9 October 2026
-
-**Version:** 0.4
-
-**Status:** Proposed design update for team review
+# TempSafe — Functional Requirements and Use Cases
 
 Priority reasons, Universal Design links and proposed scope decisions are documented in
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
@@ -43,6 +37,8 @@ A separate native mobile application is likely to follow the web application, su
 | FR-13 | Estimate observed excursion periods                  | Should   | Group consecutive low/high observations using observation order; label duration as estimated; missing/invalid samples break continuity; delayed data causes affected history to be recalculated                                                                                                                |
 | FR-14 | Send phone notifications                             | Must     | With connectivity and notification permission, send a clear Warning or Alert notification to authorised recipients; define and test the phone delivery channel, suppress repeated notifications for an unchanged state, distinguish delayed historical events from current alerts and expose delivery failures |
 | FR-15 | Provide an audible buzzer alert                      | Should   | If implemented, sound on Alert, operate locally without Wi-Fi and provide a silence control; silencing does not clear the LED or dashboard state. Define and test the sound pattern and repeat behaviour.                                                                                                      |
+
+Implementation status: [current progress](../../README.md#current-progress).
 
 ## 3. Proposed prototype settings
 

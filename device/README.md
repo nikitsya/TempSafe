@@ -1,17 +1,17 @@
 # Raspberry Pi device scripts
 
-These scripts run on the Raspberry Pi connected to the SCD41 sensor and
+These scripts run on Raspberry Pi 5 connected to the SCD41 sensor and
 single-colour LED and passive buzzer. They are separate from the FastAPI backend.
 
 ## Files
 
-| File | Purpose | Run directly? |
-| --- | --- | --- |
-| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy. | Yes |
-| `database.py` | Configures the SQLite connection and SQLAlchemy sessions. | No; imported by the other files. |
-| `models.py` | Defines the `readings` table for SQLAlchemy. | No; imported by the main script. |
-| `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds. | Yes |
-| `led_test.py` | Standalone LED pattern test; does not read temperature or use a database. | Yes |
+| File                      | Purpose                                                                                                                       | Run directly?                    |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.        | Yes                              |
+| `database.py`             | Configures the SQLite connection and SQLAlchemy sessions.                                                                     | No; imported by the other files. |
+| `models.py`               | Defines the `readings` table for SQLAlchemy.                                                                                  | No; imported by the main script. |
+| `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds. | Yes                              |
+| `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                     | Yes                              |
 
 Keep `temperature_readings.py`, `database.py` and `models.py` in the same
 directory when copying them to the Raspberry Pi.
@@ -30,7 +30,7 @@ directory when copying them to the Raspberry Pi.
   configuration; installing Python packages on Windows does not provide
   access to the Pi's GPIO or I2C hardware.
 
-The commands below use Hanna's current Pi directory. If using a repository
+The commands below use the current Pi directory. If using a repository
 checkout on the Pi, change to its `device` directory instead and activate
 the appropriate virtual environment.
 

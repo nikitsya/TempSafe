@@ -7,7 +7,7 @@
 | Test ID             | HW-01                                           |
 | Test date           | 19 October 2026                                 |
 | Tested by           | Hanna Bokariuk                                  |
-| Project             | Smart Box                                       |
+| Project             | TempSafe                                        |
 | Related requirement | FR-03 — Measure and record internal temperature |
 | Status              | **PASS — basic functional test**                |
 
@@ -17,9 +17,7 @@ Verify that the SCD41 sensor communicates with a Raspberry Pi over I²C and that
 basic temperature readings.
 
 This is an **initial functional test**. It does not validate temperature accuracy against a reference thermometer or the
-complete Smart Box system.
-
-**Hardware difference:** The project design specifies a Raspberry Pi 400; this initial test used a Raspberry Pi 5.
+complete TempSafe system.
 
 ## 3. Equipment
 
@@ -78,7 +76,7 @@ The basic functional test passes if:
 5. Prepare a Python virtual environment and install `adafruit-circuitpython-scd4x` and its dependencies.
 6. Run `python read_scd41.py` and collect the temperature measurements.
 7. Stop the program and inspect `temperature_readings.csv`.
-8. Copy the CSV file and the wiring photograph into the Smart Box repository as test evidence.
+8. Copy the CSV file and the wiring photograph into the TempSafe repository as test evidence.
 
 ## 8. Results
 
@@ -109,9 +107,8 @@ Readings recorded on **19 October 2026**:
     - [Python test script](../../device/scd41_basic_readings.py)
 
 CSV output was used only to retain evidence for this standalone hardware test.
-The planned application will buffer readings locally in SQLite and transmit
-them via MQTT to the backend for storage in MySQL.
-Database integration was outside the scope of this test.
+The later device script stores readings in SQLite; see the additional test below. MQTT transmission to the backend
+and MySQL remains planned. Database integration was outside the scope of this initial CSV test.
 
 ## 10. Issues and actions
 
@@ -154,11 +151,11 @@ readings can be recorded again after an error.
 
 ### Results
 
-| Record ID | Temperature (°C) | Quality |
-|-----------|------------------|---------|
-| 53 | 21.4 | valid |
-| 54 | NULL | sensor_error |
-| 55 | 21.4 | valid |
+| Record ID | Temperature (°C) | Quality      |
+|-----------|------------------|--------------|
+| 53        | 21.4             | valid        |
+| 54        | NULL             | sensor_error |
+| 55        | 21.4             | valid        |
 
 The database query confirmed that the simulated error was stored
 without a temperature value. A valid reading was saved after the

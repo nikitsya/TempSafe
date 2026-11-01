@@ -1,15 +1,13 @@
-# Smart Box / TempSafe - Initial Test Plan
-
-**Date:** 9 October 2026
+# TempSafe - Initial Test Plan
 
 ## Purpose
 
 Plan how to verify the [functional requirements](../requirements/functional-requirements.md) and
-selected [Universal Design principles](../design/design-principles.md). This document describes future testing.
+selected [Universal Design principles](../design/design-principles.md). This document defines planned acceptance tests.
 
 ## Equipment and prerequisites
 
-- Raspberry Pi 400, Adafruit SCD-41, single-colour LED, suitable resistor, wiring and power supply; prototype box.
+- Raspberry Pi 5, Adafruit SCD-41, single-colour LED, suitable resistor, wiring and power supply; prototype box.
 - Reference thermometer for comparison; record its stated accuracy and placement.
 - Device software, local SQLite queue, MQTT/TLS broker, ingestion worker, backend, MySQL and web application when
   available.
@@ -112,9 +110,11 @@ Use **Not Run**, **Blocked**, **Pass**, **Fail** or **Not Applicable**. Record r
 Evidence can include screenshots, paired thermometer readings, queue IDs/counts, API responses, notification timings and
 participant notes.
 
-| Test ID                             | Tester / date | Build / settings | Actual result | Status | Evidence / defect link |
-|-------------------------------------|---------------|------------------|---------------|--------|------------------------|
-| To be completed when testing begins | —             | —                | -             | -      | —                      |
+| Test ID                                   | Tester / date | Build / settings | Actual result | Status | Evidence / defect link |
+|-------------------------------------------|---------------|------------------|---------------|--------|------------------------|
+| Record each acceptance test when executed | —             | —                | -             | -      | —                      |
+
+Component and prototype results are linked from the [README](../../README.md#project-documentation).
 
 ## Planned PWA checks
 

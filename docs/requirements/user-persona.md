@@ -112,7 +112,7 @@ samples; they do not prove continuous exposure.
 
 ## Environment
 
-TempSafe is designed specifically for use in an ambulance.
+TempSafe is intended for future ambulance use; the current prototype is tested on a bench.
 
 The Controlled Drug Box is kept inside a Vehicle Security Safe in the vehicle. Because this is an enclosed storage area,
 its temperature can differ significantly from the outside air temperature.

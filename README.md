@@ -1,4 +1,4 @@
-# Smart Box — TempSafe
+# TempSafe
 
 TempSafe is an IoT project for monitoring temperature inside a prototype medication box. It combines a
 Raspberry Pi and SCD-41 sensor, local LED feedback and a web interface for viewing readings and temperature history.
@@ -21,12 +21,14 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
-- **Hardware:** separate sensor-reading and LED-pattern tests completed; combined operation remains to be implemented.
+- **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
+  readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard with sample data, a sign-in form and a history placeholder. Live data integration remains
   planned.
 - **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
 
-Device-to-backend communication, offline queuing, authentication and phone notifications remain planned.
+Device-to-backend communication, reliable offline upload and acknowledgement, authentication and phone notifications
+remain planned.
 See the [functional requirements](docs/requirements/functional-requirements.md) and
 [MoSCoW priorities](docs/requirements/moscow-prioritisation.md) for the target system.
 
@@ -66,15 +68,15 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 
 ## Project documentation
 
-| Topic                          | Documents                                                                                                                                                                                                          |
-|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Scope and requirements         | [Project scope](docs/project/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                           |
-| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                 |
-| Interface and accessibility    | [UI design](docs/design/ui-design.md) · [Core scenario mock-ups](docs/design/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility-criteria.md)                                           |
-| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                              |
-| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                     |
-| Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) |
-| Assessment and project records | [IoT G-CA1 design](docs/project/iot-gca1-design.md) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                            |
+| Topic                          | Documents                                                                                                                                                                                                                                                        |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Scope and requirements         | [Project scope](docs/project/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                         |
+| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                                                               |
+| Interface and accessibility    | [UI design](docs/design/ui-design.md) · [Core scenario mock-ups](docs/design/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility-criteria.md)                                                                                         |
+| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                            |
+| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                   |
+| Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) · [Buzzer test](docs/testing/buzzer-alert.md) |
+| Assessment and project records | [IoT G-CA1 design](docs/project/iot-gca1-design.md) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                                          |
 
 ## Licence
 

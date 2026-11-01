@@ -2,8 +2,8 @@
 
 Author: Maryna Hordiienko
 
-This diagram shows how a user moves between TempSafe screens. Every box and history request is checked by the backend;
-hiding a button is not access control.
+This diagram shows the intended flow between TempSafe screens. The target system must check every box and history
+request in the backend; those access checks are not yet implemented. Hiding a button is not access control.
 
 ```mermaid
 flowchart TD

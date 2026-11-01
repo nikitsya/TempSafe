@@ -1,13 +1,11 @@
 # TempSafe UI prototype
 
-Author: Maryna Hordiienko
-
 **Live prototype:** https://nikitsya.github.io/Smart-Box/prototype/ui/login.html
 (test account `paramedic` / `demo`; synthetic data only)
 
 A clickable HTML/CSS/JavaScript prototype of the TempSafe web application. It uses synthetic data only and does not
-connect to the backend. It is used to check the UI design and to run automated browser tests before the FastAPI
-application exists.
+connect to the backend. It is used to check the UI design and to run automated browser tests independently of the
+developing FastAPI application.
 
 ## Pages
 

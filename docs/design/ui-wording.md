@@ -1,7 +1,5 @@
 # UI wording guide
 
-Author: Maryna Hordiienko
-
 The paramedic must understand each message quickly, often under time pressure. Every message follows these rules:
 
 - Say what happened in the heading and what it means for the user in the next line.
@@ -38,7 +36,7 @@ The paramedic must understand each message quickly, often under time pressure. E
 |---------------|---------------------------------------------|
 | Empty range   | No observations found for this period.      |
 | From after To | The start time must be before the end time. |
-| Gap in data   | No data (device offline)                    |
+| Gap in data   | No observations available                   |
 
 ## Phone notifications (Web Push)
 
@@ -46,6 +44,6 @@ The paramedic must understand each message quickly, often under time pressure. E
 |---------------|-----------------------------------------------------------------------|
 | Warning       | TempSafe: Box TS-01 WARNING – 24.6°C at 14:17. Open the app to check. |
 | Alert         | TempSafe: Box TS-01 ALERT – above upper limit, 25.9°C at 14:31.       |
-| Not reporting | TempSafe: Box TS-01 has not reported for 3 min.                       |
 
+Loss of contact is shown on the dashboard; a phone notification for it is not part of FR-14.
 Notification text contains no account details. Tapping it opens the signed-in dashboard.

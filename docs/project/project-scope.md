@@ -4,6 +4,8 @@
 temperature over time and alerts the Advanced Paramedic when storage conditions approach or exceed the configured
 temperature limit.
 
+The current prototype is tested on a bench without medicines; ambulance use is a future context.
+
 The project focuses on reducing unnecessary manual temperature checks by providing automatic monitoring, local LED
 feedback, phone notifications and a record of temperature observations. Audible buzzer feedback and estimated excursion
 summaries are Should Have enhancements.

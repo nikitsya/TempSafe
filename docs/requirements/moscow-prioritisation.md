@@ -1,8 +1,4 @@
-# Smart Box / TempSafe - MoSCoW Feature Prioritisation
-
-**Date:** 8 October 2026
-
-**Status:** Draft for group review
+# TempSafe - MoSCoW Feature Prioritisation
 
 ## Decision rules
 
@@ -82,7 +78,8 @@ PWA support for home-screen access is planned.
 - Phone notifications are Must Have. Validate the proposed Web Push channel, browser support and permission handling
   before implementation
   is considered complete.
-- The buzzer is Should Have; select the part, sound pattern and silence control if implemented.
+- The buzzer remains Should Have. A passive buzzer and its sound pattern have been tested; manual silencing remains
+  outstanding. See the [buzzer test](../testing/buzzer-alert.md).
 - Humidity and CO₂ reporting are outside this release, even though the SCD-41 can measure both.
 - The agreed demo profile uses a 0.00°C lower threshold, 24.00°C warning threshold and 25.00°C upper limit.
   Alert applies at or below 0°C and above 25°C; Warning applies from 24°C through 25°C. These are prototype settings,

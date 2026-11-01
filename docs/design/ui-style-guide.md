@@ -1,8 +1,7 @@
 # UI style guide
 
-Author: Maryna Hordiienko
-
-All mock-ups and the HTML prototype use the values below, so the screens look consistent.
+These values apply to the original UI mock-ups and HTML prototype. The later
+[core scenario mock-ups](core-scenario-mockups.md) document their own visual style.
 
 ## Colours
 
