@@ -1,28 +1,27 @@
-# Smart Box: Database Technology Research
-
-**Updated:** 9 October 2026.
+# TempSafe: Database Technology Research
 
 **Scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
 paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
 
 The device records temperature inside a portable medication box. MySQL is the proposed central database; SQLite provides
-a durable offline queue on the Raspberry Pi.
+the planned durable offline queue on the Raspberry Pi. Local SQLite recording is now implemented, but MQTT upload,
+acknowledgement and full offline recovery remain planned; see the [device guide](../../device/README.md).
 
 The baseline uses one internal sensor. An external temperature sensor is a possible future research extension and
 is not included in this schema.
 
 ## 1. System technologies and languages
 
-| Component              | Proposed technology              | Language or format       | Role in Smart Box                                                   |
-|------------------------|----------------------------------|--------------------------|---------------------------------------------------------------------|
-| Device application     | Raspberry Pi application         | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
-| Device's local storage | SQLite                           | SQL through Python       | Keep an offline upload queue on the device                          |
-| Network messages       | MQTT over TLS                    | JSON payloads            | Publish observations through the broker to the ingestion worker     |
-| Backend                | FastAPI                          | Python                   | Authenticate devices and users, validate messages and retrieve data |
-| Database connector     | MySQL Connector/Python           | Python                   | Let the backend execute parameterised MySQL queries                 |
-| Central database       | MySQL with InnoDB                | SQL                      | Store boxes, access permissions and historical observations         |
-| User interface         | Web application                  | HTML, CSS and JavaScript | Display temperature, freshness, history and warnings                |
-| Scheduled processing   | cron running application scripts | cron syntax and Python   | Produce summaries, check stale devices and perform maintenance      |
+| Component              | Proposed technology                    | Language or format       | Role in TempSafe                                                    |
+|------------------------|----------------------------------------|--------------------------|---------------------------------------------------------------------|
+| Device application     | Raspberry Pi application               | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
+| Device's local storage | SQLite                                 | SQL through Python       | Keep an offline upload queue on the device                          |
+| Network messages       | MQTT over TLS                          | JSON payloads            | Publish observations through the broker to the ingestion worker     |
+| Backend                | FastAPI                                | Python                   | Authenticate devices and users, validate messages and retrieve data |
+| Database connector     | SQLAlchemy with MySQL Connector/Python | Python                   | Let the backend execute parameterised MySQL queries                 |
+| Central database       | MySQL with InnoDB                      | SQL                      | Store boxes, access permissions and historical observations         |
+| User interface         | Web application                        | HTML, CSS and JavaScript | Display temperature, freshness, history and warnings                |
+| Scheduled processing   | cron running application scripts       | cron syntax and Python   | Produce summaries, check stale devices and perform maintenance      |
 
 ## 2. Data requirements
 
@@ -40,7 +39,7 @@ device needs at least 24 hours of local queue capacity (2,880 sample attempts).
 
 ## 3. Database categories
 
-| Category                  | Examples                   | Data model                                         | Smart Box relevance                                                                   |
+| Category                  | Examples                   | Data model                                         | TempSafe relevance                                                                    |
 |---------------------------|----------------------------|----------------------------------------------------|---------------------------------------------------------------------------------------|
 | Relational                | MySQL, PostgreSQL, SQLite  | Tables linked by keys                              | Natural fit for boxes, users, permissions, threshold profiles and timestamped samples |
 | Document                  | MongoDB, Cloud Firestore   | Collections of structured documents                | Useful when sensor payloads vary significantly                                        |

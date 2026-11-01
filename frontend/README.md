@@ -1,12 +1,11 @@
-# TEMSAFE frontend
+# TempSafe frontend
 
-Author: Maryna Hordiienko
-
-The web interface of TEMSAFE, built with plain HTML, CSS and JavaScript (no build step).
+The web interface of TempSafe, built with plain HTML, CSS and JavaScript (no build step).
 It follows the revised mock-ups in [`docs/design/ui-design.md`](../docs/design/ui-design.md)
 and the values in [`docs/design/ui-style-guide.md`](../docs/design/ui-style-guide.md).
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
-real application, served by the FastAPI backend in `backend/temsafe`.
+application frontend under development, served by the FastAPI backend in `backend/temsafe`.
+Authentication is not implemented; the dashboard uses sample data and history is a placeholder.
 
 ## Structure
 
@@ -14,7 +13,7 @@ real application, served by the FastAPI backend in `backend/temsafe`.
 |------------------------|-----------------------------------------------------------------|
 | `index.html`           | Sign-in page (entry point)                                      |
 | `pages/dashboard.html` | Current status of the assigned box (sample data, `?state=...`)  |
-| `pages/history.html`   | Temperature history                                             |
+| `pages/history.html`   | Temperature history placeholder                                 |
 | `css/main.css`         | Shared styles: colour tokens, typography, layout and components |
 | `js/api.js`            | Small helper for calls to the backend API (`/api/...`)          |
 | `js/main.js`           | Page start-up code, including the API connection check          |
@@ -25,10 +24,10 @@ real application, served by the FastAPI backend in `backend/temsafe`.
 
 ## How to run
 
-From the repository root:
+Complete the [backend setup](../README.md#backend-development) and [database setup](../database/README.md),
+then run from the repository root with the project virtual environment activated:
 
 ```bash
-python -m pip install --user fastapi uvicorn
 python -m uvicorn temsafe.main:app --reload --app-dir backend
 ```
 

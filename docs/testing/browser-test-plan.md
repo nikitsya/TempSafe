@@ -1,7 +1,5 @@
 # Automated browser test plan (UI)
 
-Author: Maryna Hordiienko
-
 This plan adds automated browser tests to the manual UX tests in `initial-test-plan.md` (UX-01 to UX-06). Automated UI
 tests use Playwright. They run against the HTML prototype now (`prototype/ui`) and will run against the FastAPI web
 application during implementation. The test code is in `prototype/ui/tests/ui.spec.js`.
@@ -23,7 +21,7 @@ application during implementation. The test code is in `prototype/ui/tests/ui.sp
 
 BT-05 and BT-06 run once for each of three states, so the suite contains 16 tests for 12 IDs.
 
-Not yet automated (checked manually with UX-01, UX-02 and UX-04 in `initial-test-plan.md`): status symbols and
+Not yet automated (to be checked and recorded with UX-01, UX-02 and UX-04 in `initial-test-plan.md`): status symbols and
 `role="status"`/`role="alert"` (AC-01, AC-06), visible focus outline (AC-04), contrast (AC-02) and touch target size
 (AC-08).
 

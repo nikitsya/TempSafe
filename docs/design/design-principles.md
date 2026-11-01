@@ -1,6 +1,6 @@
 # Design principles
 
-This document explains which Universal Design principle guides the Smart Box interface and how it affects our design
+This document explains which Universal Design principle guides the TempSafe interface and how it affects our design
 decisions.
 
 ## What is Universal Design?
@@ -16,13 +16,13 @@ sensory abilities.*
 
 ### Why we chose it
 
-Paramedics use Smart Box in changing and difficult conditions: bright sunlight, darkness, noise, rain and high stress.
+Paramedics use TempSafe in changing and difficult conditions: bright sunlight, darkness, noise, rain and high stress.
 Their hands and attention are often busy with a patient. A temperature warning is only useful if it is noticed
 immediately and understood at a glance. For this reason, Principle 4 is the most important principle for our project.
 
 ### How it affects our design decisions
 
-| Guideline                                                | Design decision in Smart Box                                                                                                                                             |
+| Guideline                                                | Design decision in TempSafe                                                                                                                                              |
 |----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 4a. Use different modes for essential information        | Application warnings use colour, icon and text. Phone notifications are Must Have when connected and permitted. The local LED is single-colour; a buzzer is Should Have. |
 | 4b. Provide adequate contrast                            | Text and key values are planned to meet a minimum contrast ratio of 4.5:1; readability in bright light and a dark vehicle will be tested.                                |
@@ -88,7 +88,7 @@ These are design intentions to validate against the functional requirements, not
 
 ## Summary
 
-Smart Box is designed so that a paramedic can understand the condition of the medicine box quickly in the intended
+TempSafe is designed so that a paramedic can understand the condition of the medicine box quickly in the intended
 working environment, subject to usability testing. Principle 4 (Perceptible Information) is our key principle, supported
 by Principle 3 (Simple and Intuitive
 Use) and Principle 5 (Tolerance for Error).

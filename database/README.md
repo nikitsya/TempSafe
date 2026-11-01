@@ -1,4 +1,4 @@
-# TEMSAFE database
+# TempSafe database
 
 We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates six tables for
 boxes, users, access permissions, temperature profiles, measurements and reviews.
