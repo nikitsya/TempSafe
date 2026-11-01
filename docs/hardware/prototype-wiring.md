@@ -4,6 +4,8 @@
 
 Keep the Raspberry Pi outside the monitored box to reduce heat affecting the sensor readings.
 
+![Prototype wiring: SCD41, LED and passive buzzer](../assets/hardware/prototype-wiring.png)
+
 ## Sensor connections
 
 | Raspberry Pi 5 physical pin | Function     | Adafruit SCD-41 breakout connection |
