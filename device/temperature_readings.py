@@ -41,32 +41,46 @@ def sensor_error_flash():
         led.off()
         time.sleep(0.2)
 
+def save_reading(temperature, quality):
+    observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    with SessionLocal.begin() as session:
+        session.add(Reading(
+            sample_id=str(uuid4()),
+            observed_at=observed_at,
+            temperature_c=temperature,
+            quality=quality,
+            clock_reliable=1,
+            box_id=BOX_ID,
+            profile_id=PROFILE_ID,
+        ))
+
+    print(f"Saved: {observed_at} | {temperature} C | Quality: {quality}")
+
 while True:
     try:
+        if not sensor.data_ready:
+            time.sleep(1)
+            continue
 
-        if sensor.data_ready:
-            temperature = round(sensor.temperature, 2)
-
-            state = get_temperature_state(temperature)
-            update_led(state)
-
-            observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-            with SessionLocal.begin() as session:
-                reading = Reading(
-                    sample_id=str(uuid4()),
-                    observed_at=observed_at,
-                    temperature_c=temperature,
-                    quality="valid",
-                    clock_reliable=1,
-                    box_id=BOX_ID,
-                    profile_id=PROFILE_ID,
-                )
-                session.add(reading)            
-            print(f"Saved: {observed_at} | {temperature:.2f} C | State: {state}")
+        temperature = round(sensor.temperature, 2)
+        quality = "valid"
 
     except Exception as error:
         print("Sensor error:", error)
+        temperature = None
+        quality = "sensor_error"
+
+    if quality == "sensor_error":
         sensor_error_flash()
+    else:
+        state = get_temperature_state(temperature)
+        update_led(state)
+        print(f"State: {state}")
+
+    try:
+        save_reading(temperature, quality)
+    except Exception as error:
+        print("Database error: reading was not saved:", error)
 
     time.sleep(30)
