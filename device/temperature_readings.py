@@ -1,9 +1,9 @@
 from gpiozero import LED
-import sqlite3
 from datetime import datetime, timezone
 import time
 import board
-from pathlib import Path
+from database import Base, engine, SessionLocal
+from models import Reading
 import adafruit_scd4x
 from uuid import uuid4
 
@@ -30,22 +30,7 @@ sensor = adafruit_scd4x.SCD4X(i2c)
 
 sensor.start_periodic_measurement()
 
-connection = sqlite3.connect(Path(__file__).resolve().parent / "temperature_readings.db")
-
-connection.execute("""
-    CREATE TABLE IF NOT EXISTS readings (
-        sequence_no INTEGER PRIMARY KEY AUTOINCREMENT,
-        sample_id TEXT NOT NULL UNIQUE,
-        observed_at TEXT,
-        temperature_c REAL,
-        quality TEXT NOT NULL,
-        clock_reliable INTEGER NOT NULL,
-        box_id TEXT NOT NULL,
-        profile_id TEXT NOT NULL,
-        uploaded INTEGER NOT NULL DEFAULT 0
-    )
-""")
-connection.commit()
+Base.metadata.create_all(engine)
 
 def sensor_error_flash():
     led.off()
@@ -67,14 +52,17 @@ while True:
 
             observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-            connection.execute(
-                """INSERT INTO readings
-                (sample_id, observed_at, temperature_c, quality, clock_reliable, box_id, profile_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (str(uuid4()), observed_at, temperature, "valid", 1, BOX_ID, PROFILE_ID) 
-            )
-
-            connection.commit()
+            with SessionLocal.begin() as session:
+                reading = Reading(
+                    sample_id=str(uuid4()),
+                    observed_at=observed_at,
+                    temperature_c=temperature,
+                    quality="valid",
+                    clock_reliable=1,
+                    box_id=BOX_ID,
+                    profile_id=PROFILE_ID,
+                )
+                session.add(reading)            
             print(f"Saved: {observed_at} | {temperature:.2f} C | State: {state}")
 
     except Exception as error:
