@@ -69,7 +69,7 @@ electrical ratings were not recorded; this describes the tested assembly.
 
 ## Current assembly — 1 November 2026
 
-Hanna updated the [Fritzing file](fritzing/prototype_wiring.fzz) to reflect the
+Updated the [Fritzing file](fritzing/prototype_wiring.fzz) to reflect the
 LED and buzzer assembly. The confirmed connections above supersede the
 earlier LED design using GPIO17, a 1 kΩ resistor and ground pin 9.
 
