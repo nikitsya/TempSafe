@@ -127,7 +127,6 @@ and saved each reading with a timestamp to a CSV file. No reading errors were ob
 This result confirms basic wiring, communication, and data logging on the **Raspberry Pi 5**. This test provides partial
 evidence for FR-03; full sample metadata and application integration were not tested.
 
-
 ## Additional Test — SQLite Storage and Sensor Error Recovery
 
 **Date:** 1 November 2026  

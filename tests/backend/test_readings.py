@@ -4,10 +4,11 @@ import pytest
 from datetime import datetime
 from decimal import Decimal
 from fastapi.testclient import TestClient
+from unittest.mock import Mock
+
 from temsafe.database import get_db
 from temsafe.main import app
 from temsafe.models import TemperatureSample
-from unittest.mock import Mock
 
 
 @pytest.fixture

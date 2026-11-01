@@ -2,6 +2,7 @@
 
 import pytest
 from decimal import Decimal
+
 from temsafe.models import ThresholdProfile
 from temsafe.temperature import classify_temperature
 

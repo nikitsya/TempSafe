@@ -2,22 +2,23 @@
 
 ## 1. Test information
 
-| Item                | Details                                |
-|---------------------|----------------------------------------|
-| Test ID             | HW-02                                  |
-| nitial test date    | 29.10.2026                             |
-| ntegration test date| 30.10.2026                             |
-| Tested by           | Hanna Bokariuk                         |
-| Project             | TempSafe                               |
-| Related requirement | FR-06 — Provide a local LED warning    |
-| Status              | PASS — LED control integrated with temperature states |
+| Item                 | Details                                               |
+|----------------------|-------------------------------------------------------|
+| Test ID              | HW-02                                                 |
+| nitial test date     | 29.10.2026                                            |
+| ntegration test date | 30.10.2026                                            |
+| Tested by            | Hanna Bokariuk                                        |
+| Project              | TempSafe                                              |
+| Related requirement  | FR-06 — Provide a local LED warning                   |
+| Status               | PASS — LED control integrated with temperature states |
 
 ## 2. Objective
 
 Connect a single-colour LED to a Raspberry Pi through a current-limiting resistor and verify the planned patterns:
 off, steadily lit, and two short flashes followed by a pause.
 
-Verify that a single-colour LED connected to the Raspberry Pi is automatically controlled using temperature readings from the SCD-41 sensor and the agreed TempSafe prototype temperature profile.
+Verify that a single-colour LED connected to the Raspberry Pi is automatically controlled using temperature readings
+from the SCD-41 sensor and the agreed TempSafe prototype temperature profile.
 
 The test also verifies the double-flash pattern used to indicate a sensor error.
 
@@ -48,7 +49,8 @@ Warning: 24°C ≤ T ≤ 25°C → LED ON
 Alert: T ≤ 0°C or T > 25°C → LED ON
 Sensor error: double-flash LED pattern
 
-The threshold values are currently stored as local constants on the Raspberry Pi so that LED control can continue without a network connection.
+The threshold values are currently stored as local constants on the Raspberry Pi so that LED control can continue
+without a network connection.
 
 ## 6. Software
 
@@ -66,6 +68,7 @@ cd ~/scd41
 source .venv/bin/activate
 python temperature_readings.py
 ```
+
 The script:
 
 1. Reads the temperature from the SCD-41.
@@ -92,14 +95,14 @@ Saved: 2026-10-30T... | 20.93 C | State: Normal
 
 ## 8. Results
 
-| Test | Expected result | Observed result | Status |
-|---|---|---|---|
-| Normal | LED OFF | LED remained off | PASS |
-| Warning | LED ON | LED switched on | PASS |
-| High-temperature Alert | LED ON | LED remained on | PASS |
-| Sensor error | Two short flashes | Double-flash pattern observed | PASS |
-| Terminal status | Temperature and state displayed | Temperature and state displayed correctly | PASS |
-| Local operation | LED control does not require network access | Processing performed locally on Raspberry Pi | PASS |
+| Test                   | Expected result                             | Observed result                              | Status |
+|------------------------|---------------------------------------------|----------------------------------------------|--------|
+| Normal                 | LED OFF                                     | LED remained off                             | PASS   |
+| Warning                | LED ON                                      | LED switched on                              | PASS   |
+| High-temperature Alert | LED ON                                      | LED remained on                              | PASS   |
+| Sensor error           | Two short flashes                           | Double-flash pattern observed                | PASS   |
+| Terminal status        | Temperature and state displayed             | Temperature and state displayed correctly    | PASS   |
+| Local operation        | LED control does not require network access | Processing performed locally on Raspberry Pi | PASS   |
 
 For the sensor-error pattern, each flash is programmed for 0.2 seconds with a 0.2-second gap between flashes.
 
@@ -107,7 +110,8 @@ For the sensor-error pattern, each flash is programmed for 0.2 seconds with a 0.
 
 ![SCD-41 temperature test using hot container](../assets/testing/led/LED-hot-testing.jpg)
 
-**Figure 1.** SCD-41 temperature sensor placed near a container with hot water to increase the measured temperature and trigger the Warning and Alert states.
+**Figure 1.** SCD-41 temperature sensor placed near a container with hot water to increase the measured temperature and
+trigger the Warning and Alert states.
 
 ![Terminal output showing temperature state](../assets/testing/led/terminal-temperature-state.png)
 
@@ -119,18 +123,22 @@ For the sensor-error pattern, each flash is programmed for 0.2 seconds with a 0.
 
 ## 10. Limitations
 
-The high-temperature Warning and Alert states were tested using a container with hot water to increase the sensor temperature.
+The high-temperature Warning and Alert states were tested using a container with hot water to increase the sensor
+temperature.
 
 The low-temperature Alert condition was not physically reproduced during this test.
 
 The sensor-error state was simulated in the Python code rather than produced by physically disconnecting the sensor.
 
-The temperature thresholds are currently stored locally in the Raspberry Pi script. A future improvement could synchronise the threshold profile from the backend/MySQL database and store a local copy on the Raspberry Pi for offline operation.
+The temperature thresholds are currently stored locally in the Raspberry Pi script. A future improvement could
+synchronise the threshold profile from the backend/MySQL database and store a local copy on the Raspberry Pi for offline
+operation.
 
 ## 11. Conclusion
 
 The LED was successfully integrated with the SCD-41 temperature readings.
 
-The Raspberry Pi automatically determines the current temperature state and controls the LED locally. Normal, Warning, high-temperature Alert and sensor-error behaviour were tested successfully.
+The Raspberry Pi automatically determines the current temperature state and controls the LED locally. Normal, Warning,
+high-temperature Alert and sensor-error behaviour were tested successfully.
 
 The integration test provides evidence that FR-06 is functioning as intended.
