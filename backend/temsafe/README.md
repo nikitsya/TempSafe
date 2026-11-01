@@ -1,55 +1,6 @@
-# Run the backend locally
+# TempSafe backend
 
-## Temperature classification
-
-`temperature.py` provides `classify_temperature(temperature_c, quality, profile)`.
-Pass the profile associated with the measurement. The function uses its stored
-limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
-is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
-temperatures and sensor errors return `Unknown`.
-
-The latest-reading endpoint loads the sample's recorded profile and uses this
-function to add `temperature_state` to its response. This state describes the
-recorded temperature; it does not assess whether the reading is stale.
-
-## Saving incoming readings
-
-`ReadingCreate` in `schemas.py` validates the incoming fields. Use
-`save_reading(db, reading)` from `temsafe.readings` with a validated `ReadingCreate`
-and a dedicated `SessionLocal()` session. The function checks the box and profile,
-then uses `add()`, `commit()` and `refresh()` to save the sample.
-
-Observation times must include a timezone and are stored as UTC. Receipt time is
-set by the backend. Valid temperatures must be between -40 and 80°C with at most
-two decimal places; sensor errors require `null`. An unreliable clock requires
-`observed_at: null`. Sample and profile IDs must be UUIDs.
-
-An identical retry returns the existing sample without changing its receipt time.
-Reusing its ID or box sequence with different data raises `ValueError`. Missing
-boxes and profiles also raise `ValueError`; invalid payloads fail Pydantic validation.
-The function commits its session, so keep unrelated changes in another session.
-
-`POST /api/readings` accepts a JSON `ReadingCreate` payload and calls this function.
-It returns the stored reading with `200 OK`, both for a new sample and an identical
-retry. The response includes the server's `received_at` value. Unknown boxes or
-profiles (including a profile belonging to another box) return `404`; conflicting
-sample IDs or box sequence numbers return `409`; invalid payloads return `422`.
-
-Example request body for `/docs` or an HTTP client:
-
-```json
-{
-  "schema_version": 1,
-  "sample_id": "3f927b1e-8261-4ad8-a45e-2ba89a016d14",
-  "box_id": "TS-01",
-  "sequence_no": 1,
-  "profile_id": "ce9ea688-1a91-41aa-b765-5bc0e8af1f16",
-  "observed_at": "2026-01-01T12:00:00Z",
-  "clock_reliable": true,
-  "temperature_c": "24.50",
-  "quality": "valid"
-}
-```
+See the [API contract](../../docs/api/api-contract.md) for endpoints, fields, examples and integration status.
 
 ## Setup
 
@@ -80,83 +31,8 @@ python -m uvicorn temsafe.main:app --reload
 
 ## Open in your browser
 
-`GET /api/boxes/{box_id}/readings?limit=20` returns that box's history, ordered
-by `sequence_no` from newest to oldest. The default limit is 20; values from
-1 to 100 are allowed. Try `/api/boxes/TS-01/readings?limit=5`. The response is
-a list of reading objects, including sensor errors. A known box without readings
-returns `200 OK` with `[]`; an unknown box returns `404` with
-`{"detail":"Box not found"}`. User access checks are not implemented yet.
-
-`GET /api/boxes/{box_id}/readings/latest` returns the sample with the highest
-`sequence_no` for that box, even if an older sample was uploaded later. For our
-prototype, use `/api/boxes/TS-01/readings/latest`. The response is one reading
-object with the fields shown below plus `temperature_state`: `Normal`, `Warning`,
-`Alert` or `Unknown`. A latest sensor error is returned with a
-`null` temperature rather than replaced with an older valid reading.
-HTTP `404` returns `{"detail":"No readings available for this box"}` for an empty
-box, or `{"detail":"Box not found"}` for an unknown ID. User access checks are
-not implemented yet.
-
-For example, `GET /api/boxes/TS-01/readings/latest` with a valid 24.50°C sample
-using the agreed profile includes these fields (the other reading fields remain):
-
-```json
-{
-  "temperature_c": "24.50",
-  "quality": "valid",
-  "temperature_state": "Warning"
-}
-```
-
-History and individual-reading endpoints still use the original response format.
-
-`GET /api/boxes/{box_id}` returns a box's ID, name and last contact time, or
-`404` if it does not exist. Try it in `/docs` with an existing `box_id`.
-This prototype endpoint does not yet check user access.
-
-`GET /api/readings` returns up to 20 samples, ordered by receipt time (newest
-first). Use `/api/readings?limit=5` to change the number, from 1 to 100. An empty
-database returns `[]`. These prototype reading routes do not yet check user access.
-
 - [Website](http://127.0.0.1:8000) — the frontend.
-- [API documentation](http://127.0.0.1:8000/docs) — choose an endpoint, click **Try it out**, enter any required values
-  and click **Execute**.
-- [Health check](http://127.0.0.1:8000/api/health) — returns `{"status":"ok"}`
-  when the application is running; it does not check MySQL.
+- [API documentation](http://127.0.0.1:8000/docs) — inspect and try requests.
+- [Health check](http://127.0.0.1:8000/api/health) — returns `{"status":"ok"}`; it does not check MySQL.
 
-Keep the server running while using the site. `--reload` restarts it when Python
-files change. To stop it, use your editor's Stop button or press **Ctrl+C** in
-the terminal.
-
-## Example for the frontend
-
-With the backend and MySQL running, request up to five readings:
-
-```http
-GET http://127.0.0.1:8000/api/readings?limit=5
-```
-
-Example response with one stored reading (`200 OK`; illustrative data):
-
-```json
-[
-  {
-    "sample_id": "3f927b1e-8261-4ad8-a45e-2ba89a016d14",
-    "box_id": "TS-01",
-    "sequence_no": 1,
-    "profile_id": "ce9ea688-1a91-41aa-b765-5bc0e8af1f16",
-    "observed_at": "2026-01-01T12:00:00",
-    "clock_reliable": true,
-    "received_at": "2026-01-01T12:00:05",
-    "temperature_c": "5.25",
-    "quality": "valid"
-  }
-]
-```
-
-If there are no readings, the response is `200 OK` with `[]`.
-`temperature_c` is a decimal string, or `null` when `quality` is `sensor_error`.
-Check for `null` before converting it to a JavaScript number.
-`observed_at` can also be `null` when `clock_reliable` is `false`.
-The list is ordered by receipt time, so its first item is not necessarily the
-latest measurement taken by a box.
+Keep the server running while using the site. Stop it with **Ctrl+C**.
