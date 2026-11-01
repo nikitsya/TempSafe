@@ -3,11 +3,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from typing import Annotated
+
 from temsafe import models
 from temsafe.database import get_db
 from temsafe.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
 from temsafe.schemas import ReadingCreate, ReadingResponse
-from typing import Annotated
 
 router = APIRouter(tags=["Readings"])
 

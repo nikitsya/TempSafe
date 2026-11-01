@@ -3,11 +3,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from typing import Annotated
+
 from temsafe import models
 from temsafe.database import get_db
 from temsafe.schemas import BoxResponse, LatestReadingResponse, ReadingResponse
 from temsafe.temperature import classify_temperature
-from typing import Annotated
 
 router = APIRouter(tags=["Boxes"])
 

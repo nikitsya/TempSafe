@@ -1,7 +1,6 @@
 """Store validated readings and recognise retries without overwriting samples."""
 
 from datetime import UTC, datetime
-
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
