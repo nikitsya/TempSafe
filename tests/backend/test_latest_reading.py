@@ -27,6 +27,7 @@ def latest_reading_data():
                     lower_c=Decimal("2.00"), warning_c=Decimal("7.00"),
                     upper_c=Decimal("8.00"), is_demo=True,
                     source_note="Synthetic limits for tests only.",
+                    created_at=datetime(2026, 1, 1),
                 ))
                 db.flush()
 
@@ -80,6 +81,12 @@ def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
     assert reading["quality"] == quality
     assert reading["temperature_c"] == ("5.25" if quality == "valid" else None)
     assert reading["temperature_state"] == ("Normal" if quality == "valid" else "Unknown")
+    assert reading["profile"] == {
+        "profile_id": profile_ids[0],
+        "lower_c": "2.00",
+        "warning_c": "7.00",
+        "upper_c": "8.00",
+    }
 
 
 @pytest.mark.parametrize("temperature, expected", [
@@ -106,6 +113,7 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         lower_c=Decimal("0.00"), warning_c=Decimal("24.00"),
         upper_c=Decimal("25.00"), is_demo=True,
         source_note="Alternative profile for the API test only.",
+        created_at=datetime(2026, 1, 2),
     ))
     db.flush()
 
@@ -122,6 +130,12 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         "temperature_c": temperature,
         "quality": "valid",
         "temperature_state": expected,
+        "profile": {
+            "profile_id": profile_ids[0],
+            "lower_c": "2.00",
+            "warning_c": "7.00",
+            "upper_c": "8.00",
+        },
     }
 
 
