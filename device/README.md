@@ -59,11 +59,11 @@ Existing records are retained. It waits for sensor data and pauses for
 30 seconds after each reading or handled sensor read error; this is not
 an exact fixed-rate scheduler.
 
-| State | Current code condition | LED |
-| --- | --- | --- |
-| Normal | Above 0 and below 24 degrees C | Off |
-| Warning | 24 through 25 degrees C, inclusive | Steadily lit |
-| Alert | At or below 0, or above 25 degrees C | Steadily lit |
+| State             | Current code condition                                   | LED                                           |
+|-------------------|----------------------------------------------------------|-----------------------------------------------|
+| Normal            | Above 0 and below 24 degrees C                           | Off                                           |
+| Warning           | 24 through 25 degrees C, inclusive                       | Steadily lit                                  |
+| Alert             | At or below 0, or above 25 degrees C                     | Steadily lit                                  |
 | Sensor read error | An exception occurs while checking or reading the sensor | Two short flashes, followed by the loop pause |
 
 These are the prototype's configured thresholds, not a determination that
@@ -104,8 +104,8 @@ python scd41_basic_readings.py
 ```
 
 This is the earlier CSV test, not the main SQLite logger. It writes
-`temperature_readings.csv` in the terminal's current directory and
-**overwrites that CSV when started**. Preserve any required test evidence
+`temperature_readings.csv` in the terminal's current directory and **overwrites that CSV when started**. Preserve any
+required test evidence
 before running it again.
 
 ## Standalone LED test

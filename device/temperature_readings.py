@@ -1,12 +1,13 @@
-from gpiozero import LED, PWMOutputDevice
-from datetime import datetime, timezone
-import time
+import adafruit_scd4x
 import board
+import time
+from datetime import datetime, timezone
+from gpiozero import LED, PWMOutputDevice
+from threading import Event, Thread
+from uuid import uuid4
+
 from database import Base, engine, SessionLocal
 from models import Reading
-import adafruit_scd4x
-from uuid import uuid4
-from threading import Event, Thread
 
 BOX_ID = "TS-01"
 PROFILE_ID = "e93a4368-e11a-4f27-8b31-d55d61392548"
@@ -54,12 +55,14 @@ def update_led(state):
     else:
         led.on()
 
+
 i2c = board.I2C()
 sensor = adafruit_scd4x.SCD4X(i2c)
 
 sensor.start_periodic_measurement()
 
 Base.metadata.create_all(engine)
+
 
 def sensor_error_flash():
     led.off()
@@ -69,6 +72,7 @@ def sensor_error_flash():
         time.sleep(0.2)
         led.off()
         time.sleep(0.2)
+
 
 def save_reading(temperature, quality):
     observed_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -85,6 +89,7 @@ def save_reading(temperature, quality):
         ))
 
     print(f"Saved: {observed_at} | {temperature} C | Quality: {quality}")
+
 
 try:
 
@@ -108,7 +113,7 @@ try:
         else:
             state = get_temperature_state(temperature)
             update_led(state)
-            
+
             if state == "Alert":
                 buzzer_alert.set()
             else:
