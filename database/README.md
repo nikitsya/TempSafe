@@ -4,6 +4,46 @@ We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates six tables for
 boxes, users, access permissions, temperature profiles, measurements and reviews.
 Choose either setup below.
 
+## Table relationships
+
+The diagram shows primary and foreign keys from `schema.sql`; the sample's `(profile_id, box_id)` foreign key keeps its
+profile tied to the same box.
+
+```mermaid
+erDiagram
+   app_users ||--o{ box_access: has
+   boxes ||--o{ box_access: permits
+   boxes ||--o{ threshold_profiles: has
+   boxes ||--o{ temperature_samples: records
+   threshold_profiles ||--o{ temperature_samples: classifies
+   temperature_samples ||--o| sample_reviews: has
+   app_users ||--o{ sample_reviews: records
+
+   app_users {
+      BIGINT user_id PK
+   }
+   boxes {
+      VARCHAR box_id PK
+   }
+   box_access {
+      BIGINT user_id PK, FK
+      VARCHAR box_id PK, FK
+   }
+   threshold_profiles {
+      CHAR profile_id PK
+      VARCHAR box_id FK
+   }
+   temperature_samples {
+      CHAR sample_id PK
+      VARCHAR box_id FK
+      CHAR profile_id FK
+   }
+   sample_reviews {
+      CHAR sample_id PK, FK
+      BIGINT reviewed_by FK
+   }
+```
+
 ## With Docker Compose
 
 1. Start a Docker environment with Compose support. Docker Desktop is one option.
