@@ -59,11 +59,11 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS. The dashboar
 
 ### Endpoints and fields available now
 
-| GET endpoint                            | Successful response                                                                                                       |
-|-----------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                      |
-| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                           |
-| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; no `temperature_state`. Default limit 20, allowed 1–100. Empty history: `[]`. |
+| GET endpoint                            | Successful response                                                                                                                    |
+|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                   |
+| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                        |
+| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; no `temperature_state` or `profile`. Default limit 20, allowed 1–100. Empty history: `[]`. |
 
 Use the box-specific endpoints for the dashboard, not `/api/readings`, which mixes boxes and sorts by receipt time.
 
@@ -77,6 +77,9 @@ Use the box-specific endpoints for the dashboard, not `/api/readings`, which mix
 | `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                                            |
 | `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                                          |
 | `temperature_state`                 | string                     | Latest endpoint only: `Normal`, `Warning`, `Alert` or `Unknown`. Recorded temperature classification, not freshness. |
+
+`profile` is an object on the latest response only: `profile_id` is a string; `lower_c`, `warning_c` and `upper_c`
+are decimal strings in Celsius. It matches the reading’s `profile_id`, including for sensor errors.
 
 ### Example responses
 
@@ -93,7 +96,13 @@ Latest valid reading — `200 OK` (synthetic data):
   "received_at": "2026-11-01T12:00:05",
   "temperature_c": "24.50",
   "quality": "valid",
-  "temperature_state": "Warning"
+  "temperature_state": "Warning",
+  "profile": {
+    "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
+    "lower_c": "0.00",
+    "warning_c": "24.00",
+    "upper_c": "25.00"
+  }
 }
 ```
 
@@ -110,7 +119,13 @@ Latest sensor error — `200 OK`; do not replace it with an older valid sample:
   "received_at": "2026-11-01T12:00:35",
   "temperature_c": null,
   "quality": "sensor_error",
-  "temperature_state": "Unknown"
+  "temperature_state": "Unknown",
+  "profile": {
+    "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
+    "lower_c": "0.00",
+    "warning_c": "24.00",
+    "upper_c": "25.00"
+  }
 }
 ```
 
@@ -139,9 +154,8 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 
 ### Profile limits and remaining integration
 
-Planned addition to the latest response: `profile` containing `profile_id`, `lower_c`, `warning_c` and `upper_c`, with
-limits as decimal strings from the sample's recorded profile. This field is **not implemented**; do not invent a profile
-endpoint or substitute the box's newest profile. Until available, show limits as unavailable for live API data.
+The latest response includes `profile` from the sample's recorded profile, not the box's newest profile.
+Use these limits for display; no separate profile request is needed.
 The seeded demo limits are 0/24/25°C; the frontend fixture's 15°C lower limit is outdated.
 
 The frontend adapter must map `temperature_c` to `temperatureC`, format `observed_at` for display and derive reading
@@ -151,7 +165,7 @@ observations
 as `no_data`; `Unknown` must never become `normal`. Apply freshness separately. The current `apiGet()` helper must also
 preserve the error body so the two `404` cases can be distinguished.
 
-Still pending: profile limits in responses, explicit UTC suffixes, freshness/contact handling, authentication and box
+Still pending: explicit UTC suffixes, freshness/contact handling, authentication and box
 access checks, phone-notification status, history date filters and frontend API integration. Sample fields such as
 `pushAlerts`, `lastValidC` and profile `name` are not supplied by the current API. A silence or acknowledgement action
 is not part of these read endpoints.

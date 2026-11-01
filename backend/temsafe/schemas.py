@@ -62,7 +62,19 @@ class ReadingResponse(BaseModel):
     quality: Literal["valid", "sensor_error"]
 
 
+class ReadingProfileResponse(BaseModel):
+    """Return the limits recorded for a sample."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    profile_id: str
+    lower_c: Decimal
+    warning_c: Decimal
+    upper_c: Decimal
+
+
 class LatestReadingResponse(ReadingResponse):
-    """Include the calculated temperature state alongside all reading fields."""
+    """Include the recorded profile and calculated temperature state."""
 
     temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
+    profile: ReadingProfileResponse

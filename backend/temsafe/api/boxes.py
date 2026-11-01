@@ -73,6 +73,7 @@ def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
     return LatestReadingResponse(
         **ReadingResponse.model_validate(reading).model_dump(),
         temperature_state=temperature_state,
+        profile=profile,
     )
 
 
