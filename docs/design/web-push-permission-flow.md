@@ -48,7 +48,7 @@ sequenceDiagram
 | Unsupported   | Info banner explaining that this browser cannot show phone alerts |
 | iOS / iPadOS  | Instruction to add TempSafe to the home screen first              |
 
-## Server rules (from design document Section 6)
+## Server rules
 
 - A notification is created only when the current state changes to Warning or Alert. Unchanged repeated states are
   suppressed.
