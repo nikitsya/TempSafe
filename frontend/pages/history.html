@@ -16,13 +16,20 @@
     </nav>
 </header>
 <main class="wide">
-    <h1 class="page-title">Temperature history</h1>
-    <section class="card" id="content">
-        <p class="muted">This page will load data from the backend API.</p>
-    </section>
+    <div class="top">
+        <h1 class="page-title">Temperature history</h1>
+        <span class="muted">Prototype box TS-01</span>
+    </div>
+
+    <p class="muted">Times are original observation times. Readings are listed newest first, in the order
+        they were measured.</p>
+
+    <section aria-busy="true" class="card" id="history"></section>
+
     <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
 </main>
 <script src="../js/api.js"></script>
 <script src="../js/main.js"></script>
+<script src="../js/history.js"></script>
 </body>
 </html>

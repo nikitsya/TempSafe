@@ -309,3 +309,85 @@ input {
         max-width: 760px;
     }
 }
+
+/* History table */
+.banner.error {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: var(--red);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.table-wrap:focus-visible {
+    outline: 3px solid var(--navy);
+    outline-offset: 2px;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.history-table caption {
+    text-align: left;
+    font-weight: 600;
+    padding-bottom: 8px;
+}
+
+.history-table th {
+    text-align: left;
+    font-size: 13px;
+    color: var(--muted);
+    padding: 9px 10px;
+    border-bottom: 2px solid var(--line);
+}
+
+.history-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+.cell-warning {
+    color: var(--amber);
+    font-weight: 600;
+}
+
+.tag {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    white-space: nowrap;
+}
+
+.tag.normal {
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+.tag.alert {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.tag.unknown {
+    background: var(--grey-bg);
+    color: var(--grey);
+}
+
+@media (max-width: 480px) {
+    .history-table {
+        font-size: 14px;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 8px 6px;
+    }
+}
