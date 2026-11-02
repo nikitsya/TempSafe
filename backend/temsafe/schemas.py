@@ -88,3 +88,4 @@ class LatestReadingResponse(ReadingResponse):
 
     temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
     profile: ReadingProfileResponse
+    freshness: Literal["fresh", "stale", "unknown"]

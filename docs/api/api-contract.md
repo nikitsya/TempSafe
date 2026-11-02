@@ -59,11 +59,11 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS. The dashboar
 
 ### Endpoints and fields available now
 
-| GET endpoint                            | Successful response                                                                                                                    |
-|-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                   |
-| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                        |
-| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; no `temperature_state` or `profile`. Default limit 20, allowed 1–100. Empty history: `[]`. |
+| GET endpoint                            | Successful response                                                                                                                                 |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                                |
+| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                     |
+| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; no `temperature_state`, `profile` or `freshness`. Default limit 20, allowed 1–100. Empty history: `[]`. |
 
 Use the box-specific endpoints for the dashboard, not `/api/readings`, which mixes boxes and sorts by receipt time.
 
@@ -77,13 +77,14 @@ Use the box-specific endpoints for the dashboard, not `/api/readings`, which mix
 | `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                                            |
 | `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                                          |
 | `temperature_state`                 | string                     | Latest endpoint only: `Normal`, `Warning`, `Alert` or `Unknown`. Recorded temperature classification, not freshness. |
+| `freshness`                         | string                     | Latest endpoint only: `fresh`, `stale` or `unknown`, calculated from observation time when requested.                |
 
 `profile` is an object on the latest response only: `profile_id` is a string; `lower_c`, `warning_c` and `upper_c`
 are decimal strings in Celsius. It matches the reading’s `profile_id`, including for sensor errors.
 
 ### Example responses
 
-Latest valid reading — `200 OK` (synthetic data):
+Latest valid reading — `200 OK` (synthetic response at 12:00:05 UTC on 1 November 2026):
 
 ```json
 {
@@ -97,6 +98,7 @@ Latest valid reading — `200 OK` (synthetic data):
   "temperature_c": "24.50",
   "quality": "valid",
   "temperature_state": "Warning",
+  "freshness": "fresh",
   "profile": {
     "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
     "lower_c": "0.00",
@@ -106,7 +108,7 @@ Latest valid reading — `200 OK` (synthetic data):
 }
 ```
 
-Latest sensor error — `200 OK`; do not replace it with an older valid sample:
+Latest sensor error — `200 OK` (response at 12:00:35 UTC on the same day); do not replace it with an older valid sample:
 
 ```json
 {
@@ -120,6 +122,7 @@ Latest sensor error — `200 OK`; do not replace it with an older valid sample:
   "temperature_c": null,
   "quality": "sensor_error",
   "temperature_state": "Unknown",
+  "freshness": "fresh",
   "profile": {
     "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
     "lower_c": "0.00",
@@ -141,8 +144,10 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 
 - Responses use ISO 8601 UTC timestamps ending in `Z`, including `last_seen_at`. Fractional seconds may be present.
   Parse the timezone directly and format local time for display; missing timestamps remain `null`.
-- Intended display rule: an observation older than 90 seconds is stale. A missing/unreliable or future observation time
-  must not be labelled live. Preserve the recorded temperature state as historical information.
+- `freshness` uses server UTC time minus `observed_at`: 0–90 seconds inclusive is `fresh`; older is `stale`.
+  Missing or unreliable observation time, or time in the future, produces `unknown`. Receipt time is not used.
+  This describes sample age, not sensor health: a recent sensor error can be `fresh` with `temperature_state: Unknown`.
+  It is evaluated on each request; the frontend must refresh or age the display rather than keep a cached result live.
 - Intended contact rule: more than 180 seconds without authenticated contact means not reporting. Heartbeat updates
   are not implemented; `last_seen_at: null` means contact is unknown, not proof that the device is offline.
 - Sensor errors remain explicit even when stale or not reporting. Receipt of an old buffered sample does not make it
@@ -161,10 +166,11 @@ The frontend adapter must map `temperature_c` to `temperatureC`, format `observe
 age.
 Map valid temperature states to lower-case UI names; map `quality: sensor_error` to `sensor_error`. Handle no
 observations
-as `no_data`; `Unknown` must never become `normal`. Apply freshness separately. The current `apiGet()` helper must also
+as `no_data`; `Unknown` must never become `normal`. Apply `freshness` separately; stale or unknown-age readings must not
+appear live. The current `apiGet()` helper must also
 preserve the error body so the two `404` cases can be distinguished.
 
-Still pending: freshness/contact handling, authentication and box
+Still pending: frontend freshness display, device-contact handling, authentication and box
 access checks, phone-notification status, history date filters and frontend API integration. Sample fields such as
 `pushAlerts`, `lastValidC` and profile `name` are not supplied by the current API. A silence or acknowledgement action
 is not part of these read endpoints.
