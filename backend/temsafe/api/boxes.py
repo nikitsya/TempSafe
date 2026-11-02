@@ -1,5 +1,6 @@
 """Routes for retrieving box information."""
 
+from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -7,6 +8,7 @@ from typing import Annotated
 
 from temsafe import models
 from temsafe.database import get_db
+from temsafe.freshness import classify_freshness
 from temsafe.schemas import BoxResponse, LatestReadingResponse, ReadingResponse
 from temsafe.temperature import classify_temperature
 
@@ -70,10 +72,12 @@ def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
     temperature_state = classify_temperature(reading.temperature_c, reading.quality, profile)
 
     # Build the API response without adding a calculated field to the database model.
+    sample = ReadingResponse.model_validate(reading)
     return LatestReadingResponse(
-        **ReadingResponse.model_validate(reading).model_dump(),
+        **sample.model_dump(),
         temperature_state=temperature_state,
         profile=profile,
+        freshness=classify_freshness(sample.observed_at, sample.clock_reliable, datetime.now(UTC)),
     )
 
 

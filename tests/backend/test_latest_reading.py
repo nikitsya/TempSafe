@@ -1,9 +1,10 @@
 """Check latest readings and box history against MySQL using temporary records."""
 
 import pytest
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from fastapi.testclient import TestClient
+from unittest.mock import Mock
 from uuid import uuid4
 
 from temsafe.database import SessionLocal, get_db
@@ -12,8 +13,11 @@ from temsafe.models import Box, TemperatureSample, ThresholdProfile
 
 
 @pytest.fixture
-def latest_reading_data():
+def latest_reading_data(monkeypatch):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
+    clock = Mock()
+    clock.now.return_value = datetime(2026, 1, 1, 12, 10, tzinfo=UTC)
+    monkeypatch.setattr("temsafe.api.boxes.datetime", clock)
     with SessionLocal() as db:
         box_ids = [f"pytest-{uuid4()}", f"pytest-{uuid4()}"]
         profile_ids = [str(uuid4()), str(uuid4())]
@@ -130,6 +134,7 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         "temperature_c": temperature,
         "quality": "valid",
         "temperature_state": expected,
+        "freshness": "stale",
         "profile": {
             "profile_id": profile_ids[0],
             "lower_c": "2.00",
@@ -224,3 +229,36 @@ def test_box_history_rejects_invalid_limit(latest_reading_data, limit):
     response = client.get(f"/api/boxes/{box_ids[0]}/readings?limit={limit}")
 
     assert response.status_code == 422
+
+
+@pytest.mark.parametrize("quality", ["valid", "sensor_error"])
+@pytest.mark.parametrize("age_seconds, expected", [
+    (0, "fresh"),
+    (89.999999, "fresh"),
+    (90, "fresh"),
+    (90.000001, "stale"),
+    (300, "stale"),
+    (-1, "unknown"),
+    (None, "unknown"),
+])
+def test_latest_freshness_uses_observation_time(latest_reading_data, quality, age_seconds, expected):
+    """Fresh uploads cannot refresh old observations or hide sensor errors."""
+    client, db, box_ids, profile_ids = latest_reading_data
+    now = datetime(2026, 1, 1, 12, 10)
+    observed_at = None if age_seconds is None else now - timedelta(seconds=age_seconds)
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=box_ids[0], profile_id=profile_ids[0],
+        sequence_no=1, observed_at=observed_at, clock_reliable=observed_at is not None,
+        received_at=now, quality=quality,
+        temperature_c=Decimal("5.25") if quality == "valid" else None,
+    ))
+    db.flush()
+
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+
+    assert response.status_code == 200
+    reading = response.json()
+    assert reading["freshness"] == expected
+    assert reading["quality"] == quality
+    assert reading["temperature_state"] == ("Normal" if quality == "valid" else "Unknown")
+    assert reading["received_at"] == "2026-01-01T12:10:00Z"
