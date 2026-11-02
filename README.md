@@ -18,6 +18,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 
 ## Current progress
 
+- **Deployment:** the application is hosted at [tempsafe.app](https://tempsafe.app)
+  on AWS EC2, with Caddy providing HTTPS and a reverse proxy to FastAPI.
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
@@ -32,12 +34,17 @@ remain planned.
 See the [functional requirements](docs/requirements/functional-requirements.md) and
 [MoSCoW priorities](docs/requirements/moscow-prioritisation.md) for the target system.
 
-## Try the UI prototype
+## Try the hosted application
 
-[Open the clickable prototype](https://nikitsya.github.io/Smart-Box/prototype/ui/login.html).
-Test account: `paramedic` / `demo`. This prototype uses synthetic data and does not connect to the backend.
+[Open TempSafe](https://tempsafe.app) or go directly to the
+[dashboard](https://tempsafe.app/pages/dashboard.html).
 
-See the [prototype guide](prototype/ui/README.md) for its pages and browser tests.
+This is the application frontend served by the backend. The sign-in form is not connected to authentication,
+the dashboard uses sample data and the history page is a placeholder. "API connected" confirms that the
+backend health endpoint responds; it does not confirm a database connection or live sensor readings.
+Use test data only while authentication remains unimplemented.
+
+See the [deployment notes](docs/deployment.md) for the hosting setup and service checks.
 
 ## Backend development
 
@@ -57,14 +64,15 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 
 ## Code and development guides
 
-| Area                | Location / guide                             |
-|---------------------|----------------------------------------------|
-| Device scripts      | [device/](device/)                           |
-| Backend and API     | [Backend guide](backend/temsafe/README.md)   |
-| Database            | [Database setup](database/README.md)         |
-| Web interface       | [Frontend guide](frontend/README.md)         |
-| Clickable prototype | [Prototype guide](prototype/ui/README.md)    |
-| Backend tests       | [Test instructions](tests/backend/README.md) |
+| Area                | Location / guide                                 |
+|---------------------|--------------------------------------------------|
+| Device scripts      | [device/](device/)                               |
+| Backend and API     | [Backend guide](backend/temsafe/README.md)       |
+| Database            | [Database setup](database/README.md)             |
+| Web interface       | [Frontend guide](frontend/README.md)             |
+| Clickable prototype | [Prototype guide](prototype/ui/README.md)        |
+| Backend tests       | [Test instructions](tests/backend/README.md)     |
+| Deployment          | [Hosting and service checks](docs/deployment.md) |
 
 ## Project documentation
 

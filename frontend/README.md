@@ -7,6 +7,10 @@ The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this 
 application frontend under development, served by the FastAPI backend in `backend/temsafe`.
 Authentication is not implemented; the dashboard uses sample data and history is a placeholder.
 
+The hosted application is available at [tempsafe.app](https://tempsafe.app).
+Use the [dashboard link](https://tempsafe.app/pages/dashboard.html) to view the application;
+the sign-in form does not authenticate users. See the [deployment notes](../docs/deployment.md).
+
 ## Structure
 
 | Path                   | Purpose                                                         |
