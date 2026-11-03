@@ -24,7 +24,7 @@ const STATUS_VIEW = {
     stale: {
         cls: 'unknown',
         icon: '⏱',
-        title: 'DATA STALE',
+        title: 'NO NEW DATA',
         role: 'status'
     },
     sensor_error: {
@@ -36,7 +36,7 @@ const STATUS_VIEW = {
     not_reporting: {
         cls: 'unknown',
         icon: '⦸',
-        title: 'NOT REPORTING',
+        title: 'NO CONNECTION',
         role: 'alert'
     },
     unknown: {
@@ -47,7 +47,7 @@ const STATUS_VIEW = {
     }
 };
 
-// Convert API date to local time.
+// Convert API date to local date and time (used in Details).
 function formatTime(date) {
     if (!date) {
         return 'Unknown';
@@ -62,36 +62,51 @@ function formatTime(date) {
     return time.toLocaleString();
 }
 
-// Explain the current temperature status.
+// Convert API date to a short clock time (used on the main card).
+function formatClock(date) {
+    if (!date) {
+        return null;
+    }
+
+    const time = new Date(date);
+
+    if (isNaN(time.getTime())) {
+        return null;
+    }
+
+    return time.toLocaleTimeString();
+}
+
+// Short explanation of the status. Shown in Details, not on the main card.
 function describe(reading, profile) {
     switch (reading.status) {
         case 'normal':
-            return `Within configured limits (${profile.lowerC}–${profile.warningC}°C)`;
+            return 'Within limits';
 
         case 'warning':
-            return `At or above warning threshold (${profile.warningC}°C)`;
+            return `Close to the upper limit (${profile.upperC}°C)`;
 
         case 'alert':
             return reading.temperatureC < profile.lowerC
-                ? `Below lower limit (${profile.lowerC}°C)`
-                : `Above upper limit (${profile.upperC}°C)`;
+                ? `Below the lower limit (${profile.lowerC}°C)`
+                : `Above the upper limit (${profile.upperC}°C)`;
 
         case 'stale':
-            return 'Current conditions unknown. The last reading is old.';
+            return 'No new reading for over 90 s';
 
         case 'sensor_error':
-            return 'The sensor could not measure the temperature.';
+            return 'The sensor could not measure';
 
         case 'not_reporting':
-            return 'The device is not reporting new readings.';
+            return 'The box is not sending data';
 
         default:
-            return 'Current temperature status is unknown.';
+            return 'Measurement time is not reliable';
     }
 }
 
-// Create the main temperature card.
-function statusCard(reading, profile) {
+// Main card: only the status, the temperature and the time.
+function statusCard(reading) {
     const view = STATUS_VIEW[reading.status] || STATUS_VIEW.unknown;
 
     let body = '';
@@ -107,36 +122,14 @@ function statusCard(reading, profile) {
                 ${reading.temperatureC.toFixed(1)}<small>°C</small>
             </div>
             <div class="meta">
-                Observed ${reading.observedAt}
-                · ${reading.ageSeconds} s ago
-                · <strong>Live</strong>
+                ${reading.observedClock} · ${reading.ageSeconds} s ago
             </div>
         `;
     }
 
-    // Show old readings as historical data.
-    else if (reading.status === 'stale') {
-        body = `
-            <div class="meta">
-                ${reading.temperatureC !== null
-                    ? `Last recorded temperature: ${reading.temperatureC.toFixed(1)}°C (historical)`
-                    : 'Temperature unavailable'}
-            </div>
-            <div class="meta">
-                Observed ${reading.observedAt}
-            </div>
-        `;
-    }
-
-    // Handle unknown time, missing temperature and sensor errors.
+    // No current temperature: never show an old number here.
     else {
-        body = `
-            <div class="meta">
-                ${reading.temperatureC !== null
-                    ? `Recorded temperature: ${reading.temperatureC.toFixed(1)}°C (not confirmed live)`
-                    : 'Temperature unavailable'}
-            </div>
-        `;
+        body = `<p class="status-text">Temperature unknown</p>`;
     }
 
     return `
@@ -145,14 +138,7 @@ function statusCard(reading, profile) {
                 <span class="status-icon" aria-hidden="true">
                     ${view.icon}
                 </span>
-
-                <div>
-                    <h2 class="status-title">${view.title}</h2>
-
-                    <p class="status-text">
-                        ${describe(reading, profile)}
-                    </p>
-                </div>
+                <h2 class="status-title">${view.title}</h2>
             </div>
 
             ${body}
@@ -160,25 +146,34 @@ function statusCard(reading, profile) {
     `;
 }
 
-// Create the information card.
+// Everything else is behind the "Details" button.
 function detailsCard(reading, profile) {
+    const live = ['normal', 'warning', 'alert'].includes(reading.status) &&
+        reading.ageSeconds !== null;
+
+    const lastReading = !live && reading.temperatureC !== null
+        ? `<dt>Last reading</dt><dd>${reading.temperatureC.toFixed(1)}°C (old)</dd>`
+        : '';
+
     return `
-        <section class="card">
+        <details class="details">
+            <summary>Details</summary>
             <dl class="kv">
-                <dt>Last observation</dt>
+                <dt>Status</dt>
+                <dd>${describe(reading, profile)}</dd>
+
+                ${lastReading}
+
+                <dt>Measured</dt>
                 <dd>${reading.observedAt}</dd>
 
-                <dt>Received by server</dt>
+                <dt>Received</dt>
                 <dd>${reading.receivedAt}</dd>
 
-                <dt>Profile</dt>
-                <dd>
-                    Lower ${profile.lowerC}°C ·
-                    Warning ${profile.warningC}°C ·
-                    Upper ${profile.upperC}°C
-                </dd>
+                <dt>Limits</dt>
+                <dd>${profile.lowerC}–${profile.upperC}°C (warning from ${profile.warningC}°C)</dd>
             </dl>
-        </section>
+        </details>
     `;
 }
 
@@ -188,11 +183,10 @@ function emptyState() {
         <section class="empty" role="status">
             <div class="empty-icon" aria-hidden="true">—</div>
 
-            <h2>No observations yet</h2>
+            <h2>No readings yet</h2>
 
             <p class="muted">
-                This box has not sent any readings.
-                Current conditions are unknown.
+                Check that the box is on and connected.
             </p>
         </section>
     `;
@@ -203,7 +197,7 @@ function renderDashboard(reading, profile) {
     const dashboard = document.getElementById('dashboard');
 
     dashboard.innerHTML =
-        statusCard(reading, profile) +
+        statusCard(reading) +
         detailsCard(reading, profile);
 }
 
@@ -295,6 +289,7 @@ function convertReading(data) {
         status: status,
         temperatureC: temperature,
         observedAt: formatTime(data.observed_at),
+        observedClock: formatClock(data.observed_at),
         receivedAt: formatTime(data.received_at),
         ageSeconds: ageSeconds
     };
@@ -309,7 +304,7 @@ async function loadTemperature() {
     // Show loading message.
     dashboard.innerHTML = `
         <section class="card" role="status">
-            Loading temperature...
+            Loading…
         </section>
     `;
 
@@ -348,10 +343,10 @@ async function loadTemperature() {
     } catch (error) {
         dashboard.innerHTML = `
             <section class="empty" role="alert">
-                <h2>Unable to load temperature</h2>
+                <h2>Can't load temperature</h2>
 
                 <p class="muted">
-                    Please check the connection and try again.
+                    Check your internet and refresh.
                 </p>
             </section>
         `;
