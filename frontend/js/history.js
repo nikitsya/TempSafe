@@ -36,7 +36,7 @@ function observationCell(reading) {
 
     if (!observed) {
         return `<span class="cell-warning">Time unknown</span>
-            <br><small class="muted">Device clock not reliable</small>${receivedText}`;
+            ${receivedText}`;
     }
     return escapeHtml(observed);
 }
@@ -76,7 +76,7 @@ function renderTable(readings) {
     return `
         <div aria-label="Temperature readings table" class="table-wrap" role="region" tabindex="0">
             <table class="history-table">
-                <caption>Latest ${readings.length} readings for box ${HISTORY_BOX_ID}, newest first</caption>
+                <caption>Latest ${readings.length} readings</caption>
                 <thead>
                 <tr>
                     <th scope="col">Observation time</th>
@@ -92,7 +92,7 @@ function renderTable(readings) {
 function showMessage(container, className, title, text) {
     container.innerHTML = `
         <div class="banner ${className}" role="${className === 'error' ? 'alert' : 'status'}">
-            <strong>${escapeHtml(title)}</strong><br>${escapeHtml(text)}
+            <strong>${escapeHtml(title)}</strong>${text ? '<br>' + escapeHtml(text) : ''}
         </div>`;
 }
 
@@ -101,7 +101,7 @@ async function loadHistory() {
     if (!container) return;
 
     container.setAttribute('aria-busy', 'true');
-    showMessage(container, '', 'Loading readings…', 'Please wait.');
+    showMessage(container, '', 'Loading…', '');
 
     try {
         const response = await fetch(
@@ -111,7 +111,7 @@ async function loadHistory() {
 
         if (response.status === 404) {
             showMessage(container, 'error', 'Box not found',
-                'This box is not available. Ask your administrator to check the box setup.');
+                'Ask your administrator to check the box.');
             return;
         }
         if (!response.ok) {
@@ -121,16 +121,16 @@ async function loadHistory() {
         const readings = await response.json();
 
         if (!Array.isArray(readings) || readings.length === 0) {
-            showMessage(container, '', 'No observations found',
-                'This box has not sent any readings yet.');
+            showMessage(container, '', 'No readings yet',
+                'Check that the box is on and connected.');
             return;
         }
 
         container.innerHTML = renderTable(readings);
     } catch (error) {
         console.error('History error:', error);
-        showMessage(container, 'error', 'Unable to load history',
-            'The readings could not be loaded. Check your connection and refresh the page.');
+        showMessage(container, 'error', "Can't load history",
+            'Check your internet and refresh.');
     } finally {
         container.setAttribute('aria-busy', 'false');
     }
