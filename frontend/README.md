@@ -1,8 +1,9 @@
 # TempSafe frontend
 
 The web interface of TempSafe, built with plain HTML, CSS and JavaScript (no build step).
-It follows the revised mock-ups in [`docs/design/ui-design.md`](../docs/design/ui-design.md)
-and the values in [`docs/design/ui-style-guide.md`](../docs/design/ui-style-guide.md).
+The latest layout changes are recorded in
+the [accessibility review](../docs/testing/core-scenario-accessibility-review.md).
+The [UI mock-ups](../docs/design/ui-design.md) describe the wider target design.
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
 application frontend under development, served by the FastAPI backend in `backend/temsafe`.
 Authentication is not implemented. The dashboard and history load readings for prototype box `TS-01`
@@ -38,4 +39,4 @@ python -m uvicorn temsafe.main:app --reload --app-dir backend
 ```
 
 Then open http://127.0.0.1:8000 in a browser. The status line shows "API connected"
-when `GET /api/health` returns `{"status": "ok"}`.
+when `GET /api/health` returns `{"status": "ok"}`; it does not check MySQL or the sensor.

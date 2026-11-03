@@ -25,28 +25,21 @@ See the [wiring record](prototype-wiring.md) for the current connections.
 The tested buzzer circuit also uses two 220 Ω resistors in series. See the
 [buzzer test](../testing/buzzer-alert.md) for the recorded connections and limitations.
 
-## Feedback Logic
+## Feedback logic
 
-- **Normal:** physical LED off; application shows green with a text label and symbol.
-- **Warning:** physical LED on; application shows amber with text and a symbol; send a phone notification when
-  connected.
-- **Alert:** physical LED on; application shows red with text and a symbol; send a phone notification when connected.
-  Sound the buzzer if implemented.
-- **Sensor failure:** distinct LED blinking and an explicit application error, never Normal.
+| Condition           | Single-colour LED                      | Passive buzzer                         | Application status                         |
+|---------------------|----------------------------------------|----------------------------------------|--------------------------------------------|
+| 0°C < T < 24°C      | Off                                    | Off                                    | Normal: text, symbol and green             |
+| 24°C ≤ T ≤ 25°C     | Steadily lit                           | Off                                    | Warning: text, symbol and amber            |
+| T ≤ 0°C or T > 25°C | Steadily lit                           | 500 Hz; one second on, two seconds off | Alert: text, symbol and red                |
+| Sensor read error   | Two short flashes, then the loop pause | Repetition disabled                    | Explicit sensor error; temperature unknown |
 
-For the agreed demo profile, Warning applies from 24°C through 25°C. Alert applies above 25°C
-or at or below the 0°C lower threshold.
+These are demonstration thresholds. An unlit LED does not prove acceptable temperature or working power.
+Manual buzzer silencing is still outstanding. Phone notifications remain planned and require connectivity
+and permission; they are separate from the local hardware feedback.
 
-The LED and buzzer are **output / feedback devices**, not sensors. The SCD-41 remains the main sensor used to collect
-environmental data.
+## Behaviour and scope
 
-## Scope Notes
-
-- **Scope note:** The reed switch/opening sensor and GNSS/GPS module are not included in the current version of the
-  project.
-- **Project focus:** The prototype focuses on temperature monitoring over time, logging, web alerts and phone
-  notifications, and clear local LED feedback, with audible feedback as a Should Have enhancement.
-- **Temperature threshold:** The prototype uses **25°C** as the upper temperature limit for alerting, with an early
-  warning before the limit is exceeded.
-- **User interaction:** The Advanced Paramedic should not need to check the application while the temperature is normal.
-  The system provides feedback automatically when attention is required.
+The LED and buzzer are output devices; the SCD-41 is the sensor. See the
+[device guide](../../device/README.md#main-temperature-logger) for implemented feedback and the
+[project scope](../project/project-scope.md) for included and excluded features.

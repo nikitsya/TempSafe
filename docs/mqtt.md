@@ -4,7 +4,12 @@ The broker has been configured on AWS with TLS and separate device and backend a
 The operator reported successful connectivity, authenticated message delivery in both directions,
 and refusal of device publishing to the acknowledgement topic and another box's topic.
 The ingestion worker is implemented locally; AWS deployment and a real MQTT-to-MySQL test are still pending.
-The Raspberry Pi publisher and application acknowledgement handling are not yet implemented.
+The Raspberry Pi publisher and application acknowledgement handling are not implemented in this repository.
+
+On 3 November 2026, the operator supplied broker configuration and a certificate-verified TLS test:
+`allow_anonymous false`, separate password-file accounts and the topic ACLs below. An anonymous MQTT v5
+connection returned `CONNACK (135): Not authorized`. This confirms anonymous rejection; Raspberry Pi
+connectivity through a hotspot and end-to-end ingestion remain to be verified.
 
 ## Connection and permissions
 
@@ -15,8 +20,8 @@ The Raspberry Pi publisher and application acknowledgement handling are not yet 
 - Device publishes to `tempsafe/boxes/TS-01/readings` and subscribes to `tempsafe/boxes/TS-01/acks`.
 - Backend permissions are the reverse. No wildcard access is required.
 - Use QoS 1 and `retain=false` for readings and acknowledgements.
-- AWS currently permits port 8883 from the operator's public IP. Add the Raspberry Pi network's public
-  IP before testing from the device; do not open unencrypted port 1883.
+- AWS permits TCP 8883 from `0.0.0.0/0` so the Pi can change Wi-Fi networks or use a mobile hotspot.
+  TLS, device credentials and topic ACLs remain mandatory. See [network rules](deployment.md#network-access).
 
 The broker ACL is the identity boundary: the worker cannot see the original publisher's username.
 Only the assigned device account must have write permission for its readings topic.
@@ -24,26 +29,9 @@ The worker additionally checks that the payload's box ID matches that topic.
 
 ## Message contract
 
-The payload uses the same validation as `POST /api/readings`, with a maximum MQTT payload of 4096 bytes:
-
-```json
-{
-  "schema_version": 1,
-  "sample_id": "2e8a8349-8694-47b7-8abe-284adf85738a",
-  "box_id": "TS-01",
-  "sequence_no": 1,
-  "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
-  "observed_at": "2026-11-03T12:00:00Z",
-  "clock_reliable": true,
-  "temperature_c": 23.45,
-  "quality": "valid"
-}
-```
-
-The box and its profile must already exist in MySQL. Use each real sample's UUID and persistent
-sequence number, not the example identifiers. Sequence numbers must not restart after a device reboot.
-For a sensor error, use `quality: "sensor_error"` and `temperature_c: null`.
-For an unreliable clock, use `clock_reliable: false` and `observed_at: null`.
+Publish the [ReadingCreate JSON payload](api/api-contract.md#saving-incoming-readings) to the device's
+readings topic, with a maximum MQTT payload of 4096 bytes. The box and profile must already exist in
+MySQL. Preserve the sample UUID, persistent sequence and observation time on every retry.
 
 After a database commit, or an identical retry of a stored record, the worker publishes:
 
@@ -124,4 +112,4 @@ invalid JSON and quality, retained and oversized payloads, repeated unchanged de
 They use a mock storage boundary and do not replace the MQTT-to-MySQL integration test.
 
 MQTT security does not secure the existing HTTP reading endpoint. API authentication and authorisation
-remain separate required work. The dashboard still uses sample data and history is a placeholder.
+remain separate required work. Current frontend behaviour is described in the [frontend guide](../frontend/README.md).

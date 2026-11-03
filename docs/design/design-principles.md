@@ -86,13 +86,6 @@ for an unchanged state are suppressed. The interface provides no deletion workfl
 
 These are design intentions to validate against the functional requirements, not claims that testing has already passed.
 
-## Summary
-
-TempSafe is designed so that a paramedic can understand the condition of the medicine box quickly in the intended
-working environment, subject to usability testing. Principle 4 (Perceptible Information) is our key principle, supported
-by Principle 3 (Simple and Intuitive
-Use) and Principle 5 (Tolerance for Error).
-
 ## Reference
 
 National Disability Authority – The 7 Principles of Universal

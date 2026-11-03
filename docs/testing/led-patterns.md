@@ -2,15 +2,15 @@
 
 ## 1. Test information
 
-| Item                 | Details                                               |
-|----------------------|-------------------------------------------------------|
-| Test ID              | HW-02                                                 |
-| nitial test date     | 29.10.2026                                            |
-| ntegration test date | 30.10.2026                                            |
-| Tested by            | Hanna Bokariuk                                        |
-| Project              | TempSafe                                              |
-| Related requirement  | FR-06 — Provide a local LED warning                   |
-| Status               | PASS — LED control integrated with temperature states |
+| Item                  | Details                                               |
+|-----------------------|-------------------------------------------------------|
+| Test ID               | HW-02                                                 |
+| Initial test date     | 29.10.2026                                            |
+| Integration test date | 30.10.2026                                            |
+| Tested by             | Hanna Bokariuk                                        |
+| Project               | TempSafe                                              |
+| Related requirement   | FR-06 — Provide a local LED warning                   |
+| Status                | PASS — LED control integrated with temperature states |
 
 ## 2. Objective
 
@@ -37,8 +37,8 @@ The test also verifies the double-flash pattern used to indicate a sensor error.
 | Physical pin 12 — GPIO18 | Connected through a 220 Ω resistor to the LED anode |
 | Physical pin 14 — GND    | Connected to the LED cathode                        |
 
-**Difference from the project wiring diagram:** GPIO18 and a 220 Ω resistor were used instead of GPIO17 and a 1 kΩ
-resistor.
+This test replaced the earlier GPIO17/1 kΩ LED design. The [wiring record](../hardware/prototype-wiring.md)
+was updated on 1 November to match the tested GPIO18/220 Ω assembly.
 
 ## 5. Temperature profile
 
@@ -57,7 +57,7 @@ without a network connection.
 - Python 3.
 - GPIO Zero library.
 - Main script: temperature_readings.py on the Raspberry Pi.
-- Repository copy: [Python LED test script](../../device/temperature_readings.py).
+- Repository copy: [Integrated temperature logger](../../device/temperature_readings.py).
 - Python virtual environment: .venv.
 - Editor: Vim.
 
@@ -134,11 +134,4 @@ The temperature thresholds are currently stored locally in the Raspberry Pi scri
 synchronise the threshold profile from the backend/MySQL database and store a local copy on the Raspberry Pi for offline
 operation.
 
-## 11. Conclusion
-
-The LED was successfully integrated with the SCD-41 temperature readings.
-
-The Raspberry Pi automatically determines the current temperature state and controls the LED locally. Normal, Warning,
-high-temperature Alert and sensor-error behaviour were tested successfully.
-
-The integration test provides evidence that FR-06 is functioning as intended.
+This run provides partial FR-06 evidence; the untested low-temperature and deliberate network-loss cases remain open.

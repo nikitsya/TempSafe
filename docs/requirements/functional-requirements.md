@@ -4,10 +4,8 @@ Priority reasons, Universal Design links and proposed scope decisions are docume
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
 project direction.
 
-TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
-Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
-in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
-A separate native mobile application is likely to follow the web application, subject to a final team decision.
+Platform and release boundaries are defined in the [project scope](../project/project-scope.md).
+These requirements describe the target system; implementation status is tracked in the README.
 
 ## 1. Users and context (UTSE)
 

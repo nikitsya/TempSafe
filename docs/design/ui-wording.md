@@ -1,49 +1,49 @@
 # UI wording guide
 
-The paramedic must understand each message quickly, often under time pressure. Every message follows these rules:
+Use short, plain English. Status needs a word and symbol as well as colour. Describe readings against
+configured limits; do not label medicines “safe” or “unsafe”.
 
-- Say what happened in the heading and what it means for the user in the next line.
-- Never present old or missing data as the current condition.
-- Never use clinical words such as "safe" or "unsafe". The system compares readings with configured limits only.
-- Use plain English, short sentences and no technical codes.
+## Current application
 
-## Status messages
+The main card shows status, temperature and observation time. Explanations and limits sit behind **Details**. Missing or
+unreliable current values show **Temperature unknown**; older recorded values
+may appear in Details. See the [frontend guide](../../frontend/README.md) for implementation limits.
 
-| State           | Heading                   | Supporting text                                                                   |
-|-----------------|---------------------------|-----------------------------------------------------------------------------------|
-| Normal          | NORMAL                    | Above 0°C and below 24°C                                                          |
-| Warning         | WARNING                   | From 24°C through 25°C                                                            |
-| Alert (high)    | ALERT                     | Above configured upper limit (25°C)                                               |
-| Alert (low)     | ALERT                     | At or below configured lower threshold (0°C)                                      |
-| Stale           | DATA STALE                | Current conditions unknown. No new reading for {time} (limit 90 s).               |
-| Sensor failure  | SENSOR ERROR              | Latest reading failed at {time}. Temperature is unknown.                          |
-| No contact      | NOT REPORTING             | No contact from the device for {time}.                                            |
-| Network failure | Unable to refresh         | Check your internet connection. Information below is from {time}.                 |
-| No data         | No observations yet       | This box has not sent any readings. Current conditions are unknown.               |
-| No access       | No assigned box available | Your account is not assigned to a box. Ask your administrator to give you access. |
+| Situation                 | Heading or label       | Supporting text                                                 |
+|---------------------------|------------------------|-----------------------------------------------------------------|
+| Normal                    | NORMAL                 | Within limits (Details)                                         |
+| Warning                   | WARNING                | Close to the upper limit ({upper}°C) (Details)                  |
+| High alert                | ALERT                  | Above the upper limit ({upper}°C) (Details)                     |
+| Stale reading             | NO NEW DATA            | Temperature unknown; No new reading for over 90 s (Details)     |
+| Sensor failure            | SENSOR ERROR           | Temperature unknown; The sensor could not measure (Details)     |
+| Unreliable time           | UNKNOWN                | Temperature unknown; Measurement time is not reliable (Details) |
+| No readings               | No readings yet        | Check that the box is on and connected.                         |
+| Dashboard request failure | Can't load temperature | Check your internet and refresh.                                |
+| History request failure   | Can't load history     | Check your internet and refresh.                                |
+| Unknown history box       | Box not found          | Ask your administrator to check the box.                        |
+| Loading                   | Loading…               | No extra explanation needed                                     |
+| Missing history timestamp | Time unknown           | Show receipt time separately when available                     |
 
-## Sign-in messages
+The low-alert explanation should be **At or below the lower limit ({lower}°C)** to match the API's
+inclusive lower boundary. The current dashboard wording at equality remains a known defect.
 
-| Situation                  | Message                                                                        |
-|----------------------------|--------------------------------------------------------------------------------|
-| Wrong username or password | Sign-in failed. The email/username or password is incorrect. Please try again. |
-| Empty field                | Enter your email or username. / Enter your password.                           |
-| Session expired            | Your session has ended. Please sign in again.                                  |
+Sign-in currently checks empty fields and explains that authentication is not available. The Sign out
+link only returns to the sign-in page.
 
-## History messages
+## Planned features
 
-| Situation     | Message                                     |
-|---------------|---------------------------------------------|
-| Empty range   | No observations found for this period.      |
-| From after To | The start time must be before the end time. |
-| Gap in data   | No observations available                   |
+These messages are design targets, not working authentication, contact detection or notification features:
 
-## Phone notifications (Web Push)
+| Situation             | Proposed wording                                                      |
+|-----------------------|-----------------------------------------------------------------------|
+| Device contact lost   | NO CONNECTION — The box is not sending data.                          |
+| No access             | No assigned box available. Ask your administrator for access.         |
+| Invalid credentials   | Sign-in failed. The email/username or password is incorrect.          |
+| Session expired       | Your session has ended. Please sign in again.                         |
+| Invalid history range | The start time must be before the end time.                           |
+| Empty history range   | No observations found for this period.                                |
+| Phone warning         | TempSafe: Box TS-01 WARNING — 24.6°C at 14:17. Open the app to check. |
+| Phone alert           | TempSafe: Box TS-01 ALERT — above upper limit, 25.9°C at 14:31.       |
 
-| Event   | Notification text                                                     |
-|---------|-----------------------------------------------------------------------|
-| Warning | TempSafe: Box TS-01 WARNING – 24.6°C at 14:17. Open the app to check. |
-| Alert   | TempSafe: Box TS-01 ALERT – above upper limit, 25.9°C at 14:31.       |
-
-Loss of contact is shown on the dashboard; a phone notification for it is not part of FR-14.
-Notification text contains no account details. Tapping it opens the signed-in dashboard.
+Phone notifications contain no account details and should open the authorised dashboard.
+See the [planned Web Push flow](web-push-permission-flow.md).

@@ -1,7 +1,5 @@
 # Usability test script (end users)
 
-Author: Maryna Hordiienko
-
 `initial-test-plan.md` lists UX-03 with the precondition "Task script ready". This file is that task script: the
 step-by-step guide for the end-user tests UX-01, UX-03 and UX-05. Results are copied into the Execution record of
 `initial-test-plan.md`. Only synthetic data is used.
@@ -10,9 +8,11 @@ step-by-step guide for the end-user tests UX-01, UX-03 and UX-05. Results are co
 
 The tests use the clickable UI prototype, because it can show every status screen and the history page on request:
 
-- Prototype: open `prototype/ui/login.html` in a browser (no server needed; GitHub Pages is not enabled)
+- Prototype: open `prototype/ui/login.html` locally or use the link in
+  the [prototype guide](../../prototype/ui/README.md).
 - Test account: `paramedic` / `demo`
-- Box TS-01, profile Demo v1: Lower 15°C · Warning 24°C · Upper 25°C (synthetic data)
+- Box TS-01, legacy Demo v1: Lower 15°C · Warning 24°C · Upper 25°C (synthetic data).
+  This differs from the application's 0/24/25°C profile; these tasks apply only to the HTML prototype.
 
 The facilitator switches the dashboard state by opening `dashboard.html?state=...` before a task. The participant does
 not use the "Prototype states" links. These links and the "synthetic data" note on the history page label the
@@ -76,7 +76,7 @@ earlier excursion above 25°C has ended.
 1. What was the easiest part? What was the hardest part?
 2. Was any message confusing?
 3. Was it clear what the condition is now and what happened earlier?
-4. Rate from 1 (very hard) to 5 (very easy): "It was easy to know if the box is OK."
+4. Rate from 1 (very hard) to 5 (very easy): "It was easy to understand the box status."
 
 ## Success criteria
 

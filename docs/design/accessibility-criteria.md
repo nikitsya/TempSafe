@@ -1,14 +1,15 @@
 # Accessibility acceptance criteria
 
 These criteria turn Principle 4 (Perceptible Information) from [design-principles.md](design-principles.md) and WCAG 2.2
-level AA into checks for each screen. A screen is accepted only when all its criteria pass. BT IDs refer to the
+level AA into checks for each screen. These are project acceptance targets; completed checks and limitations are
+recorded in test reports. BT IDs refer to the
 automated browser test plan (`docs/testing/browser-test-plan.md`); UX IDs refer to the manual tests in
 `docs/testing/initial-test-plan.md`.
 
 | ID    | Criterion                                                                       | How it is checked                                                          | Test         |
 |-------|---------------------------------------------------------------------------------|----------------------------------------------------------------------------|--------------|
 | AC-01 | Every status uses text and a symbol as well as colour.                          | Inspect each state in greyscale.                                           | BT-05, UX-01 |
-| AC-02 | Text contrast is at least 4.5:1; large text and icons at least 3:1.             | Contrast checker on each colour pair.                                      | UX-02        |
+| AC-02 | Text contrast is at least 4.5:1; large text and meaningful icons at least 3:1.  | Contrast checker on each colour pair.                                      | UX-02        |
 | AC-03 | All features work with the keyboard only (Tab, Shift+Tab, Enter, Space).        | Complete sign-in and history filter without a mouse.                       | BT-08, UX-04 |
 | AC-04 | The focused element always has a visible outline.                               | Tab through every screen.                                                  | BT-08, UX-04 |
 | AC-05 | Every form field has a visible label linked to the input.                       | Check `label for` / `id` pairs.                                            | BT-01        |

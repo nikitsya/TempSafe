@@ -27,14 +27,15 @@ python -m pytest tests/backend/test_save_reading.py -v
 
 ## Test files
 
-| File                     | Coverage                                                               |
-|--------------------------|------------------------------------------------------------------------|
-| `test_database.py`       | Database connection, stored reading retrieval and missing readings.    |
-| `test_boxes.py`          | Box responses and unknown boxes.                                       |
-| `test_readings.py`       | Reading lists and limit validation.                                    |
-| `test_latest_reading.py` | Latest readings, recorded profiles, box history and measurement order. |
-| `test_save_reading.py`   | Input validation, storage, retries, conflicts and POST responses.      |
-| `test_temperature.py`    | Temperature thresholds and sensor errors.                              |
+| File                     | Coverage                                                                           |
+|--------------------------|------------------------------------------------------------------------------------|
+| `test_database.py`       | Database connection, stored reading retrieval and missing readings.                |
+| `test_boxes.py`          | Box responses and unknown boxes.                                                   |
+| `test_readings.py`       | Reading lists and limit validation.                                                |
+| `test_latest_reading.py` | Latest readings, recorded profiles, UTC/freshness, box history and sequence order. |
+| `test_save_reading.py`   | Input validation, storage, retries, conflicts and POST responses.                  |
+| `test_mqtt_worker.py`    | MQTT validation, topic checks and acknowledgement after storage (mock storage).    |
+| `test_temperature.py`    | Temperature thresholds and sensor errors.                                          |
 
 A successful run has no failures or errors. If a test fails, inspect the error and
 check the database connection, table setup and selected Python environment.

@@ -20,11 +20,24 @@ TempSafe was deployed on 2 November 2026 at
 The frontend and API share the same domain. Closing an SSH session or a local SSH tunnel does not stop
 the services. The EC2 instance must remain running for the site to be available.
 
+## Network access
+
+The saved EC2 inbound rules supplied on 3 November 2026 allow:
+
+| Port           | Source                                 | Purpose                                                   |
+|----------------|----------------------------------------|-----------------------------------------------------------|
+| TCP 80 and 443 | `0.0.0.0/0`                            | HTTP and HTTPS for the website                            |
+| TCP 8883       | `0.0.0.0/0`                            | Authenticated MQTT over TLS from changing device networks |
+| TCP 22         | Operator's public IPv4 address (`/32`) | SSH administration                                        |
+
+No inbound rules expose MQTT port 1883 or MySQL ports 3306/3307. The supplied instance view shows no
+broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions are documented in the
+[MQTT guide](mqtt.md); AWS network rules do not replace those controls.
+
 ## Current limitations
 
-The current repository frontend loads dashboard and history readings through the API on page refresh.
-The sign-in form does not authenticate users. Automatic refresh, server-based
-frontend freshness handling and device-to-database deployment remain follow-up work.
+See the [frontend guide](../frontend/README.md) for application limitations and the
+[MQTT guide](mqtt.md) for worker deployment and device integration status.
 
 Caddy Basic Authentication was used during initial setup. It is a separate server access control,
 not application authentication. If it is removed, the API is publicly
