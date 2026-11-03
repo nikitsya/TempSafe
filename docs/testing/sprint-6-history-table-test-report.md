@@ -27,8 +27,8 @@ The API returns readings in descending `sequence_no` order. The page keeps this 
 
 | Case                                        | Displayed                                                         |
 |---------------------------------------------|-------------------------------------------------------------------|
-| Valid reading                               | Temperature with one decimal place, e.g. `24.5°C`, and `✓ Valid`  |
-| Sensor error                                | `— Unknown` and `⚠ Sensor error` (never 0°C)                      |
+| Valid reading                               | Temperature with one decimal place, e.g. `24.5°C`, and `✓ Valid` |
+| Sensor error                                | `— Unknown` and `⚠ Sensor error` (never 0°C)                     |
 | Missing temperature                         | `— Missing`                                                       |
 | `observed_at` is null or clock not reliable | `Time unknown`, `Device clock not reliable` and the received time |
 | Loading                                     | `Loading readings…`                                               |
@@ -50,10 +50,10 @@ The backend was started locally with MySQL in Docker. The page
 `http://127.0.0.1:8000/pages/history.html` was compared with the raw API response from
 `http://127.0.0.1:8000/api/boxes/TS-01/readings?limit=20`.
 
-| `sequence_no` | API response                                                                                         | Table row                                                           | Match |
-|---------------|------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|-------|
-| 2             | `quality: sensor_error`, `temperature_c: null`, `observed_at: null`, `received_at: 21:37:24Z`        | Time unknown · Received 2 Nov 2026, 21:37:24 · — Unknown · Sensor error | Yes   |
-| 1             | `quality: valid`, `temperature_c: "24.50"`, `observed_at: null`, `received_at: 20:57:07Z`            | Time unknown · Received 2 Nov 2026, 20:57:07 · 24.5°C · Valid           | Yes   |
+| `sequence_no` | API response                                                                                  | Table row                                                               | Match |
+|---------------|-----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|-------|
+| 2             | `quality: sensor_error`, `temperature_c: null`, `observed_at: null`, `received_at: 21:37:24Z` | Time unknown · Received 2 Nov 2026, 21:37:24 · — Unknown · Sensor error | Yes   |
+| 1             | `quality: valid`, `temperature_c: "24.50"`, `observed_at: null`, `received_at: 20:57:07Z`     | Time unknown · Received 2 Nov 2026, 20:57:07 · 24.5°C · Valid           | Yes   |
 
 The rows appear in the same order as the API response (newest `sequence_no` first). The sensor error is not shown
 as 0°C, and neither reading is given an observation time because the device clock was not reliable.
@@ -72,11 +72,11 @@ the screen without horizontal page scrolling, and no uncaught JavaScript errors 
 
 ## 4. Definition of Done Review
 
-| Requirement                                                                              | Status    |
-|------------------------------------------------------------------------------------------|-----------|
-| The table loads readings for the selected prototype box from the API                    | Completed |
-| Each row displays observation time, temperature and quality in the agreed order          | Completed |
-| Missing values and sensor errors are clearly labelled                                    | Completed |
-| Loading, empty results and request failures are handled                                  | Completed |
-| The table uses semantic headers and remains readable on phone and desktop layouts        | Completed |
-| Displayed values have been checked against an API response                               | Completed |
+| Requirement                                                                       | Status    |
+|-----------------------------------------------------------------------------------|-----------|
+| The table loads readings for the selected prototype box from the API              | Completed |
+| Each row displays observation time, temperature and quality in the agreed order   | Completed |
+| Missing values and sensor errors are clearly labelled                             | Completed |
+| Loading, empty results and request failures are handled                           | Completed |
+| The table uses semantic headers and remains readable on phone and desktop layouts | Completed |
+| Displayed values have been checked against an API response                        | Completed |

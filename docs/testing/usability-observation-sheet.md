@@ -9,8 +9,8 @@ summary into the Execution record in `initial-test-plan.md` (Test IDs UX-01, UX-
 **Participant type:** ☐ Paramedic ☐ Proxy user (student)
 **Consent given:** ☐ Yes (consent wording read aloud; notes only, no recording, no personal data stored)
 
-**Completed:** Y = without help · H = with help · N = failed or gave up
-**Assistance:** 0 = none · 1 = instruction repeated · 2 = hint given · 3 = answer shown
+**Completed:** Y = without help · H = with help · N = failed or gave up **Assistance:** 0 = none · 1 = instruction
+repeated · 2 = hint given · 3 = answer shown
 
 | Task                         | Completed (Y / H / N) | Assistance (0–3) | Time (s) | Errors / difficulties | Notes / quotes |
 |------------------------------|-----------------------|------------------|----------|-----------------------|----------------|

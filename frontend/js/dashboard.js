@@ -1,4 +1,3 @@
-
 // Dashboard for TEMSAFE.
 // Get temperature data from the backend API.
 

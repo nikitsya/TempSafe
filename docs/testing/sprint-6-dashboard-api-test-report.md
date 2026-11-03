@@ -1,21 +1,22 @@
-
 # Sprint 6 — Dashboard API Integration and Testing Report
 
 **Project:** TempSafe (Smart-Box)  
 **Date:** 2 November 2026  
 **Backlog Item:** #71049 — Connect the dashboard to the API  
 **Branch:** `feature/sprint-6-frontend`  
-**Area:** Frontend / Backend API Integration  
+**Area:** Frontend / Backend API Integration
 
 ---
 
 ## 1. Objective
 
-The objective of this Sprint 6 task was to replace the sample temperature readings on the main dashboard with data retrieved from the FastAPI backend.
+The objective of this Sprint 6 task was to replace the sample temperature readings on the main dashboard with data
+retrieved from the FastAPI backend.
 
 The dashboard should display the temperature, observation time, temperature profile limits and current status.
 
-It must also handle missing readings, unreliable timestamps, sensor errors, stale data and API failures without displaying misleading information.
+It must also handle missing readings, unreliable timestamps, sensor errors, stale data and API failures without
+displaying misleading information.
 
 ## 2. Development Environment Setup
 
@@ -64,11 +65,11 @@ The prototype box `TS-01` and its configured temperature limits were subsequentl
 
 The temperature profile contained the following thresholds:
 
-| Setting | Temperature |
-|---|---|
-| Lower limit | 0°C |
-| Warning threshold | 24°C |
-| Upper limit | 25°C |
+| Setting           | Temperature |
+|-------------------|-------------|
+| Lower limit       | 0°C         |
+| Warning threshold | 24°C        |
+| Upper limit       | 25°C        |
 
 ![Database migrations](../assets/testing/frontend-api/15-migrations-run-in-terminal.png)
 
@@ -303,40 +304,40 @@ However, the screenshots do not conclusively confirm the Loading message or a co
 
 ## 5. Test Summary
 
-| Scenario | Result |
-|---|---|
-| Docker Desktop running | PASS |
-| MySQL container healthy | PASS |
-| Database migrations applied | PASS |
-| FastAPI health endpoint | PASS |
-| Dashboard API temperature retrieval | PASS |
-| UNKNOWN / unreliable time | PASS |
-| Empty test box creation | PASS |
-| No observations API response | PASS |
-| No observations dashboard UI | PASS |
-| Sensor error dashboard UI | PASS |
-| Missing temperature not displayed as zero | PASS |
-| Duplicate sample conflict handling | PASS |
-| Backend unavailable | Observed |
-| Responsive layout | Partially checked |
-| Loading state | Not conclusively verified |
-| Stale state | Not conclusively verified |
-| NORMAL / WARNING / ALERT | Not conclusively verified |
-| In-page API failure display | Not conclusively verified |
-| Full JavaScript Console check | Not conclusively verified |
+| Scenario                                  | Result                    |
+|-------------------------------------------|---------------------------|
+| Docker Desktop running                    | PASS                      |
+| MySQL container healthy                   | PASS                      |
+| Database migrations applied               | PASS                      |
+| FastAPI health endpoint                   | PASS                      |
+| Dashboard API temperature retrieval       | PASS                      |
+| UNKNOWN / unreliable time                 | PASS                      |
+| Empty test box creation                   | PASS                      |
+| No observations API response              | PASS                      |
+| No observations dashboard UI              | PASS                      |
+| Sensor error dashboard UI                 | PASS                      |
+| Missing temperature not displayed as zero | PASS                      |
+| Duplicate sample conflict handling        | PASS                      |
+| Backend unavailable                       | Observed                  |
+| Responsive layout                         | Partially checked         |
+| Loading state                             | Not conclusively verified |
+| Stale state                               | Not conclusively verified |
+| NORMAL / WARNING / ALERT                  | Not conclusively verified |
+| In-page API failure display               | Not conclusively verified |
+| Full JavaScript Console check             | Not conclusively verified |
 
 ---
 
 ## 6. Definition of Done Review
 
-| Requirement | Status |
-|---|---|
-| Dashboard loads readings from backend API | Completed |
-| Temperature and profile values match the observed API response | Completed for tested reading |
-| Loading, no observations, sensor errors, stale data and request failures have clear displays | Implemented; partially tested |
-| Missing temperatures are never displayed as zero or NORMAL | Verified for sensor error |
-| Remaining demonstration mode is clearly labelled | Sample-data dependency removed from dashboard rendering |
-| Browser checks confirm no uncaught JavaScript errors | Final confirmation outstanding |
+| Requirement                                                                                  | Status                                                  |
+|----------------------------------------------------------------------------------------------|---------------------------------------------------------|
+| Dashboard loads readings from backend API                                                    | Completed                                               |
+| Temperature and profile values match the observed API response                               | Completed for tested reading                            |
+| Loading, no observations, sensor errors, stale data and request failures have clear displays | Implemented; partially tested                           |
+| Missing temperatures are never displayed as zero or NORMAL                                   | Verified for sensor error                               |
+| Remaining demonstration mode is clearly labelled                                             | Sample-data dependency removed from dashboard rendering |
+| Browser checks confirm no uncaught JavaScript errors                                         | Final confirmation outstanding                          |
 
 ---
 
@@ -400,19 +401,23 @@ All evidence screenshots are stored in:
 
 `docs/assets/testing/frontend-api/`
 
-The screenshots above document the environment setup, database preparation, frontend integration and observed test results.
+The screenshots above document the environment setup, database preparation, frontend integration and observed test
+results.
 
 ---
 
 ## 9. Conclusion
 
-The Sprint 6 Dashboard API integration was implemented and successfully tested against the local FastAPI and MySQL environment.
+The Sprint 6 Dashboard API integration was implemented and successfully tested against the local FastAPI and MySQL
+environment.
 
-The dashboard retrieves real API responses and correctly handles unreliable timestamps, missing observations and sensor errors in the tested scenarios.
+The dashboard retrieves real API responses and correctly handles unreliable timestamps, missing observations and sensor
+errors in the tested scenarios.
 
 The local development environment and database migrations were completed successfully.
 
-The remaining edge cases should receive final verification before the entire backlog item's Definition of Done is marked complete.
+The remaining edge cases should receive final verification before the entire backlog item's Definition of Done is marked
+complete.
 
 **Branch:** `feature/sprint-6-frontend`  
 **Backlog:** #71049 — Connect the dashboard to the API
