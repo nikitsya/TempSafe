@@ -3,11 +3,10 @@
 import json
 import logging
 import os
+import paho.mqtt.client as mqtt
 import re
 import signal
 import ssl
-
-import paho.mqtt.client as mqtt
 from sqlalchemy.exc import SQLAlchemyError
 
 from temsafe.schemas import ReadingCreate

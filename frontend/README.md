@@ -5,7 +5,8 @@ It follows the revised mock-ups in [`docs/design/ui-design.md`](../docs/design/u
 and the values in [`docs/design/ui-style-guide.md`](../docs/design/ui-style-guide.md).
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
 application frontend under development, served by the FastAPI backend in `backend/temsafe`.
-Authentication is not implemented; the dashboard uses sample data and history is a placeholder.
+Authentication is not implemented. The dashboard and history load readings for prototype box `TS-01`
+from the backend API when each page opens. Refresh the page to fetch new readings.
 
 The hosted application is available at [tempsafe.app](https://tempsafe.app).
 Use the [dashboard link](https://tempsafe.app/pages/dashboard.html) to view the application;
@@ -16,13 +17,14 @@ the sign-in form does not authenticate users. See the [deployment notes](../docs
 | Path                   | Purpose                                                         |
 |------------------------|-----------------------------------------------------------------|
 | `index.html`           | Sign-in page (entry point)                                      |
-| `pages/dashboard.html` | Current status of the assigned box (sample data, `?state=...`)  |
-| `pages/history.html`   | Temperature history placeholder                                 |
+| `pages/dashboard.html` | Latest API reading for prototype box `TS-01`                    |
+| `pages/history.html`   | Latest 20 API readings, ordered by measurement sequence         |
 | `css/main.css`         | Shared styles: colour tokens, typography, layout and components |
 | `js/api.js`            | Small helper for calls to the backend API (`/api/...`)          |
 | `js/main.js`           | Page start-up code, including the API connection check          |
-| `js/sample-data.js`    | Sample readings for each dashboard state until the API is ready |
+| `js/sample-data.js`    | Legacy fixtures; not loaded by the application pages            |
 | `js/dashboard.js`      | Draws the dashboard status card, details and warning messages   |
+| `js/history.js`        | Loads and renders the accessible readings table                 |
 | `js/signin.js`         | Sign-in form handler (keeps the password out of the page URL)   |
 | `assets/icons/`        | Icons and images used by the interface                          |
 
@@ -37,10 +39,3 @@ python -m uvicorn temsafe.main:app --reload --app-dir backend
 
 Then open http://127.0.0.1:8000 in a browser. The status line shows "API connected"
 when `GET /api/health` returns `{"status": "ok"}`.
-
-The dashboard uses sample data. Choose a state with the URL, for example
-http://127.0.0.1:8000/pages/dashboard.html?state=alert
-(`normal`, `warning`, `alert`, `stale`, `sensor_error`, `not_reporting`, `no_data`).
-
-Opening `index.html` directly from disk also works, but the status line then shows
-"API not reachable", because the browser blocks requests from a local file to the API.

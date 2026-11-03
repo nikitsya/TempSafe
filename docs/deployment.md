@@ -22,9 +22,9 @@ the services. The EC2 instance must remain running for the site to be available.
 
 ## Current limitations
 
-The dashboard still uses sample data, history is a placeholder and the sign-in form does not authenticate
-users. Device uploads and live frontend data integration remain planned. Deploying the application does
-not complete these features.
+The current repository frontend loads dashboard and history readings through the API on page refresh.
+The sign-in form does not authenticate users. Automatic refresh, server-based
+frontend freshness handling and device-to-database deployment remain follow-up work.
 
 Caddy Basic Authentication was used during initial setup. It is a separate server access control,
 not application authentication. If it is removed, the API is publicly
