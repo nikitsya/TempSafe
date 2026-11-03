@@ -30,8 +30,8 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 | Stale-reading threshold  | Proposed 90 seconds; agree and test independently of the 180-second contact timeout.                                                                                                             |
 | Measurement tolerance    | Agree from sensor and reference specifications before physical comparison.                                                                                                                       |
 | Notifications            | Proposed Web Push; verify browser/platform support, home-screen installation where required, permission, authorised recipients, unchanged-state suppression and 60-second online receipt target. |
-| LED sensor-error pattern | Proposed two short flashes followed by a pause; agree timings and test recognition.                                                                                                              |
-| Buzzer, if implemented   | Define sound pattern, repetition, silence and reset behaviour.                                                                                                                                   |
+| LED sensor-error pattern | Two 0.2-second flashes separated by 0.2 seconds; test recognition. See the device guide for the loop pause.                                                                                      |
+| Buzzer, if implemented   | Tested: 500 Hz, one second on/two seconds off. Manual silencing and its reset behaviour remain unimplemented.                                                                                    |
 
 ## Functional tests
 
@@ -75,14 +75,14 @@ results separately.
 
 ## Additional secure pub-sub tests
 
-| ID     | Actions                                                                                       | Expected result                                                                                           |
-|--------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| SEC-01 | Connect using missing, revoked or untrusted certificates; try plaintext transport.            | Connections rejected; no fallback to plaintext.                                                           |
-| SEC-02 | Publish to another box topic, forge payload box ID or publish an acknowledgement as a device. | Broker ACL or worker rejects the action; no unauthorised records.                                         |
-| SEC-03 | Receive broker PUBACK, interrupt ingestion before commit and restart the device.              | Pending record remains in SQLite until application acknowledgement after commit.                          |
-| SEC-04 | Replay old heartbeats and upload old samples during an outage.                                | Contact freshness does not advance without a valid current heartbeat challenge/live sample.               |
-| SEC-05 | Run cron jobs twice, overlap runs and force backup failure.                                   | No duplicate transition events; locks prevent overlaps; retention does not run without successful backup. |
-| SEC-06 | Restore an encrypted backup in an isolated test environment.                                  | Authorised restore succeeds and sample IDs/counts reconcile.                                              |
+| ID     | Actions                                                                                        | Expected result                                                                                           |
+|--------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| SEC-01 | Try missing/wrong device credentials, an untrusted broker certificate and plaintext transport. | Connections rejected; no fallback to plaintext.                                                           |
+| SEC-02 | Publish to another box topic, forge payload box ID or publish an acknowledgement as a device.  | Broker ACL or worker rejects the action; no unauthorised records.                                         |
+| SEC-03 | Receive broker PUBACK, interrupt ingestion before commit and restart the device.               | Pending record remains in SQLite until application acknowledgement after commit.                          |
+| SEC-04 | Replay old heartbeats and upload old samples during an outage.                                 | Contact freshness does not advance without a valid current heartbeat challenge/live sample.               |
+| SEC-05 | Run cron jobs twice, overlap runs and force backup failure.                                    | No duplicate transition events; locks prevent overlaps; retention does not run without successful backup. |
+| SEC-06 | Restore an encrypted backup in an isolated test environment.                                   | Authorised restore succeeds and sample IDs/counts reconcile.                                              |
 
 ## Conditional Should Have tests
 

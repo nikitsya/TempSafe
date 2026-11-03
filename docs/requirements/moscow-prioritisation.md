@@ -56,9 +56,8 @@ colour; the application uses green, amber and red with labels and symbols.
 
 ## Could Have
 
-A separate native mobile application is a likely follow-up to the web application. It remains provisional until
-the team confirms feasibility, timing and scope. The responsive web application with a FastAPI backend is confirmed;
-PWA support for home-screen access is planned.
+A native mobile application is a possible follow-up, subject to team agreement. See the
+[platform scope](../project/project-scope.md#application-platform) for the web application and planned PWA.
 
 ## Won't Have This Time
 
@@ -86,11 +85,3 @@ PWA support for home-screen access is planned.
   not a universal medicine storage range.
 - Record the clarified priorities and any subsequent group decisions in Scrumwise. This document does not claim that a
   group meeting or approval has occurred.
-
-## Short version for the elevator pitch
-
-> Our Must Have features provide internal temperature monitoring, a single-colour local warning LED, phone notifications
-> with connectivity, authorised access and reliable history. The application combines Normal, Warning and Alert colours
-> with text and symbols, following Perceptible Information. Fault and offline handling support Tolerance for Error. A
-> buzzer, automatic refresh, review acknowledgement and estimated excursion summaries are Should Have improvements.
-> Humidity, weight, tracking and cooling are outside this release.

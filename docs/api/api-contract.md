@@ -153,8 +153,9 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 - Sensor errors remain explicit even when stale or not reporting. Receipt of an old buffered sample does not make it
   fresh.
 - Handle HTTP status and `detail` together: `404` with `Box not found` is not the no-observations state. Invalid `limit`
-  returns `422` with a validation-error array in `detail`. Network errors and `5xx` mean refresh failed; retain any
-  previous data as historical, never present them as an empty history or a fresh Normal reading.
+  returns `422` with a validation-error array in `detail`. Network errors and `5xx` mean loading failed. The current
+  pages replace the content with an error message;
+  retaining previous values as explicitly historical data is a possible future enhancement.
 
 ### Profile limits and remaining integration
 
@@ -162,18 +163,12 @@ The latest response includes `profile` from the sample's recorded profile, not t
 The dashboard displays these limits; no separate profile request is needed.
 The seeded demo limits are 0/24/25°C; the unused legacy frontend fixture's 15°C lower limit is outdated.
 
-The frontend adapter maps `temperature_c` to `temperatureC`, formats `observed_at` for display and derives reading
-age using the browser clock.
-Map valid temperature states to lower-case UI names; map `quality: sensor_error` to `sensor_error`. Handle no
-observations
-as `no_data`; `Unknown` must never become `normal`. Apply `freshness` separately; stale or unknown-age readings must not
-appear live. The dashboard uses `fetch()` directly and reads the error body to distinguish the two `404` cases.
-The shared `apiGet()` helper currently serves the health check and does not preserve error bodies.
+The dashboard maps the API response and distinguishes the two `404` cases using the error body.
+It currently derives age from the browser clock rather than consuming `freshness`. See the
+[frontend guide](../../frontend/README.md#current-behaviour-and-limitations) for remaining UI work.
 
-Still pending: automatic refresh, using server-calculated freshness in the frontend, device-contact handling,
-authentication and box access checks, phone-notification status and history date filters. Sample fields such as
-`pushAlerts`, `lastValidC` and profile `name` are not supplied by the current API. A silence or acknowledgement action
-is not part of these read endpoints.
+Device-contact handling and application authentication remain unimplemented. A silence or review
+acknowledgement action is not part of these read endpoints.
 
 ## Other available endpoints
 

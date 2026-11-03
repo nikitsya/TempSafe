@@ -7,6 +7,9 @@ A clickable HTML/CSS/JavaScript prototype of the TempSafe web application. It us
 connect to the backend. It is used to check the UI design and to run automated browser tests independently of the
 developing FastAPI application.
 
+The legacy synthetic profile uses 15/24/25°C; the application uses 0/24/25°C. These fixtures and
+prototype test results are not evidence of backend authentication or live device integration.
+
 ## Pages
 
 | File                       | Screen                                                                                                           |

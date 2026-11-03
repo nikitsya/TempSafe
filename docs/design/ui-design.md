@@ -1,13 +1,12 @@
 # TempSafe: user interface design
 
-Target UI behaviour; see the [README](../../README.md#current-progress) for implementation status.
+Target UI behaviour and original mock-ups. The application now uses a shorter main card with a Details panel;
+see the [accessibility review](../testing/core-scenario-accessibility-review.md) and
+[current wording](ui-wording.md). Graphs, authentication and phone notifications below remain planned.
 
 ## Planned platform
 
-TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
-Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
-in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
-A separate native mobile application is likely to follow the web application, subject to a final team decision.
+The [project scope](../project/project-scope.md#application-platform) defines the web platform and planned PWA support.
 
 Home-screen access is a planned enhancement; the browser interface remains the baseline. A web app manifest will
 define the application name, icons, start URL and standalone display mode. The proposed Web Push channel will use
