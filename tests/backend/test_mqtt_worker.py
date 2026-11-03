@@ -1,12 +1,11 @@
 """Check topic authorisation and the boundary between storage and acknowledgement."""
 
 import json
+import pytest
+from sqlalchemy.exc import SQLAlchemyError
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 from uuid import uuid4
-
-import pytest
-from sqlalchemy.exc import SQLAlchemyError
 
 from temsafe.mqtt_worker import ReadingConsumer
 

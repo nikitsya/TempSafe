@@ -27,8 +27,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   Worker deployment and device-to-database integration testing remain pending. See the [MQTT guide](docs/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
-- **Frontend:** dashboard with sample data, a sign-in form and a history placeholder. Live data integration remains
-  planned.
+- **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API on page refresh.
+  Authentication, automatic refresh and device-contact status remain planned.
 - **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
 
 Device-to-backend communication, reliable offline upload and acknowledgement, authentication and phone notifications
@@ -42,8 +42,9 @@ See the [functional requirements](docs/requirements/functional-requirements.md) 
 [dashboard](https://tempsafe.app/pages/dashboard.html).
 
 This is the application frontend served by the backend. The sign-in form is not connected to authentication,
-the dashboard uses sample data and the history page is a placeholder. "API connected" confirms that the
-backend health endpoint responds; it does not confirm a database connection or live sensor readings.
+the current frontend loads dashboard and history data through the API when each page opens.
+Refresh the page to fetch new readings; the deployed version depends on the latest server update. "API connected"
+confirms that the backend health endpoint responds; it does not confirm a database connection or live sensor readings.
 Use test data only while authentication remains unimplemented.
 
 See the [deployment notes](docs/deployment.md) for the hosting setup and service checks.

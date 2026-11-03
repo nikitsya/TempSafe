@@ -55,7 +55,7 @@ Example request body for `/docs` or an HTTP client:
 ## Dashboard API contract
 
 Working integration contract based on the current backend; team review is pending.
-Use relative `/api` URLs when served by FastAPI, locally or on AWS. The dashboard still uses sample data.
+Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 
 ### Endpoints and fields available now
 
@@ -159,19 +159,19 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 ### Profile limits and remaining integration
 
 The latest response includes `profile` from the sample's recorded profile, not the box's newest profile.
-Use these limits for display; no separate profile request is needed.
-The seeded demo limits are 0/24/25°C; the frontend fixture's 15°C lower limit is outdated.
+The dashboard displays these limits; no separate profile request is needed.
+The seeded demo limits are 0/24/25°C; the unused legacy frontend fixture's 15°C lower limit is outdated.
 
-The frontend adapter must map `temperature_c` to `temperatureC`, format `observed_at` for display and derive reading
-age.
+The frontend adapter maps `temperature_c` to `temperatureC`, formats `observed_at` for display and derives reading
+age using the browser clock.
 Map valid temperature states to lower-case UI names; map `quality: sensor_error` to `sensor_error`. Handle no
 observations
 as `no_data`; `Unknown` must never become `normal`. Apply `freshness` separately; stale or unknown-age readings must not
-appear live. The current `apiGet()` helper must also
-preserve the error body so the two `404` cases can be distinguished.
+appear live. The dashboard uses `fetch()` directly and reads the error body to distinguish the two `404` cases.
+The shared `apiGet()` helper currently serves the health check and does not preserve error bodies.
 
-Still pending: frontend freshness display, device-contact handling, authentication and box
-access checks, phone-notification status, history date filters and frontend API integration. Sample fields such as
+Still pending: automatic refresh, using server-calculated freshness in the frontend, device-contact handling,
+authentication and box access checks, phone-notification status and history date filters. Sample fields such as
 `pushAlerts`, `lastValidC` and profile `name` are not supplied by the current API. A silence or acknowledgement action
 is not part of these read endpoints.
 
