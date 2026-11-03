@@ -18,15 +18,15 @@ The facilitator switches the dashboard state by opening `dashboard.html?state=..
 not use the "Prototype states" links. These links and the "synthetic data" note on the history page label the
 prototype as a demonstration.
 
-| Task | Screen prepared by the facilitator  |
-|------|-------------------------------------|
-| T1   | `login.html`                        |
-| T2   | `dashboard.html?state=normal`       |
-| T3   | `dashboard.html?state=normal`       |
+| Task | Screen prepared by the facilitator   |
+|------|--------------------------------------|
+| T1   | `login.html`                         |
+| T2   | `dashboard.html?state=normal`        |
+| T3   | `dashboard.html?state=normal`        |
 | T4   | `history.html` (default 14:00–14:40) |
-| T5   | `dashboard.html?state=stale`        |
-| T6   | `dashboard.html?state=sensor`       |
-| T7   | Any page while signed in            |
+| T5   | `dashboard.html?state=stale`         |
+| T6   | `dashboard.html?state=sensor`        |
+| T7   | Any page while signed in             |
 
 ## Participants
 
@@ -55,15 +55,15 @@ the observation sheet. Team members who built the prototype do not take part as 
 Read each instruction exactly as written. Do not use screen names, button labels or status words in the instruction.
 Do not help the participant during a task. If they are stuck for 2 minutes, mark the task as failed and move on.
 
-| Task | Instruction to the participant                                                                                        | Success when the participant…                                                                                                                     | Target time | Plan ID      |
-|------|-----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|-------------|--------------|
-| T1   | Sign in with the test account.                                                                                        | Reaches the current status screen.                                                                                                                | 60 s        | UX-03        |
-| T2   | Tell me the condition of the medicine box right now.                                                                  | Says the current status and value (Normal, 21.8°C, observed 14:20).                                                                               | 15 s        | UX-01, UX-03 |
+| Task | Instruction to the participant                                                                                       | Success when the participant…                                                                                                                                                                                 | Target time | Plan ID      |
+|------|----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|--------------|
+| T1   | Sign in with the test account.                                                                                       | Reaches the current status screen.                                                                                                                                                                            | 60 s        | UX-03        |
+| T2   | Tell me the condition of the medicine box right now.                                                                 | Says the current status and value (Normal, 21.8°C, observed 14:20).                                                                                                                                           | 15 s        | UX-01, UX-03 |
 | T3   | Did the temperature go above its upper limit at any time earlier today? If it did, tell me when and how high it got. | Finds the earlier period above 25°C (about 14:10–14:16) and the highest value (26.0°C), **and** says that the excursion is over and the box is no longer above 25°C. Does not mix up past and current status. | 90 s        | UX-03        |
-| T4   | Find a time when there was no data.                                                                                   | Points to the gap (14:26:30–14:29).                                                                                                               | 60 s        | UX-05        |
-| T5   | Is the temperature shown here the current temperature?                                                               | Says the data is stale and current conditions are unknown; the 22.8°C reading is from 14:12:05 and is historical.                                | 20 s        | UX-05        |
-| T6   | What is the temperature in the box now?                                                                               | Says it is unknown because the sensor failed. Does not read it as 0°C or Normal.                                                                 | 20 s        | UX-01, UX-05 |
-| T7   | Sign out.                                                                                                             | Returns to the sign-in page.                                                                                                                      | 15 s        | UX-03        |
+| T4   | Find a time when there was no data.                                                                                  | Points to the gap (14:26:30–14:29).                                                                                                                                                                           | 60 s        | UX-05        |
+| T5   | Is the temperature shown here the current temperature?                                                               | Says the data is stale and current conditions are unknown; the 22.8°C reading is from 14:12:05 and is historical.                                                                                             | 20 s        | UX-05        |
+| T6   | What is the temperature in the box now?                                                                              | Says it is unknown because the sensor failed. Does not read it as 0°C or Normal.                                                                                                                              | 20 s        | UX-01, UX-05 |
+| T7   | Sign out.                                                                                                            | Returns to the sign-in page.                                                                                                                                                                                  | 15 s        | UX-03        |
 
 After each task, record completion, assistance, time, difficulties and quotes on the observation sheet.
 
@@ -89,14 +89,14 @@ earlier excursion above 25°C has ended.
 
 One team member runs every task on the prepared prototype and confirms it can be completed.
 
-| Task | Screen opens as listed above | Task can be completed | Notes                                                                                   |
-|------|------------------------------|-----------------------|-----------------------------------------------------------------------------------------|
-| T1   | ✅                           | ✅                    | Sign-in opens the dashboard in the default WARNING state                                |
-| T2   | ✅                           | ✅                    | NORMAL, 21.8°C, observed 14:20:00                                                       |
+| Task | Screen opens as listed above | Task can be completed | Notes                                                                                         |
+|------|------------------------------|-----------------------|-----------------------------------------------------------------------------------------------|
+| T1   | ✅                           | ✅                    | Sign-in opens the dashboard in the default WARNING state                                      |
+| T2   | ✅                           | ✅                    | NORMAL, 21.8°C, observed 14:20:00                                                             |
 | T3   | ✅                           | ✅                    | "View temperature history": Alert rows 14:10:00–14:16:00, max 26.0°C; back link opens WARNING |
-| T4   | ✅                           | ✅                    | Missing (device offline) 14:26:30–14:29:00 in graph and table                           |
-| T5   | ✅                           | ✅                    | DATA STALE, 22.8°C recorded 14:12:05 labelled historical                                |
-| T6   | ✅                           | ✅                    | SENSOR ERROR, "Temperature is unknown", not shown as 0°C or Normal                      |
-| T7   | ✅                           | ✅                    | "Sign out" on the dashboard returns to the sign-in page (history page has no sign-out)  |
+| T4   | ✅                           | ✅                    | Missing (device offline) 14:26:30–14:29:00 in graph and table                                 |
+| T5   | ✅                           | ✅                    | DATA STALE, 22.8°C recorded 14:12:05 labelled historical                                      |
+| T6   | ✅                           | ✅                    | SENSOR ERROR, "Temperature is unknown", not shown as 0°C or Normal                            |
+| T7   | ✅                           | ✅                    | "Sign out" on the dashboard returns to the sign-in page (history page has no sign-out)        |
 
-**Walkthrough done by:** Maryna Hordiienko  **Date:** 2 November 2026
+**Walkthrough done by:** Maryna Hordiienko **Date:** 2 November 2026
