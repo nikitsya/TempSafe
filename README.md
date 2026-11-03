@@ -23,6 +23,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
+- **MQTT:** TLS broker configured; ingestion worker implemented with validation and acknowledgements after storage.
+  Worker deployment and device-to-database integration testing remain pending. See the [MQTT guide](docs/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard with sample data, a sign-in form and a history placeholder. Live data integration remains

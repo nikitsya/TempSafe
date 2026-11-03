@@ -1,0 +1,21 @@
+[Unit]
+Description=TempSafe MQTT ingestion worker
+Wants=network-online.target
+After=network-online.target mosquitto.service docker.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Smart-Box
+EnvironmentFile=/home/ubuntu/Smart-Box/.env
+EnvironmentFile=/etc/tempsafe/mqtt.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/ubuntu/Smart-Box/.venv/bin/python -m temsafe.mqtt_worker
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
