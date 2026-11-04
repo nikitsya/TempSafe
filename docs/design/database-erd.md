@@ -1,6 +1,6 @@
 # TempSafe database ERD
 
-Figure 1 shows the six MySQL tables defined in [schema.sql](../../database/schema.sql).
+Figure 1 shows the seven MySQL tables defined in [schema.sql](../../database/schema.sql).
 It describes stored data and constraints, not whether every related application feature
 has been implemented.
 
@@ -8,14 +8,20 @@ has been implemented.
 
 ```mermaid
 erDiagram
-    app_users ||--o{ box_access : has
-    boxes ||--o{ box_access : permits
-    boxes ||--o{ threshold_profiles : has
-    boxes ||--o{ temperature_samples : records
-    threshold_profiles ||--o{ temperature_samples : classifies
-    temperature_samples ||--o| sample_reviews : has
-    app_users ||--o{ sample_reviews : records
+    boxes ||--o| box_configuration: selects
+    threshold_profiles ||--o| box_configuration: selected_by
+    app_users ||--o{ box_access: has
+    boxes ||--o{ box_access: permits
+    boxes ||--o{ threshold_profiles: has
+    boxes ||--o{ temperature_samples: records
+    threshold_profiles ||--o{ temperature_samples: classifies
+    temperature_samples ||--o| sample_reviews: has
+    app_users ||--o{ sample_reviews: records
 
+    box_configuration {
+        VARCHAR box_id PK, FK
+        CHAR profile_id FK "Composite FK with box_id"
+    }
     app_users {
         BIGINT user_id PK "Unsigned; auto-increment"
         VARCHAR auth_subject UK "191 characters"
@@ -94,3 +100,12 @@ prevent an UPDATE to the threshold values.
 A `valid` sample must have a temperature between -40 and 80 degrees Celsius. A
 `sensor_error` sample must have a NULL temperature. Validity describes the
 measurement, not whether its temperature is within the configured limits.
+
+## Desired box configuration
+
+`box_configuration` selects at most one profile per box. The composite foreign key
+`(profile_id, box_id)` references the unique pair on `threshold_profiles`, preventing
+a selection from crossing box boundaries. A profile can be selected by at most its
+own box. New selections do not change the profiles attached to earlier samples.
+This is desired backend configuration, not confirmation that the device has adopted it.
+See the [operator API guide](../api/threshold-configuration.md).
