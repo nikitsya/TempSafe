@@ -20,7 +20,7 @@ Some subsequent SSH connections still timed out, so the verification is partial.
 | Public listeners        | TCP 22, 80, 443 and 8883; AWS rules still control external access     |
 | Database read           | Successful read of `temperature_samples` using the `temsafe` account  |
 | Database grants         | `ALL PRIVILEGES` on `temsafe.*`                                       |
-| Scheduled backups       | No MySQL backup timer identified; cron verification incomplete        |
+| Scheduled backups       | No MySQL backup timer or database-related cron job found              |
 
 The effective backend environment, current AWS rule sources and off-server backup
 configuration have not been independently verified. Secrets were not displayed.
@@ -128,14 +128,21 @@ During this AWS inspection, the `temsafe` account had `ALL PRIVILEGES` on
 schema-management account from a runtime account is follow-up work; do not describe
 least-privilege database access as fully implemented without checking its grants.
 
-Automated database backups, off-server copies, retention and successful restore
-tests are **not verified**. A backup proposal in the design document is not evidence
-of a running backup job. No MySQL backup task was identified in the systemd timer list. The
-`dpkg-db-backup` timer backs up package-management metadata, not the application
-database. The Ubuntu and root crontab commands returned no content, but their
-errors were suppressed, so absence of jobs is not confirmed. Recheck both crontabs, `/etc/crontab`, `/etc/cron.d`, systemd timers and any external backup
-service. Verify the actual backup files and restoration process before recording
-backups as operational.
+Backup checks on 4 November 2026 found:
+
+- No crontab for either `ubuntu` or `root` (confirmed by the command errors).
+- No database-related entries in `/etc/crontab` or the checked files under
+  `/etc/cron.d`, `/etc/cron.daily`, `/etc/cron.weekly` and `/etc/cron.monthly`.
+- No MySQL backup task in the systemd timer list. `dpkg-db-backup` backs up
+  package-management metadata, not the application database.
+- No backup candidates matching the inspected names and dump extensions under
+  `/var/backups`, `/home/ubuntu/Smart-Box`, `/home/ubuntu/backups` or `/opt`.
+
+These checks found no evidence of an operational application database backup on
+the host. They do not rule out custom jobs elsewhere or external AWS Backup/EBS
+snapshots, which were not inspected. Off-server copies, retention and successful
+restore tests remain **unverified**. A backup proposal in the design document is
+not evidence of a running backup job.
 
 ## Remaining server checks
 
@@ -147,6 +154,7 @@ Use an authorised SSH session to confirm:
 2. Current AWS inbound rule sources. A listener check does not verify security groups.
 3. A successful PyCharm connection through the local SSH tunnel. Database access
    inside the server has been verified.
-4. Cron backup jobs, off-server storage and a restore test.
+4. External backup services, off-server storage and a restore test. Host cron and
+   systemd timer checks are recorded above.
 
 This documentation change does not change server settings or introduce a backup job.
