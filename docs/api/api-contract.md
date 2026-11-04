@@ -179,3 +179,8 @@ acknowledgement action is not part of these read endpoints.
 | `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
 
 Run the server using the [backend guide](../../backend/temsafe/README.md); inspect live schemas at `/docs`.
+
+## Operator configuration
+
+The protected [threshold configuration API](threshold-configuration.md) creates and
+selects versioned demo profiles. Its operator token does not secure the other endpoints.

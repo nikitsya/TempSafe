@@ -22,6 +22,9 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   on AWS EC2, with Caddy providing HTTPS and a reverse proxy to FastAPI.
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
+- **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
+  frontend integration, per-user permissions and device delivery remain pending. See the
+  [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** TLS broker configured; ingestion worker implemented with validation and acknowledgements after storage.
   Worker deployment and device-to-database integration testing remain pending. See the [MQTT guide](docs/mqtt.md).
