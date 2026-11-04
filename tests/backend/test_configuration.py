@@ -1,13 +1,12 @@
 """Check operator configuration and historical integrity against isolated MySQL."""
 
+import pytest
 from datetime import datetime
 from decimal import Decimal
-from uuid import uuid4
-
-import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+from uuid import uuid4
 
 from temsafe.database import engine, get_db
 from temsafe.main import app

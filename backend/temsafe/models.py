@@ -99,6 +99,7 @@ class SampleReview(Base):
         DATETIME(fsp=6), server_default=text("CURRENT_TIMESTAMP(6)")
     )
 
+
 # Create tables using database/schema.sql; these models map the existing tables.
 
 
