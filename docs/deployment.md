@@ -44,6 +44,9 @@ not application authentication. If it is removed, the API is publicly
 accessible, including reading submission. Use test data only; implement authentication and authorisation
 before handling real user or device data.
 
+For connection diagrams, PyCharm tunnel settings and the distinction between
+verified configuration and pending server checks, see [Database connections](database-connections.md).
+
 ## Service checks
 
 Run these commands over SSH on the Ubuntu server:

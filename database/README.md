@@ -1,14 +1,19 @@
 # TempSafe database
 
-We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates six tables for
-boxes, users, access permissions, temperature profiles, measurements and reviews.
+We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates seven tables for
+boxes, users, access permissions, temperature profiles, measurements, reviews and the selected box configuration.
 Choose either setup below.
 
 ## Table relationships
 
 See [Figure 1: the database ERD](../docs/design/database-erd.md#figure-1-tables-keys-and-relationships)
-for all six tables, their fields, primary and foreign keys, and relationship cardinalities.
+for all seven tables, their fields, primary and foreign keys, and relationship cardinalities.
 The document also explains composite constraints and historical threshold profiles.
+
+## Hosted database access
+
+See [Database connections](../docs/database-connections.md) for the backend connection,
+PyCharm SSH tunnel, credentials, network boundaries and backup verification status.
 
 ## With Docker Compose
 
@@ -23,7 +28,7 @@ docker compose up -d --wait mysql
 ```
 
 On the first start, this creates the `temsafe` database, the `temsafe` database
-user and all six tables. Connect using host `127.0.0.1`, port `3307` (unless changed
+user and all seven tables. Connect using host `127.0.0.1`, port `3307` (unless changed
 in `.env`), user `temsafe` and your `MYSQL_PASSWORD`.
 
 To stop it, use `docker compose stop mysql`. Your data stays in the Docker volume.
@@ -79,6 +84,14 @@ historical settings.
 See the [API contract](../docs/api/api-contract.md#temperature-classification)
 for temperature classification rules.
 
+## Threshold configuration migration
+
+For an existing database, apply
+[003_add_box_configuration.sql](migrations/003_add_box_configuration.sql) once after
+backing up. Fresh databases created with the updated schema already have this table;
+do not run migration 003 again. See the
+[operator API guide](../docs/api/threshold-configuration.md) for selection and access rules.
+
 ## Verify the setup
 
 Select `temsafe` and run:
@@ -88,7 +101,7 @@ SHOW TABLES;
 ```
 
 Expected tables: `app_users`, `box_access`, `boxes`, `sample_reviews`,
-`temperature_samples` and `threshold_profiles`.
+`temperature_samples`, `threshold_profiles` and `box_configuration`.
 
 Follow the [backend test instructions](../tests/backend/README.md) to check database
 access and API behaviour. For the schema rationale, see the
