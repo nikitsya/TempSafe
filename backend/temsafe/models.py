@@ -1,8 +1,8 @@
-"""SQLAlchemy models for the six existing TEMSAFE database tables."""
+"""SQLAlchemy models for the TEMSAFE database tables."""
 
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, String, Text, text
+from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, String, Text, UniqueConstraint, text
 from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -46,6 +46,7 @@ class ThresholdProfile(Base):
     """Represent the limits associated with a box's measurements."""
 
     __tablename__ = "threshold_profiles"
+    __table_args__ = (UniqueConstraint("profile_id", "box_id"),)
 
     profile_id: Mapped[str] = mapped_column(CHAR(36), primary_key=True)
     box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"))
@@ -99,3 +100,18 @@ class SampleReview(Base):
     )
 
 # Create tables using database/schema.sql; these models map the existing tables.
+
+
+class BoxConfiguration(Base):
+    """Select one desired threshold profile without rewriting sample history."""
+
+    __tablename__ = "box_configuration"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["profile_id", "box_id"],
+            ["threshold_profiles.profile_id", "threshold_profiles.box_id"],
+        ),
+    )
+
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"), primary_key=True)
+    profile_id: Mapped[str] = mapped_column(CHAR(36))
