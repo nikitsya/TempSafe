@@ -308,7 +308,7 @@ function convertReading(data) {
 }
 
 // Automatic refresh settings.
-const REFRESH_SECONDS = 30;   // ask the API for new data
+const REFRESH_SECONDS = 5;   // ask the API for new data
 const TICK_SECONDS = 5;       // update "… s ago" and the stale check
 
 let lastData = null;          // last successful API response
