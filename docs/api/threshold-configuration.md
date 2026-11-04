@@ -29,9 +29,9 @@ sets their limits. Existing profiles and measurements are preserved.
 
 ## Routes
 
-| Method and path | Behaviour |
-|---|---|
-| `GET /api/boxes/{box_id}/configuration` | Return the selected desired profile; `404` if the box or selection is absent. |
+| Method and path                         | Behaviour                                                                                     |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------|
+| `GET /api/boxes/{box_id}/configuration` | Return the selected desired profile; `404` if the box or selection is absent.                 |
 | `PUT /api/boxes/{box_id}/configuration` | Create a new demo profile and select it atomically; return `200`. Missing boxes return `404`. |
 
 Example PUT body:

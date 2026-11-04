@@ -1,11 +1,10 @@
 """Operator-only routes for a box's desired threshold configuration."""
 
-from typing import Annotated
-from uuid import uuid4
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from typing import Annotated
+from uuid import uuid4
 
 from temsafe.admin import require_configuration_admin
 from temsafe.database import get_db
@@ -28,9 +27,9 @@ def get_configuration(box_id: str, db: Annotated[Session, Depends(get_db)]):
 
 @router.put("/boxes/{box_id}/configuration", response_model=ThresholdSettingsResponse)
 def set_configuration(
-    box_id: str,
-    settings: ThresholdSettingsCreate,
-    db: Annotated[Session, Depends(get_db)],
+        box_id: str,
+        settings: ThresholdSettingsCreate,
+        db: Annotated[Session, Depends(get_db)],
 ):
     """Atomically create a profile and select it; serialise writes per box."""
     try:

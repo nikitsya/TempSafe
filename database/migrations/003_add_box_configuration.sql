@@ -2,7 +2,7 @@
 -- A configuration selects the desired profile; it does not confirm device adoption.
 CREATE TABLE box_configuration
 (
-    box_id VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+    box_id     VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
     profile_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     CONSTRAINT fk_configuration_box FOREIGN KEY (box_id) REFERENCES boxes (box_id),
     CONSTRAINT fk_configuration_profile_box FOREIGN KEY (profile_id, box_id)

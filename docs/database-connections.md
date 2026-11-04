@@ -102,9 +102,10 @@ stop the website or database.
 ## Network access and troubleshooting
 
 The recorded AWS rules allow website ports 80/443, MQTT TLS port 8883 and SSH port
+
 22. SSH should be restricted to the operator's current public IP (`/32`). MySQL
-ports 3306/3307 and backend port 8000 should not be publicly exposed. The current
-security group rules still need live verification; see [Network access](deployment.md#network-access).
+    ports 3306/3307 and backend port 8000 should not be publicly exposed. The current
+    security group rules still need live verification; see [Network access](deployment.md#network-access).
 
 | Symptom                            | What to check                                                               |
 |------------------------------------|-----------------------------------------------------------------------------|
@@ -114,8 +115,8 @@ security group rules still need live verification; see [Network access](deployme
 | MySQL reports access denied        | Server database credentials and database grants                             |
 
 An SSH process with no output is not sufficient proof that the tunnel is ready.
-On the Mac, check `lsof -nP -iTCP:13307 -sTCP:LISTEN`, then use PyCharm's
-**Test Connection**. Do not resolve a tunnel problem by opening MySQL to the internet.
+On the Mac, check `lsof -nP -iTCP:13307 -sTCP:LISTEN`, then use PyCharm's **Test Connection**. Do not resolve a tunnel
+problem by opening MySQL to the internet.
 
 ## Persistence, permissions and backups
 

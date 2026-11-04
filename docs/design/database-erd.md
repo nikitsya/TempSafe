@@ -8,15 +8,15 @@ has been implemented.
 
 ```mermaid
 erDiagram
-    boxes ||--o| box_configuration : selects
-    threshold_profiles ||--o| box_configuration : selected_by
-    app_users ||--o{ box_access : has
-    boxes ||--o{ box_access : permits
-    boxes ||--o{ threshold_profiles : has
-    boxes ||--o{ temperature_samples : records
-    threshold_profiles ||--o{ temperature_samples : classifies
-    temperature_samples ||--o| sample_reviews : has
-    app_users ||--o{ sample_reviews : records
+    boxes ||--o| box_configuration: selects
+    threshold_profiles ||--o| box_configuration: selected_by
+    app_users ||--o{ box_access: has
+    boxes ||--o{ box_access: permits
+    boxes ||--o{ threshold_profiles: has
+    boxes ||--o{ temperature_samples: records
+    threshold_profiles ||--o{ temperature_samples: classifies
+    temperature_samples ||--o| sample_reviews: has
+    app_users ||--o{ sample_reviews: records
 
     box_configuration {
         VARCHAR box_id PK, FK
