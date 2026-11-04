@@ -10,6 +10,11 @@ See [Figure 1: the database ERD](../docs/design/database-erd.md#figure-1-tables-
 for all six tables, their fields, primary and foreign keys, and relationship cardinalities.
 The document also explains composite constraints and historical threshold profiles.
 
+## Hosted database access
+
+See [Database connections](../docs/database-connections.md) for the backend connection,
+PyCharm SSH tunnel, credentials, network boundaries and backup verification status.
+
 ## With Docker Compose
 
 1. Start a Docker environment with Compose support. Docker Desktop is one option.
