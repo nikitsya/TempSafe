@@ -132,7 +132,7 @@ function statusCard(reading) {
     }
 
     return `
-        <section class="status ${view.cls}" role="${view.role}">
+        <section class="status ${view.cls}">
             <div class="status-row">
                 <span class="status-icon" aria-hidden="true">
                     ${view.icon}
@@ -191,13 +191,19 @@ function emptyState() {
     `;
 }
 
-// Show the dashboard.
+// Show the dashboard and keep the Details panel open if the user opened it.
 function renderDashboard(reading, profile) {
     const dashboard = document.getElementById('dashboard');
+    const details = dashboard.querySelector('details');
+    const detailsOpen = details ? details.open : false;
 
     dashboard.innerHTML =
         statusCard(reading) +
         detailsCard(reading, profile);
+
+    if (detailsOpen) {
+        dashboard.querySelector('details').open = true;
+    }
 }
 
 // Convert API data into frontend data.
@@ -248,6 +254,11 @@ function convertReading(data) {
             ageSeconds = Math.floor(
                 (Date.now() - observed.getTime()) / 1000
             );
+
+            // Allow a small clock difference between the device and this computer.
+            if (ageSeconds < 0 && ageSeconds >= -30) {
+                ageSeconds = 0;
+            }
         }
     }
 
@@ -296,16 +307,80 @@ function convertReading(data) {
     return {reading, profile};
 }
 
+// Automatic refresh settings.
+const REFRESH_SECONDS = 30;   // ask the API for new data
+const TICK_SECONDS = 5;       // update "… s ago" and the stale check
+
+let lastData = null;          // last successful API response
+let lastStatus = null;        // last announced status
+let loading = false;          // avoid overlapping requests
+
+// Tell screen readers only when the status changes, not on every refresh.
+function announceStatus(reading) {
+    const view = STATUS_VIEW[reading.status] || STATUS_VIEW.unknown;
+    const live = ['normal', 'warning', 'alert'].includes(reading.status) &&
+        reading.ageSeconds !== null;
+    const text = live
+        ? `Status ${view.title}, ${reading.temperatureC.toFixed(1)} degrees Celsius`
+        : `Status ${view.title}, temperature unknown`;
+
+    if (reading.status === lastStatus) {
+        return;
+    }
+    lastStatus = reading.status;
+
+    const polite = document.getElementById('status-announcer');
+    const urgent = document.getElementById('alert-announcer');
+    polite.textContent = '';
+    urgent.textContent = '';
+
+    if (view.role === 'alert') {
+        urgent.textContent = text;
+    } else {
+        polite.textContent = text;
+    }
+}
+
+// Show the last saved data again, so the age and stale state stay correct.
+function showLastData() {
+    if (!lastData) {
+        return;
+    }
+    const result = convertReading(lastData);
+    renderDashboard(result.reading, result.profile);
+    announceStatus(result.reading);
+}
+
+// Short message when a refresh fails but older data is still on screen.
+function showRefreshError(show) {
+    const banner = document.getElementById('refresh-error');
+    if (!banner) {
+        return;
+    }
+    banner.hidden = !show;
+    if (show && lastData) {
+        banner.textContent =
+            `Can't refresh. Showing data from ${formatClock(lastData.received_at) || 'earlier'}.`;
+    }
+}
+
 // Get the latest reading from the API.
 async function loadTemperature() {
     const dashboard = document.getElementById('dashboard');
 
-    // Show loading message.
-    dashboard.innerHTML = `
-        <section class="card" role="status">
-            Loading…
-        </section>
-    `;
+    if (loading) {
+        return;
+    }
+    loading = true;
+
+    // Show the loading message only the first time.
+    if (!lastData && !dashboard.innerHTML.trim()) {
+        dashboard.innerHTML = `
+            <section class="card" role="status">
+                Loading…
+            </section>
+        `;
+    }
 
     try {
         const response = await fetch(
@@ -320,6 +395,8 @@ async function loadTemperature() {
                 errorData.detail ===
                 'No readings available for this box'
             ) {
+                lastData = null;
+                showRefreshError(false);
                 dashboard.innerHTML = emptyState();
                 return;
             }
@@ -330,29 +407,51 @@ async function loadTemperature() {
             throw new Error('API error: ' + response.status);
         }
 
-        // Read JSON response.
+        // Read and check the JSON response before saving it.
         const data = await response.json();
+        convertReading(data);
 
-        // Convert API response.
-        const result = convertReading(data);
-
-        // Display dashboard.
-        renderDashboard(result.reading, result.profile);
+        lastData = data;
+        showRefreshError(false);
+        showLastData();
 
     } catch (error) {
-        dashboard.innerHTML = `
-            <section class="empty" role="alert">
-                <h2>Can't load temperature</h2>
-
-                <p class="muted">
-                    Check your internet and refresh.
-                </p>
-            </section>
-        `;
-
         console.error('Dashboard error:', error);
+
+        // Keep the old data on screen if we have it.
+        if (lastData) {
+            showLastData();
+            showRefreshError(true);
+        } else {
+            dashboard.innerHTML = `
+                <section class="empty" role="alert">
+                    <h2>Can't load temperature</h2>
+
+                    <p class="muted">
+                        Check your internet and refresh.
+                    </p>
+                </section>
+            `;
+        }
+    } finally {
+        loading = false;
     }
 }
 
-// Load API data when the page opens.
-document.addEventListener('DOMContentLoaded', loadTemperature);
+// Start loading and refreshing when the page opens.
+document.addEventListener('DOMContentLoaded', () => {
+    loadTemperature();
+
+    // Ask the API for new data every 30 seconds.
+    setInterval(loadTemperature, REFRESH_SECONDS * 1000);
+
+    // Update the age every 5 seconds without a new request.
+    setInterval(showLastData, TICK_SECONDS * 1000);
+
+    // Refresh at once when the user comes back to the tab.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            loadTemperature();
+        }
+    });
+});
