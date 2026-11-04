@@ -89,3 +89,33 @@ class LatestReadingResponse(ReadingResponse):
     temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
     profile: ReadingProfileResponse
     freshness: Literal["fresh", "stale", "unknown"]
+
+
+class ThresholdSettingsCreate(BaseModel):
+    """Validate prototype limits before creating an immutable profile."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    lower_c: Decimal = Field(ge=-40, le=80, max_digits=5, decimal_places=2)
+    warning_c: Decimal = Field(ge=-40, le=80, max_digits=5, decimal_places=2)
+    upper_c: Decimal = Field(ge=-40, le=80, max_digits=5, decimal_places=2)
+    source_note: str = Field(min_length=1, max_length=2000)
+
+    @model_validator(mode="after")
+    def check_limits(self):
+        """Require ordered limits and a meaningful explanation."""
+        if not self.lower_c < self.warning_c < self.upper_c:
+            raise ValueError("Require lower_c < warning_c < upper_c")
+        self.source_note = self.source_note.strip()
+        if not self.source_note:
+            raise ValueError("A source note is required")
+        return self
+
+
+class ThresholdSettingsResponse(ReadingProfileResponse):
+    """Describe the desired profile, not confirmation of device adoption."""
+
+    box_id: str
+    source_note: str
+    is_demo: bool
+    created_at: UTCTimestamp
