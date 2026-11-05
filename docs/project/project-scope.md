@@ -33,7 +33,7 @@ A separate native mobile application is likely to follow the web application, su
 - Buzzer feedback on Alert is Should Have, rather than a guaranteed baseline component.
 - A responsive web application with a FastAPI backend for viewing current status, alerts and temperature history.
 - Automatic logging of sample attempts, including errors, quality and original observation times.
-- Device publishing through MQTT over TLS, a cloud ingestion worker and MySQL; HTTPS for the web API.
+- Device publishing through MQTT over TLS, a cloud FastMQTT subscriber and MySQL; HTTPS for the web API.
 - Testing the system using a prototype Controlled Drug Box.
 
 ## Excluded from the Project

@@ -16,7 +16,7 @@ is not included in this schema.
 |------------------------|----------------------------------------|--------------------------|---------------------------------------------------------------------|
 | Device application     | Raspberry Pi application               | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
 | Device's local storage | SQLite                                 | SQL through Python       | Keep an offline upload queue on the device                          |
-| Network messages       | MQTT over TLS                          | JSON payloads            | Publish observations through the broker to the ingestion worker     |
+| Network messages       | MQTT over TLS                          | JSON payloads            | Publish observations through the broker to the FastMQTT subscriber  |
 | Backend                | FastAPI                                | Python                   | Authenticate devices and users, validate messages and retrieve data |
 | Database connector     | SQLAlchemy with MySQL Connector/Python | Python                   | Let the backend execute parameterised MySQL queries                 |
 | Central database       | MySQL with InnoDB                      | SQL                      | Store boxes, access permissions and historical observations         |
@@ -185,7 +185,8 @@ retained locally so offline warnings still work.
 
 - Device loop: sample every 30 seconds, validate, classify and control local LED without internet; heartbeat every 60
   seconds when connected.
-- MQTT ingestion worker: enforce authenticated topic/box identity, validate and deduplicate, preserve historical times
+- MQTT FastMQTT subscriber: enforce authenticated topic/box identity, validate and deduplicate, preserve historical
+  times
   and profiles; acknowledge only after database commit. HTTPS serves user-facing API requests.
   Reject replayed heartbeats using a fresh, single-use challenge; historical uploads must not refresh device contact.
 - Dashboard: show current freshness, raw history, threshold bands and flagged observations; do not rely on cron for the
