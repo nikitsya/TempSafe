@@ -3,16 +3,16 @@
 import pytest
 from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
-from unittest.mock import Mock
-
 from temsafe.database import get_db
 from temsafe.main import app
 from temsafe.models import Box
+from unittest.mock import Mock
 
 
 @pytest.fixture
-def box_client():
+def box_client(grant_boxes):
     """Provide a test client without querying the real database."""
+    grant_boxes("test-box")
     db = Mock()
     db.execute.return_value.scalars.return_value.first.return_value = None
 

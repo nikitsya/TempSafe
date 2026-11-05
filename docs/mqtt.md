@@ -116,5 +116,5 @@ Unit tests cover storage before acknowledgement, failure without acknowledgement
 invalid JSON and quality, retained and oversized payloads, repeated unchanged delivery, and wildcard configuration.
 They use a mock storage boundary and do not replace the MQTT-to-MySQL integration test.
 
-MQTT security does not secure the existing HTTP reading endpoint. API authentication and authorisation
-remain separate required work. Current frontend behaviour is described in the [frontend guide](../frontend/README.md).
+HTTP publishers use a separate device key restricted to their assigned box.
+See the [API authentication guide](api/api-contract.md#authentication).
