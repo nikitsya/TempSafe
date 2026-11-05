@@ -9,7 +9,7 @@ selected [Universal Design principles](../design/design-principles.md). This doc
 
 - Raspberry Pi 5, Adafruit SCD-41, single-colour LED, suitable resistor, wiring and power supply; prototype box.
 - Reference thermometer for comparison; record its stated accuracy and placement.
-- Device software, local SQLite queue, MQTT/TLS broker, ingestion worker, backend, MySQL and web application when
+- Device software, local SQLite queue, MQTT/TLS broker, FastMQTT subscriber, backend, MySQL and web application when
   available.
 - Controllable Wi-Fi, a phone with the chosen notification channel and two authorised users assigned to the same
   physical prototype box, plus an unassigned test user.
@@ -78,7 +78,7 @@ results separately.
 | ID     | Actions                                                                                        | Expected result                                                                                           |
 |--------|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
 | SEC-01 | Try missing/wrong device credentials, an untrusted broker certificate and plaintext transport. | Connections rejected; no fallback to plaintext.                                                           |
-| SEC-02 | Publish to another box topic, forge payload box ID or publish an acknowledgement as a device.  | Broker ACL or worker rejects the action; no unauthorised records.                                         |
+| SEC-02 | Publish to another box topic, forge payload box ID or publish an acknowledgement as a device.  | Broker ACL or subscriber rejects the action; no unauthorised records.                                     |
 | SEC-03 | Receive broker PUBACK, interrupt ingestion before commit and restart the device.               | Pending record remains in SQLite until application acknowledgement after commit.                          |
 | SEC-04 | Replay old heartbeats and upload old samples during an outage.                                 | Contact freshness does not advance without a valid current heartbeat challenge/live sample.               |
 | SEC-05 | Run cron jobs twice, overlap runs and force backup failure.                                    | No duplicate transition events; locks prevent overlaps; retention does not run without successful backup. |

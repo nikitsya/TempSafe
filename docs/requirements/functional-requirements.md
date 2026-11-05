@@ -75,7 +75,8 @@ Invalid credentials, an unassigned user and denied access have explicit UI state
 2. Record a valid temperature or a sensor-error status; never substitute zero for failure.
 3. Compare a valid value with the provisioned profile and update the local LED.
 4. Persist the attempt in SQLite before publishing via MQTT over TLS when connected.
-5. The broker authenticates the device; the ingestion worker validates its box/profile, stores the sample idempotently
+5. The broker authenticates the device; the FastMQTT subscriber validates its box/profile, stores the sample
+   idempotently
    and publishes an application acknowledgement after commit.
 
 A read failure or unsynchronised clock is identified explicitly. A network failure does not stop local sampling or the
