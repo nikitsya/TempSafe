@@ -2,15 +2,19 @@
 
 The MQTT broker is configured on AWS with TLS and separate accounts for the device and backend.
 
-The Raspberry Pi publisher is implemented in `device/mqtt_publisher.py`. It sends readings from the local SQLite database and waits for the server's storage confirmation.
+The Raspberry Pi publisher is implemented in `device/mqtt_publisher.py`. It sends readings from the local SQLite
+database and waits for the server's storage confirmation.
 
 The server-side MQTT worker receives readings and saves them to MySQL.
 
-On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous connections were rejected. Broker topic permissions were also checked: the device account could not publish to the acknowledgement topic or another box's topic.
+On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous
+connections were rejected. Broker topic permissions were also checked: the device account could not publish to the
+acknowledgement topic or another box's topic.
 
 ## Integration check — 3 November 2026
 
-Real SCD41 readings were sent from the Raspberry Pi to the server through MQTT. The publisher received `stored` acknowledgements.
+Real SCD41 readings were sent from the Raspberry Pi to the server through MQTT. The publisher received `stored`
+acknowledgements.
 
 A new reading recorded on 3 November 2026 at 23:02:57 UTC, with a temperature of 18.91°C, appeared on the History page.
 
