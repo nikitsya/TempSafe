@@ -5,7 +5,8 @@ The MQTT broker is configured on AWS with TLS and separate accounts for the devi
 The Raspberry Pi publisher is implemented in `device/mqtt_publisher.py`. It sends readings from the local SQLite
 database and waits for the server's storage confirmation.
 
-The FastAPI service uses FastMQTT to receive readings and save them to MySQL. Deployment and an end-to-end check of this version on EC2 are pending.
+The FastAPI service uses FastMQTT to receive readings and save them to MySQL. Deployment and an end-to-end check of this
+version on EC2 are pending.
 
 On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous
 connections were rejected. Broker topic permissions were also checked: the device account could not publish to the
@@ -18,7 +19,8 @@ acknowledgements.
 
 A new reading recorded on 3 November 2026 at 23:02:57 UTC, with a temperature of 18.91°C, appeared on the History page.
 
-This check covered the Raspberry Pi, broker, standalone MQTT worker, MySQL and web application. Repeat it after deploying the FastMQTT subscriber.
+This check covered the Raspberry Pi, broker, standalone MQTT worker, MySQL and web application. Repeat it after
+deploying the FastMQTT subscriber.
 
 ## Connection and permissions
 

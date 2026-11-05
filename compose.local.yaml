@@ -1,6 +1,6 @@
 services:
   mysql:
-    ports: !reset []
+    ports: !reset [ ]
     volumes:
       - ./database/migrations/001_add_prototype_box.sql:/docker-entrypoint-initdb.d/002-box.sql:ro
       - ./database/migrations/002_add_prototype_temperature_profile.sql:/docker-entrypoint-initdb.d/003-profile.sql:ro
@@ -8,7 +8,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto:2
     healthcheck:
-      test: ["CMD", "mosquitto_pub", "-t", "health", "-n"]
+      test: [ "CMD", "mosquitto_pub", "-t", "health", "-n" ]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -33,7 +33,7 @@ services:
       MQTT_ENABLED: "true"
       TEMSAFE_LOCAL_MQTT: "1"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)" ]
       interval: 5s
       timeout: 3s
       retries: 10
