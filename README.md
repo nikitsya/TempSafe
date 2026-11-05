@@ -4,6 +4,8 @@ TempSafe is an IoT project for monitoring temperature inside a prototype medicat
 Raspberry Pi and SCD-41 sensor, local LED feedback and a web interface for viewing readings and temperature history.
 The prototype is for bench testing without real medicines; it does not determine whether medicines are suitable for use.
 
+[View the system architecture diagram](docs/assets/design/system-architecture.svg).
+
 ## Team
 
 **Class group:** SD3a-G2
@@ -27,7 +29,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** TLS broker configured; ingestion worker implemented with validation and acknowledgements after storage.
-  Worker deployment and device-to-database integration testing remain pending. See the [MQTT guide](docs/mqtt.md).
+  The 3 November integration check traced a Raspberry Pi reading through MySQL to the History page. See
+  the [MQTT guide](docs/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API on page refresh.
