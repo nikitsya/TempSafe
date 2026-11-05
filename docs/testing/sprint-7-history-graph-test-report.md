@@ -2,7 +2,8 @@
 
 **Project:** TempSafe (Smart-Box)  
 **Date:** 4 November 2026  
-**Backlog items:** #71286 — Add a temperature graph to the history page; FR-13 — Show how long the box was too hot or too cold  
+**Backlog items:** #71286 — Add a temperature graph to the history page; FR-13 — Show how long the box was too hot or
+too cold  
 **Branch:** `feature/history-graph`  
 **Author:** Maryna Hordiienko
 
@@ -16,11 +17,11 @@ or too cold, for how long, and the highest or lowest temperature. This is the ke
 
 ## 2. What was added
 
-| Part | What it shows |
-|---|---|
-| **Alerts table** | Each alert period: type (Too hot / Too cold), time, **how long**, and peak temperature. Newest first. |
-| **Graph** | The last 100 readings, oldest on the left. Dashed red line = 25°C limit, dotted line = 24°C warning, red points = too high. |
-| **Readings table** | Time, temperature and the **status** of each reading (Normal, Warning, Too high, Too low, Sensor error). |
+| Part               | What it shows                                                                                                               |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **Alerts table**   | Each alert period: type (Too hot / Too cold), time, **how long**, and peak temperature. Newest first.                       |
+| **Graph**          | The last 100 readings, oldest on the left. Dashed red line = 25°C limit, dotted line = 24°C warning, red points = too high. |
+| **Readings table** | Time, temperature and the **status** of each reading (Normal, Warning, Too high, Too low, Sensor error).                    |
 
 The limits come from the box profile in the database (0°C / 24°C / 25°C), not from the code.
 
@@ -45,11 +46,11 @@ The backend and MySQL were run locally. Test readings were sent with `POST /api/
 Readings sent: 22.0°C, 26.5°C, 27.2°C, 23.0°C. Earlier test readings from the same evening (26.0°C followed by a
 sensor error and a long break) were also in the database.
 
-| Alert | Time | How long | Peak | Why |
-|---|---|---|---|---|
-| Too hot | 22:53 | about 1 min | 27.2°C | Ended by a normal reading |
-| Too hot | 21:13 – no data | at least 1 min | 26.0°C | No reading for over 90 seconds |
-| Too hot | 21:14 – sensor error | at least 1 min | 26.0°C | Ended by a sensor error |
+| Alert   | Time                 | How long       | Peak   | Why                            |
+|---------|----------------------|----------------|--------|--------------------------------|
+| Too hot | 22:53                | about 1 min    | 27.2°C | Ended by a normal reading      |
+| Too hot | 21:13 – no data      | at least 1 min | 26.0°C | No reading for over 90 seconds |
+| Too hot | 21:14 – sensor error | at least 1 min | 26.0°C | Ended by a sensor error        |
 
 ![Alerts table](../assets/testing/history-graph/01-alerts-table.png)
 
@@ -76,13 +77,13 @@ Each reading shows its own status. The sensor error shows "—" and "Sensor erro
 
 Checked in Chromium with prepared test data:
 
-| Case | Shown |
-|---|---|
+| Case                                                      | Shown                                           |
+|-----------------------------------------------------------|-------------------------------------------------|
 | Main use case: above 25°C from 14:01 to 14:20, max 28.1°C | Too hot · 14:01 – 14:20 · about 19 min · 28.1°C |
-| Alert not finished | Too hot · since 14:01 · still going |
-| Below 0°C | Too cold · 14:01 – 14:02 · about 2 min · −1.2°C |
-| No alerts | ✓ No alerts in these readings |
-| Only one reading | Not enough readings for a graph yet |
+| Alert not finished                                        | Too hot · since 14:01 · still going             |
+| Below 0°C                                                 | Too cold · 14:01 – 14:02 · about 2 min · −1.2°C |
+| No alerts                                                 | ✓ No alerts in these readings                  |
+| Only one reading                                          | Not enough readings for a graph yet             |
 
 ### Test 5 — Accessibility and phone layout
 
@@ -104,11 +105,11 @@ Checked in Chromium with prepared test data:
 
 ## 6. Definition of Done
 
-| Requirement | Status |
-|---|---|
-| The graph shows the latest readings from the API in the order they were measured. | Done |
-| The 24°C and 25°C lines have text labels. | Done |
-| Sensor errors and missing values are gaps, never 0°C. | Done |
-| The graph has a text label for screen readers, and the table shows the same data. | Done |
-| The graph fits a phone screen without sideways scrolling. | Done |
-| Alert periods show start, end, estimated duration and peak temperature (FR-13). | Done |
+| Requirement                                                                       | Status |
+|-----------------------------------------------------------------------------------|--------|
+| The graph shows the latest readings from the API in the order they were measured. | Done   |
+| The 24°C and 25°C lines have text labels.                                         | Done   |
+| Sensor errors and missing values are gaps, never 0°C.                             | Done   |
+| The graph has a text label for screen readers, and the table shows the same data. | Done   |
+| The graph fits a phone screen without sideways scrolling.                         | Done   |
+| Alert periods show start, end, estimated duration and peak temperature (FR-13).   | Done   |

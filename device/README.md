@@ -5,14 +5,14 @@ single-colour LED and passive buzzer. They are separate from the FastAPI backend
 
 ## Files
 
-| File                      | Purpose                                                                                                                       | Run directly?                    |
-|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.        | Yes                              |
-| `database.py`             | Configures the SQLite connection and SQLAlchemy sessions.                                                                     | No; imported by the other files. |
-| `models.py`               | Defines the `readings` table for SQLAlchemy.                                                                                  | No; imported by the main script. |
-| `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds. | Yes                              |
-| `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                     | Yes                              |
-| `mqtt_publisher.py`             | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements.                                                     | Yes                              |
+| File                      | Purpose                                                                                                                        | Run directly?                    |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.         | Yes                              |
+| `database.py`             | Configures the SQLite connection and SQLAlchemy sessions.                                                                      | No; imported by the other files. |
+| `models.py`               | Defines the `readings` table for SQLAlchemy.                                                                                   | No; imported by the main script. |
+| `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds.  | Yes                              |
+| `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                      | Yes                              |
+| `mqtt_publisher.py`       | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements. | Yes                              |
 
 Keep `temperature_readings.py`, `database.py` and `models.py` in the same
 directory when copying them to the Raspberry Pi.
@@ -45,13 +45,14 @@ For an existing hardware environment that does not yet have SQLAlchemy:
 ```bash
 python -m pip install "SQLAlchemy>=2,<3"
 ```
+
 For MQTT support:
 
 ```bash
 python -m pip install "paho-mqtt>=2,<3"
 ```
 
-Run only one hardware script at a time. 
+Run only one hardware script at a time.
 The MQTT publisher runs separately and may run at the same time as temperature_readings.py.
 Stop a running script with `Ctrl+C`
 before starting another.
@@ -95,6 +96,7 @@ after the transaction commits.
 ```bash
 python mqtt_publisher.py
 ```
+
 The MQTT publisher runs separately from the temperature measurement script.
 
 It sends readings that have not yet been confirmed as stored by the backend.
@@ -128,6 +130,7 @@ cd /home/user/scd41
 source .venv/bin/activate
 python temperature_readings.py
 ```
+
 In the second terminal, activate the same environment and provide the MQTT password:
 
 ```bash
@@ -138,14 +141,15 @@ echo
 export MQTT_PASSWORD
 python mqtt_publisher.py
 ```
-The MQTT password is entered without being displayed on the screen. It is not stored in the source code and is available only in the current terminal session.
+
+The MQTT password is entered without being displayed on the screen. It is not stored in the source code and is available
+only in the current terminal session.
 
 A message similar to:
 
 ```bash
 Server confirmed storage: ...
 ```
-
 
 means that the backend has confirmed that the reading was stored.
 
