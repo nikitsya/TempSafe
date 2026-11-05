@@ -64,6 +64,31 @@ Invalid data, unknown references, conflicting retries and database failures rece
 acknowledgement. Preserve those records and investigate subscriber logs rather than deleting them or
 generating replacement identifiers. Retained messages are not supported.
 
+## Device heartbeat contract
+
+The TLS subscriber accepts live contact independently of temperature samples.
+Before enabling this on a broker, grant the assigned device write access to its
+`heartbeat` topic and read access to its `challenge` topic. Grant the backend
+the reverse permissions and keep both topics private to those accounts. These
+grants are in addition to the existing readings and acknowledgement grants.
+The anonymous local Compose broker skips heartbeat processing.
+
+1. The Pi subscribes to `tempsafe/boxes/TS-01/challenge` before publishing.
+2. To request a challenge, publish `{"schema_version":1,"box_id":"TS-01"}` to
+   `tempsafe/boxes/TS-01/heartbeat`. Use QoS 1 and retain=false for the exchange.
+3. The backend replies on the challenge topic with `schema_version`, `box_id`,
+   a random `challenge` and the desired `heartbeat_interval_seconds`. The device
+   echoes only the version, box ID and challenge on the heartbeat topic within
+   30 seconds. Repeated requests within that window share the outstanding challenge.
+4. After verifying the echo, the backend records server UTC in `boxes.last_seen_at`.
+   The signed-in box details endpoint exposes that time. The device should start
+   a fresh exchange at the desired interval even when the sensor fails. Discard
+   expired challenges on reconnect rather than placing heartbeats in the readings outbox.
+
+A duplicate echo, a retained message or an echo from before a subscriber restart
+cannot refresh contact. The single-worker subscriber keeps challenges in memory.
+The Pi exchange and production broker grants require a separate deployment check.
+
 ## Deploy on the existing EC2 server
 
 First transfer the reviewed code to `/home/ubuntu/Smart-Box` and install its dependencies:
@@ -143,7 +168,7 @@ For local HTTP-only development, leave `MQTT_ENABLED=false` in `.env`. To test i
 set it to `true` and supply the MQTT settings using a separate authorised client identity; do not
 connect using the production client ID while the server is running.
 
-Expected log: `Subscribed to tempsafe/boxes/TS-01/readings`. A running service alone does not prove
+Expected log: `Broker accepted MQTT subscription`. A running service alone does not prove
 successful ingestion. Submit a valid test record, observe `stored`, check the same sample in MySQL,
 and repeat the identical message to verify that there is only one database record. Also verify a
 database failure produces no `stored`, followed by a successful unchanged retry after recovery.

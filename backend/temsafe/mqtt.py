@@ -2,15 +2,16 @@
 
 import asyncio
 import json
-from contextlib import asynccontextmanager
-from fastapi_mqtt import FastMQTT, MQTTConfig
-from starlette.concurrency import run_in_threadpool
 import logging
 import os
 import re
 import ssl
+from contextlib import asynccontextmanager
+from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
+from starlette.concurrency import run_in_threadpool
 
+from temsafe.heartbeat import subscribe_heartbeats
 from temsafe.schemas import ReadingCreate
 
 LOGGER = logging.getLogger(__name__)
@@ -69,7 +70,8 @@ def create_mqtt():
     from temsafe.database import SessionLocal
     from temsafe.readings import save_reading
 
-    if os.getenv("TEMSAFE_LOCAL_MQTT") == "1":
+    local_broker = os.getenv("TEMSAFE_LOCAL_MQTT") == "1"
+    if local_broker:
         config = MQTTConfig(host="mosquitto", port=1883)
     else:
         for name in ("MQTT_HOST", "MQTT_PASSWORD"):
@@ -105,12 +107,16 @@ def create_mqtt():
                     return
                 client.publish(consumer.acks_topic, acknowledgement, qos=1, retain=False)
 
+    # The anonymous Compose broker cannot authenticate a heartbeat publisher.
+    if not local_broker:
+        subscribe_heartbeats(mqtt, consumer.box_id, SessionLocal)
+
     @mqtt.on_subscribe()
     def subscribed(client, mid, granted_qos, properties):
         if not granted_qos or any(code >= 128 for code in granted_qos):
             LOGGER.error("MQTT subscription refused; check broker ACLs")
         else:
-            LOGGER.info("Subscribed to %s", consumer.readings_topic)
+            LOGGER.info("Broker accepted MQTT subscription")
 
     return mqtt
 

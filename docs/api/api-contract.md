@@ -190,8 +190,9 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
   Missing or unreliable observation time, or time in the future, produces `unknown`. Receipt time is not used.
   This describes sample age, not sensor health: a recent sensor error can be `fresh` with `temperature_state: Unknown`.
   It is evaluated on each request; the frontend must refresh or age the display rather than keep a cached result live.
-- Intended contact rule: more than 180 seconds without authenticated contact means not reporting. Heartbeat updates
-  are not implemented; `last_seen_at: null` means contact is unknown, not proof that the device is offline.
+- Intended contact rule: more than 180 seconds without authenticated contact means not reporting.
+  The [MQTT challenge exchange](../mqtt.md#device-heartbeat-contract) records server UTC on a valid echo;
+  `last_seen_at: null` means contact is unknown, not proof that the device is offline.
 - Sensor errors remain explicit even when stale or not reporting. Receipt of an old buffered sample does not make it
   fresh.
 - Handle HTTP status and `detail` together: `404` with `Box not found` is not the no-observations state. Invalid `limit`

@@ -3,11 +3,10 @@
 import json
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
+from temsafe.mqtt import ReadingConsumer
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 from uuid import uuid4
-
-from temsafe.mqtt import ReadingConsumer
 
 
 @pytest.fixture
@@ -115,8 +114,11 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
         mqtt.client.subscribe = Mock()
         for _ in range(2):
             mqtt.client.on_connect(0, 0, {})
-        assert mqtt.client.subscribe.call_count == 2
-        subscription = mqtt.client.subscribe.call_args.args[0]
+        topics = [call.args[0].topic for call in mqtt.client.subscribe.call_args_list]
+        assert topics.count("tempsafe/boxes/TS-01/readings") == 2
+        assert topics.count("tempsafe/boxes/TS-01/heartbeat") == 2
+        subscription = next(call.args[0] for call in mqtt.client.subscribe.call_args_list
+                            if call.args[0].topic.endswith("/readings"))
         assert subscription.topic == "tempsafe/boxes/TS-01/readings"
         assert subscription.retain_as_published
         client = mqtt.client
@@ -169,3 +171,39 @@ def test_mqtt_disabled_or_missing_configuration(monkeypatch):
     monkeypatch.setenv("MQTT_HOST", "mqtt.example.test")
     with pytest.raises(ValueError, match="MQTT_PASSWORD"):
         create_mqtt()
+
+
+@pytest.mark.parametrize("local", [False, True])
+def test_heartbeat_dispatch_requires_authenticated_broker(monkeypatch, local):
+    import asyncio
+    from temsafe.heartbeat import HeartbeatConsumer
+    from temsafe.mqtt import create_mqtt
+
+    monkeypatch.setenv("MQTT_ENABLED", "true")
+    monkeypatch.setenv("TEMSAFE_LOCAL_MQTT", "1" if local else "0")
+    monkeypatch.setenv("MQTT_HOST", "mqtt.example.test")
+    monkeypatch.setenv("MQTT_PASSWORD", "test-password")
+    monkeypatch.setenv("MQTT_BOX_ID", "TS-01")
+    receive = Mock(return_value="challenge-response")
+    monkeypatch.setattr(HeartbeatConsumer, "receive", receive)
+    topic = "tempsafe/boxes/TS-01/heartbeat"
+
+    async def scenario():
+        client = create_mqtt().client
+        client.subscribe = Mock()
+        client.on_connect(0, 0, {})
+        topics = {call.args[0].topic for call in client.subscribe.call_args_list}
+        if local:
+            assert topic not in topics
+            return
+        assert topic in topics
+        client._connack_received.set()
+        client._connection = Mock()
+        client._connection.is_closing.return_value = False
+        client.publish = Mock()
+        await client.on_message(topic, b"request", 1, {"retain": 1})
+        receive.assert_called_once_with(topic, b"request", True)
+        client.publish.assert_called_once_with("tempsafe/boxes/TS-01/challenge", "challenge-response", qos=1,
+                                               retain=False)
+
+    asyncio.run(scenario())
