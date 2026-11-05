@@ -225,4 +225,5 @@ Run the server using the [backend guide](../../backend/temsafe/README.md); inspe
 ## Operator configuration
 
 The protected [threshold configuration API](threshold-configuration.md) creates and
-selects versioned demo profiles. Its operator token does not secure the other endpoints.
+selects versioned demo profiles. Its heartbeat routes independently read and update the desired interval for a box. Its
+operator token does not secure the other endpoints.

@@ -101,6 +101,13 @@ is missing, back up the database and run
 The sign-in endpoint uses this table to create and expire sessions. Fresh databases
 created with the current schema already include it.
 
+## Heartbeat interval migration
+
+Before starting the updated backend against an existing database, back it up and
+apply [005_add_box_heartbeat_interval.sql](migrations/005_add_box_heartbeat_interval.sql)
+once if `boxes.heartbeat_interval_seconds` is missing. Existing boxes receive the
+60-second default. The current baseline already defines this column for fresh installs.
+
 ## Verify the setup
 
 Select `temsafe` and run:
