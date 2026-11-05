@@ -19,7 +19,7 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 ## Current progress
 
 - **Deployment:** the application is hosted at [tempsafe.app](https://tempsafe.app)
-  on AWS EC2, with Caddy providing HTTPS and a reverse proxy to FastAPI.
+  on AWS EC2, with Nginx providing HTTPS and a reverse proxy to FastAPI.
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
 - **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
