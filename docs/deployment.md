@@ -10,15 +10,69 @@ TempSafe was deployed on 2 November 2026 at
 | Server            | AWS EC2, Ubuntu Server 24.04 LTS, x86-64, `t3.small`                                |
 | Storage           | 20 GiB EBS volume                                                                   |
 | DNS               | Cloudflare A record for `tempsafe.app` pointing to the server's public IPv4 address |
-| HTTPS             | Caddy, with automatic certificate management                                        |
+| HTTPS             | Nginx with a Certbot-managed Let’s Encrypt certificate                              |
 | Backend           | FastAPI and Uvicorn, managed by `tempsafe.service`                                  |
-| Backend listener  | `127.0.0.1:8000`, reached through Caddy                                             |
+| Backend listener  | `127.0.0.1:8000`, reached through Nginx                                             |
 | Database          | MySQL 8.4 in Docker Compose, with the persistent `mysql_data` volume                |
 | Database listener | `127.0.0.1:3307` on the host                                                        |
 | Project directory | `/home/ubuntu/Smart-Box`                                                            |
 
 The frontend and API share the same domain. Closing an SSH session or a local SSH tunnel does not stop
 the services. The EC2 instance must remain running for the site to be available.
+
+## HTTPS on Ubuntu
+
+The [Nginx site](../deploy/tempsafe-nginx.conf) serves the public domain on 443.
+It redirects HTTP to HTTPS and serves HTTP-01 certificate challenges for both
+`tempsafe.app` and `mqtt.tempsafe.app` from `/var/www/letsencrypt`. Mosquitto
+owns port 8883 and uses its own certificate and renewal hook.
+
+On a new host, install Nginx and Certbot. Point the two public DNS names at EC2
+and allow port 80. Create the webroot with `sudo install -d -m 755 /var/www/letsencrypt`.
+Enable the port-80 server block from the site file on its own first, so that the
+challenge path works before the HTTPS certificate exists. On an existing host,
+serve that same challenge path through the running proxy until the certificate
+has been issued. Preserve any existing proxy-level authentication during migration.
+Then run:
+
+```sh
+sudo certbot certonly --webroot -w /var/www/letsencrypt --cert-name tempsafe.app -d tempsafe.app
+sudo install -m 644 deploy/tempsafe-nginx.conf /etc/nginx/sites-available/tempsafe
+sudo ln -sfn /etc/nginx/sites-available/tempsafe /etc/nginx/sites-enabled/tempsafe
+sudo nginx -t
+```
+
+Disable the distribution’s default site if enabled. When replacing another proxy,
+stop it only after validation, start Nginx and check the responses below. If the
+checks fail, stop Nginx and restart the previous service. After successful checks,
+enable Nginx at boot and disable the previous service. For an existing Nginx
+instance, reload it after validation.
+
+```sh
+sudo install -m 755 deploy/tempsafe-nginx-renew /etc/letsencrypt/renewal-hooks/deploy/tempsafe-nginx
+sudo systemctl enable --now certbot.timer
+sudo certbot renew --dry-run
+curl -I http://tempsafe.app/
+curl -i https://tempsafe.app/api/health
+curl -I https://tempsafe.app/docs
+```
+
+Expect a 308 redirect to HTTPS, a 200 health response and a 404 for the
+documentation paths (`/docs`, `/redoc` and `/openapi.json`). HTTPS responses
+carry HSTS, `X-Content-Type-Options: nosniff` and `X-Frame-Options: DENY`.
+The renewal hook reloads Nginx after renewal of the website certificate.
+
+### Deployment verification on 5 November 2026
+
+External checks returned 200 for the home page and `/api/health`, 308 for the
+HTTP redirect and 404 for `/docs`, `/redoc` and `/openapi.json`. The health
+response identified Nginx and carried all three security headers. The box’s latest
+reading still returned 200 without a session on the deployed revision. Confirm
+per-box authorisation when deploying the protected API.
+
+On EC2, Nginx listened on ports 80 and 443 and Mosquitto listened on 8883.
+Certbot successfully simulated renewal for both domains. The website renewal
+hook passed its configuration test and reloaded Nginx.
 
 ## Network access
 
@@ -39,10 +93,9 @@ broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions ar
 See the [frontend guide](../frontend/README.md) for application limitations and the
 [MQTT guide](mqtt.md) for worker deployment and device integration status.
 
-Caddy Basic Authentication was used during initial setup. It is a separate server access control,
-not application authentication. If it is removed, the API is publicly
-accessible, including reading submission. Use test data only; implement authentication and authorisation
-before handling real user or device data.
+Nginx terminates TLS and proxies the website and API to Uvicorn. Keep application
+authentication and box permissions in FastAPI. Use test data until the deployed
+revision has passed the access checks.
 
 For connection diagrams, PyCharm tunnel settings and the distinction between
 verified configuration and pending server checks, see [Database connections](database-connections.md).
@@ -52,7 +105,7 @@ verified configuration and pending server checks, see [Database connections](dat
 Run these commands over SSH on the Ubuntu server:
 
 ```sh
-sudo systemctl status tempsafe caddy --no-pager
+sudo systemctl status tempsafe nginx --no-pager
 cd /home/ubuntu/Smart-Box
 sudo docker compose ps
 curl --fail http://127.0.0.1:8000/api/health
@@ -66,20 +119,20 @@ To inspect recent logs:
 
 ```sh
 sudo journalctl -u tempsafe -n 50 --no-pager
-sudo journalctl -u caddy -n 50 --no-pager
+sudo journalctl -u nginx -n 50 --no-pager
 ```
 
-After changing `/etc/caddy/Caddyfile`, validate it before reloading:
+After changing `/etc/nginx/sites-available/tempsafe`, validate it before reloading:
 
 ```sh
-sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ## Configuration and persistence
 
 Database credentials are stored in the server's `.env` file. Keep that file, SSH private keys and
 access credentials out of Git. The backend service definition is stored at
-`/etc/systemd/system/tempsafe.service`; Caddy configuration is stored at `/etc/caddy/Caddyfile`.
+`/etc/systemd/system/tempsafe.service`; the Nginx site is enabled through `/etc/nginx/sites-enabled/tempsafe`.
 
 The Docker volume preserves database data when containers are recreated. It is not a backup;
 do not run `docker compose down -v` unless the stored data should be deleted.
@@ -90,33 +143,6 @@ An Elastic IP can provide a stable address if configured later.
 
 Changes committed locally do not automatically update the server. Deploy application changes separately,
 apply any required database migrations and restart `tempsafe.service` after updating the backend.
-
-## Public endpoint hardening
-
-On 5 November 2026, unauthenticated requests to the public `/docs`, `/redoc` and
-`/openapi.json` endpoints returned 200. The three headers below were absent on the
-checked responses. To apply the prepared change after review, install the
-[site directives](../deploy/tempsafe-hardening.caddy) on EC2:
-
-```sh
-cd /home/ubuntu/Smart-Box
-sudo install -m 644 deploy/tempsafe-hardening.caddy /etc/caddy/tempsafe-hardening.caddy
-```
-
-Add `import /etc/caddy/tempsafe-hardening.caddy` inside the existing
-`tempsafe.app` site block. Keep the site's reverse proxy and any access controls.
-Validate the complete Caddyfile and reload using the service commands above.
-Check the public URLs from outside EC2:
-
-```sh
-for endpoint in docs redoc openapi.json api/health; do
-    curl -sS -o /dev/null -D - "https://tempsafe.app/$endpoint"
-done
-```
-
-Expect 404 for the three documentation paths and 200 for health. Check for
-`Strict-Transport-Security` with `max-age=31536000`, `X-Content-Type-Options: nosniff`
-and `X-Frame-Options: DENY` on the responses.
 
 ## Stored data checks
 

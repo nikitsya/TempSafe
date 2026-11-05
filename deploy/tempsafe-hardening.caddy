@@ -1,9 +1,0 @@
-# Import inside the existing tempsafe.app site block.
-header {
-    Strict-Transport-Security "max-age=31536000"
-    X-Content-Type-Options "nosniff"
-    X-Frame-Options "DENY"
-}
-
-@apiDocs path /docs /docs/* /redoc /redoc/* /openapi.json /openapi.json/
-respond @apiDocs 404
