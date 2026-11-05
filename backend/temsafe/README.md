@@ -5,7 +5,7 @@ See the [API contract](../../docs/api/api-contract.md) for endpoints, fields, ex
 ## Hosted backend
 
 The application at [tempsafe.app](https://tempsafe.app) runs this backend as the `tempsafe`
-systemd service on AWS EC2. Nginx forwards HTTPS requests to Uvicorn on `127.0.0.1:8000`.
+systemd service on AWS EC2. Caddy forwards HTTPS requests to Uvicorn on `127.0.0.1:8000`.
 See the [deployment notes](../../docs/deployment.md) for service checks.
 The commands below are for local development; the hosted service runs without `--reload`.
 
