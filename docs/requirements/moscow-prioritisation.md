@@ -48,11 +48,11 @@ colour; the application uses green, amber and red with labels and symbols.
 
 ## Should Have
 
-| ID    | Feature                             | Status      | Why it is valuable                                                                     | Temporary alternative and UD justification                                                                                                                           |
-|-------|-------------------------------------|-------------|----------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FR-11 | Refresh the dashboard automatically | Done        | Reduce repeated interaction while viewing status.                                      | A clearly labelled manual refresh can support the baseline journey. P3: automatic refresh reduces effort, with refresh failures visible.                             |
-| FR-12 | Record review of a flagged sample   | Planned     | Help users record that a flagged observation has been reviewed.                        | The user can inspect history without recording acknowledgement. P3/P5: distinguish reviewed from resolved; acknowledgement must not remove an ongoing warning.       |
-| FR-15 | Provide an audible buzzer alert     | In progress | Add local audible feedback on Alert when available.                                    | P4: complement LED and application information. Visual feedback remains the temporary alternative; a silence control must not clear the warning.                     |
+| ID    | Feature                             | Status      | Why it is valuable                                              | Temporary alternative and UD justification                                                                                                                     |
+|-------|-------------------------------------|-------------|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| FR-11 | Refresh the dashboard automatically | Done        | Reduce repeated interaction while viewing status.               | A clearly labelled manual refresh can support the baseline journey. P3: automatic refresh reduces effort, with refresh failures visible.                       |
+| FR-12 | Record review of a flagged sample   | Planned     | Help users record that a flagged observation has been reviewed. | The user can inspect history without recording acknowledgement. P3/P5: distinguish reviewed from resolved; acknowledgement must not remove an ongoing warning. |
+| FR-15 | Provide an audible buzzer alert     | In progress | Add local audible feedback on Alert when available.             | P4: complement LED and application information. Visual feedback remains the temporary alternative; a silence control must not clear the warning.               |
 
 ## Could Have
 
