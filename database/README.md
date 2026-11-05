@@ -1,13 +1,14 @@
 # TempSafe database
 
-We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates seven tables for
-boxes, users, access permissions, temperature profiles, measurements, reviews and the selected box configuration.
+We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates eight tables for
+boxes, users, access permissions, temperature profiles, measurements, reviews, the selected box configuration and user
+sessions.
 Choose either setup below.
 
 ## Table relationships
 
 See [Figure 1: the database ERD](../docs/design/database-erd.md#figure-1-tables-keys-and-relationships)
-for all seven tables, their fields, primary and foreign keys, and relationship cardinalities.
+for the relationships between boxes, users, profiles, measurements and reviews.
 The document also explains composite constraints and historical threshold profiles.
 
 ## Hosted database access
@@ -28,7 +29,7 @@ docker compose up -d --wait mysql
 ```
 
 On the first start, this creates the `temsafe` database, the `temsafe` database
-user and all seven tables. Connect using host `127.0.0.1`, port `3307` (unless changed
+user and all eight tables. Connect using host `127.0.0.1`, port `3307` (unless changed
 in `.env`), user `temsafe` and your `MYSQL_PASSWORD`.
 
 To stop it, use `docker compose stop mysql`. Your data stays in the Docker volume.
@@ -92,6 +93,14 @@ backing up. Fresh databases created with the updated schema already have this ta
 do not run migration 003 again. See the
 [operator API guide](../docs/api/threshold-configuration.md) for selection and access rules.
 
+## User session migration
+
+On an existing database, check `SHOW TABLES;` for `user_sessions`. If the table
+is missing, back up the database and run
+[004_add_user_sessions.sql](migrations/004_add_user_sessions.sql) once.
+The sign-in endpoint uses this table to create and expire sessions. Fresh databases
+created with the current schema already include it.
+
 ## Verify the setup
 
 Select `temsafe` and run:
@@ -101,7 +110,7 @@ SHOW TABLES;
 ```
 
 Expected tables: `app_users`, `box_access`, `boxes`, `sample_reviews`,
-`temperature_samples`, `threshold_profiles` and `box_configuration`.
+`temperature_samples`, `threshold_profiles`, `box_configuration` and `user_sessions`.
 
 Follow the [backend test instructions](../tests/backend/README.md) to check database
 access and API behaviour. For the schema rationale, see the
