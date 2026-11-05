@@ -377,6 +377,11 @@ input {
     color: var(--red);
 }
 
+.tag.warning {
+    background: var(--amber-bg);
+    color: var(--amber);
+}
+
 .tag.unknown {
     background: var(--grey-bg);
     color: var(--grey);
@@ -438,4 +443,162 @@ input {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+}
+
+/* Text for screen readers only */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* History graph */
+.graph {
+    margin: 0 0 16px;
+}
+
+.graph svg {
+    display: block;
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+}
+
+.graph figcaption {
+    margin-top: 6px;
+}
+
+.graph-grid {
+    stroke: var(--line);
+    stroke-width: 1;
+}
+
+.graph-axis {
+    fill: var(--muted);
+    font-size: 14px;
+}
+
+.graph-line {
+    fill: none;
+    stroke: var(--navy);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+}
+
+.graph-point {
+    fill: var(--navy);
+}
+
+.graph-point-high {
+    fill: var(--red);
+}
+
+.graph-upper {
+    stroke: var(--red);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+}
+
+.graph-warning {
+    stroke: #946800;
+    stroke-width: 1.5;
+    stroke-dasharray: 2 4;
+}
+
+.graph-legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 8px 0 4px;
+    padding: 0;
+    font-size: 14px;
+}
+
+.graph-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-upper,
+.legend-warning {
+    display: inline-block;
+    width: 24px;
+    border-top: 2px dashed var(--red);
+}
+
+.legend-warning {
+    border-top: 2px dotted #946800;
+}
+
+.legend-high {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+}
+
+.graph figcaption p {
+    margin: 4px 0 0;
+}
+
+/* Alert periods above the history graph (FR-13) */
+.periods {
+    margin-bottom: 14px;
+}
+
+.periods-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+}
+
+.periods-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.periods-table .periods-title {
+    text-align: left;
+    font-weight: 700;
+    font-size: 16px;
+    padding-bottom: 6px;
+}
+
+.periods-table th,
+.periods-table td {
+    text-align: left;
+    padding: 8px 8px;
+    border-bottom: 1px solid #f1c7cb;
+    vertical-align: top;
+}
+
+.periods-table thead th {
+    font-size: 13px;
+    color: var(--muted);
+    border-bottom: 2px solid var(--line);
+}
+
+.periods-table tbody th,
+.periods-table tbody td {
+    background: var(--red-bg);
+    color: var(--red);
+}
+
+.periods-table tbody th {
+    white-space: nowrap;
+}
+
+.period-none {
+    margin: 0 0 14px;
+    color: var(--green);
+    font-weight: 600;
 }
