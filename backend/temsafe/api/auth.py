@@ -3,15 +3,14 @@
 import hashlib
 import os
 import secrets
-from datetime import UTC, datetime, timedelta
-from typing import Annotated
-
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
+from datetime import UTC, datetime, timedelta
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Response
 from pydantic import BaseModel, SecretStr
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 from temsafe.database import get_db
 from temsafe.models import AppUser, BoxAccess, UserSession

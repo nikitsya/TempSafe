@@ -7,11 +7,10 @@ from datetime import datetime
 from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlalchemy import select, text
-from uuid import uuid4
-
 from temsafe.database import SessionLocal, get_db
 from temsafe.main import app
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
+from uuid import uuid4
 
 
 def test_database_connection():
