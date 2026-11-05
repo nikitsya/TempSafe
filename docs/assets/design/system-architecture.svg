@@ -4,7 +4,8 @@
     to SQLite. A separate Pi publisher retries queued samples until the server confirms storage. Over TLS, an MQTT
     broker forwards each reading to a worker that stores it in MySQL. A stored acknowledgement returns through the
     broker. The browser requests dashboard and history data over HTTPS through Caddy and FastAPI. The broker,
-    worker, web services and MySQL share one EC2 instance.
+    worker, web services and MySQL share one EC2 instance. The MySQL host port is bound to localhost.
+    Database credentials come from the server .env file. The account schema stores password hashes.
   </desc>
   <defs>
     <marker id="write" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#087466"/></marker>
@@ -44,6 +45,9 @@
   <text x="1126" y="413" class="name">MySQL 8.4</text>
   <text x="1126" y="452" class="detail">Docker Compose</text>
   <text x="1126" y="480" class="detail">Persistent volume</text>
+  <text x="1104" y="548" class="detail">Host access: 127.0.0.1:3307</text>
+  <text x="1104" y="578" class="detail">DB credentials: server .env</text>
+  <text x="1104" y="608" class="detail">User accounts: password hashes</text>
   <path class="wire ingest" d="M288 405 H337 V324 H426"/>
   <path class="wire ingest" d="M655 324 H742"/>
   <path class="wire ingest" d="M966 324 H1034 V390 H1100"/>
@@ -59,7 +63,7 @@
   <text x="450" y="590" class="detail">HTTPS · port 443</text>
   <rect x="746" y="510" width="220" height="115" rx="12" class="node"/>
   <text x="766" y="555" class="name">FastAPI</text>
-  <text x="766" y="590" class="detail">Pages and API</text>
+  <text x="766" y="590" class="detail">HTTP · 127.0.0.1:8000</text>
   <path class="wire query" d="M288 565 H426"/>
   <path class="wire query" d="M655 565 H742"/>
   <path class="wire query" d="M966 565 H1034 V480 H1100"/>
