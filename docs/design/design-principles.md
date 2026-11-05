@@ -53,7 +53,7 @@ immediately and understood at a glance. For this reason, Principle 4 is the most
    warning.
 6. The paramedic notices the alert without reading long text.
 7. When there is time, the paramedic opens the dashboard and sees the current temperature in large numbers and its
-   observation time. Estimated excursion start, duration and maximum-temperature summaries are Should Have enhancements.
+   observation time. Estimated excursion start, duration and maximum-temperature summaries are required for FR-13.
 8. The paramedic checks the box and follows the service's procedures.
 9. The reading history keeps the record for later review.
 

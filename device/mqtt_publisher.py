@@ -1,16 +1,15 @@
 import json
 import os
-import ssl
-from threading import Event
-from uuid import UUID
-
 import paho.mqtt.client as mqtt
+import ssl
+from queue import SimpleQueue, Empty
 from sqlalchemy import select, update
+from threading import Event
+from time import monotonic, sleep
+from uuid import UUID
 
 from database import SessionLocal
 from models import Reading
-from queue import SimpleQueue, Empty
-from time import monotonic, sleep
 
 BOX_ID = "TS-01"
 MQTT_HOST = "mqtt.tempsafe.app"
@@ -21,6 +20,8 @@ READINGS_TOPIC = f"tempsafe/boxes/{BOX_ID}/readings"
 ACKS_TOPIC = f"tempsafe/boxes/{BOX_ID}/acks"
 
 subscription_ready = Event()
+
+
 def on_connect(client, userdata, flags, reason_code, properties):
     subscription_ready.clear()
 
@@ -47,7 +48,8 @@ def on_subscribe(client, userdata, mid, reason_codes, properties):
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
     subscription_ready.clear()
     print("MQTT disconnected:", reason_code)
-    
+
+
 acknowledgements = SimpleQueue()
 
 
@@ -77,6 +79,8 @@ def on_message(client, userdata, message):
         return
 
     acknowledgements.put(sample_id)
+
+
 def make_payload(reading):
     return json.dumps({
         "schema_version": 1,
@@ -91,6 +95,8 @@ def make_payload(reading):
         "temperature_c": reading.temperature_c,
         "quality": reading.quality,
     }, allow_nan=False)
+
+
 def create_client():
     password = os.environ.get("MQTT_PASSWORD")
     if not password:
@@ -117,6 +123,8 @@ def create_client():
     client.reconnect_delay_set(min_delay=1, max_delay=30)
 
     return client
+
+
 def get_pending_reading():
     with SessionLocal() as session:
         reading = session.scalar(
@@ -145,9 +153,11 @@ def mark_uploaded(sample_id):
                 Reading.uploaded == 0,
             )
             .values(uploaded=1)
-            )
+        )
 
     print("Server confirmed storage:", sample_id)
+
+
 def send_and_wait(client, sample_id, payload):
     result = client.publish(
         READINGS_TOPIC,
@@ -180,6 +190,8 @@ def send_and_wait(client, sample_id, payload):
 
     print("No storage confirmation; record remains pending")
     return False
+
+
 def main():
     client = create_client()
     retry_delay = 2

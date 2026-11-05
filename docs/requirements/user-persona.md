@@ -102,7 +102,7 @@ records the temperature excursion. With connectivity and permission, a phone Ale
 
 > **Alert: Controlled Drug Box temperature has exceeded 25°C.**
 >
-If the Should Have excursion summary is implemented, the web application can show an estimated period and maximum
+The Must Have excursion summary (FR-13) shows an estimated period and maximum
 temperature, for example:
 
 > **ESTIMATED EXCURSION – 12 min – max 27.4°C**
@@ -161,7 +161,7 @@ The TempSafe system includes:
 - **SCD-41 temperature sensor** – measures the temperature inside the Controlled Drug Box;
 - **LED indicator** – provides immediate visual feedback about the temperature status;
 - **Buzzer** – Should Have audible feedback, subject to implementation;
-- **Database / Data Storage** – stores sample attempts and profiles; estimated excursion summaries are Should Have;
+- **Database / Data Storage** – stores sample attempts and profiles; estimated excursion summaries are Must Have;
 - **Web Application** – displays current status, freshness, history and alerts; estimated excursion duration is
   optional;
 - **Notification System** – sends warnings and alerts to the user;

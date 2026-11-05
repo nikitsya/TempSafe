@@ -8,7 +8,7 @@ to collect the following data:
 - Current temperature inside the controlled drug box (°C).
 - Date and time of each temperature reading.
 - Temperature status, for example `Normal`, `Warning` or `Alert`.
-- Timestamped out-of-range observations; estimated excursion duration is a Should Have summary.
+- Timestamped out-of-range observations; FR-13 requires an estimate of excursion duration.
 
 **Current project scope:** GPS/location tracking and bag-opening detection are not included in this version of the
 project.
