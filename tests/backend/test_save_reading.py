@@ -15,12 +15,18 @@ from temsafe.models import Box, TemperatureSample, ThresholdProfile
 from temsafe.readings import save_reading
 from temsafe.schemas import ReadingCreate
 
+DEVICE_KEY = uuid4().hex
+
 
 @pytest.fixture
-def payload():
+def payload(monkeypatch, grant_boxes):
     """Provide a valid device payload without inserting any records."""
+    box_id = f"pytest-{uuid4()}"
+    grant_boxes(box_id)
+    monkeypatch.setenv("TEMSAFE_DEVICE_KEY", DEVICE_KEY)
+    monkeypatch.setenv("TEMSAFE_DEVICE_BOX_ID", box_id)
     return {
-        "sample_id": str(uuid4()), "box_id": f"pytest-{uuid4()}",
+        "sample_id": str(uuid4()), "box_id": box_id,
         "sequence_no": 1, "profile_id": str(uuid4()),
         "observed_at": "2026-01-01T13:00:00+01:00", "clock_reliable": True,
         "temperature_c": "24.50", "quality": "valid",
@@ -194,7 +200,7 @@ def test_duplicate_insert_race(stored_box, monkeypatch, conflicting):
 
 def test_post_reading_and_retry(stored_box):
     """Persist through HTTP and return the same sample for an equivalent retry."""
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
         response = client.post("/api/readings", json=stored_box)
         assert response.status_code == 200
         saved = response.json()
@@ -220,7 +226,7 @@ def test_post_reading_and_retry(stored_box):
 ])
 def test_post_conflicting_reading(stored_box, changes):
     """Return 409 for reused identifiers and preserve the stored reading."""
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
         original = client.post("/api/readings", json=stored_box)
         assert original.status_code == 200
         response = client.post("/api/readings", json=stored_box | changes)
@@ -230,14 +236,14 @@ def test_post_conflicting_reading(stored_box, changes):
 
 
 @pytest.mark.parametrize("field, detail", [
-    ("box_id", "Box not found"),
+    ("box_id", "Device cannot submit readings for this box"),
     ("profile_id", "Temperature profile not found for this box"),
 ])
 def test_post_missing_reference(stored_box, field, detail):
     """Return 404 when a required parent record is missing."""
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
         response = client.post("/api/readings", json=stored_box | {field: str(uuid4())})
-        assert response.status_code == 404
+        assert response.status_code == (403 if field == "box_id" else 404)
         assert response.json() == {"detail": detail}
 
 
@@ -247,7 +253,7 @@ def test_post_missing_reference(stored_box, field, detail):
 ])
 def test_post_missing_sensor_or_clock_data(stored_box, changes):
     """Preserve explicitly missing measurements and unreliable clock data."""
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
         response = client.post("/api/readings", json=stored_box | changes)
         assert response.status_code == 200
         for field, value in changes.items():
@@ -262,6 +268,6 @@ def test_post_missing_sensor_or_clock_data(stored_box, changes):
 ])
 def test_post_invalid_reading(payload, changes):
     """Return 422 for invalid payloads, including unsupported database dates."""
-    with TestClient(app) as client:
+    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
         response = client.post("/api/readings", json=payload | changes)
         assert response.status_code == 422

@@ -11,8 +11,9 @@ from temsafe.models import Box
 
 
 @pytest.fixture
-def box_client():
+def box_client(grant_boxes):
     """Provide a test client without querying the real database."""
+    grant_boxes("test-box")
     db = Mock()
     db.execute.return_value.scalars.return_value.first.return_value = None
 

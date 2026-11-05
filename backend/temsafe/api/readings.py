@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from temsafe import models
+from temsafe.api.auth import AllowedBoxes, require_device
 from temsafe.database import get_db
 from temsafe.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
 from temsafe.schemas import ReadingCreate, ReadingResponse
@@ -19,9 +20,12 @@ router = APIRouter(tags=["Readings"])
 })
 def post_reading(
         reading: ReadingCreate,
+        device_box: Annotated[str, Depends(require_device)],
         db: Annotated[Session, Depends(get_db)],
 ):
     """Store a sample or return an identical retry without changing its receipt time."""
+    if reading.box_id != device_box:
+        raise HTTPException(403, "Device cannot submit readings for this box")
     try:
         return save_reading(db, reading)
     except ReadingReferenceNotFound as error:
@@ -34,6 +38,7 @@ def post_reading(
 
 @router.get("/readings", response_model=list[ReadingResponse])
 def get_readings(
+        allowed: AllowedBoxes,
         db: Annotated[Session, Depends(get_db)],
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
@@ -41,6 +46,7 @@ def get_readings(
     # Sort by receipt time; delayed uploads may have older observation times.
     result = db.execute(
         select(models.TemperatureSample)
+        .where(models.TemperatureSample.box_id.in_(allowed))
         .order_by(
             models.TemperatureSample.received_at.desc(),
             models.TemperatureSample.sample_id.desc(),
@@ -53,11 +59,14 @@ def get_readings(
 @router.get("/readings/{sample_id}", response_model=ReadingResponse)
 def get_reading(
         sample_id: str,
+        allowed: AllowedBoxes,
         db: Annotated[Session, Depends(get_db)]
 ):
     """Return one sample by ID, or 404 when it does not exist."""
     result = db.execute(
-        select(models.TemperatureSample).where(models.TemperatureSample.sample_id == sample_id)
+        select(models.TemperatureSample).where(
+            models.TemperatureSample.sample_id == sample_id, models.TemperatureSample.box_id.in_(allowed)
+        )
     )
     reading = result.scalars().first()
 
