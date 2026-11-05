@@ -13,13 +13,14 @@ from temsafe.models import Box, TemperatureSample, ThresholdProfile
 
 
 @pytest.fixture
-def latest_reading_data(monkeypatch):
+def latest_reading_data(monkeypatch, grant_boxes):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
     clock = Mock()
     clock.now.return_value = datetime(2026, 1, 1, 12, 10, tzinfo=UTC)
     monkeypatch.setattr("temsafe.api.boxes.datetime", clock)
     with SessionLocal() as db:
         box_ids = [f"pytest-{uuid4()}", f"pytest-{uuid4()}"]
+        grant_boxes(*box_ids)
         profile_ids = [str(uuid4()), str(uuid4())]
 
         try:

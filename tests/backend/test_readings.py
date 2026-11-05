@@ -12,8 +12,9 @@ from temsafe.models import TemperatureSample
 
 
 @pytest.fixture
-def reading_client():
+def reading_client(grant_boxes):
     """Replace the database session for these HTTP response tests only."""
+    grant_boxes("test-box")
     db = Mock()
     db.execute.return_value.scalars.return_value.all.return_value = []
 

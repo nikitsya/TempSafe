@@ -1,5 +1,47 @@
 # TempSafe API contract
 
+## Authentication
+
+- `POST /api/login` accepts JSON fields `username` and `password`. Success returns 204
+  and an eight-hour, host-only session cookie with Secure, HttpOnly and SameSite=Strict.
+  Use HTTPS. Incorrect credentials return 401.
+- `POST /api/logout` revokes the server-side session and clears the cookie. It returns 204.
+- Box and reading queries require a current session (401 otherwise). Lists contain only
+  assigned boxes' samples. Requests for unassigned boxes or samples return 404.
+  Threshold configuration also requires the existing operator bearer token.
+- `POST /api/readings` requires the `X-Device-Key` header. Set `TEMSAFE_DEVICE_KEY` in
+  the server environment to a separate randomly generated secret of at least 32 characters
+  and set `TEMSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
+  return 401. A valid key used for another box returns 403. The Raspberry Pi MQTT publisher
+  continues to use its broker credentials. `GET /api/health` remains public.
+
+### Provision a prototype account
+
+For an existing database, apply [migration 004](../../database/migrations/004_add_user_sessions.sql)
+once after backing up MySQL. Fresh installations include the session table in the baseline schema.
+Install the project dependencies. From the project root, run the following with the
+project virtual environment active. Enter a new username and a password when prompted.
+The example grants access to the existing prototype box. Both inserts commit together.
+
+```sh
+python - <<'PYTHON'
+from getpass import getpass
+from argon2 import PasswordHasher
+from temsafe.database import SessionLocal
+from temsafe.models import AppUser, BoxAccess
+
+username = getpass("New username (hidden): ").strip()
+password = getpass("New password: ")
+if not username or not password:
+    raise SystemExit("A username and password are required.")
+with SessionLocal.begin() as db:
+    user = AppUser(auth_subject=username, password_hash=PasswordHasher().hash(password))
+    db.add(user)
+    db.flush()
+    db.add(BoxAccess(user_id=user.user_id, box_id="TS-01"))
+PYTHON
+```
+
 ## Temperature classification
 
 [`temperature.py`](../../backend/temsafe/temperature.py) provides
@@ -167,7 +209,7 @@ The dashboard maps the API response and distinguishes the two `404` cases using 
 It currently derives age from the browser clock rather than consuming `freshness`. See the
 [frontend guide](../../frontend/README.md#current-behaviour-and-limitations) for remaining UI work.
 
-Device-contact handling and application authentication remain unimplemented. A silence or review
+Device-contact handling remains planned. A silence or review
 acknowledgement action is not part of these read endpoints.
 
 ## Other available endpoints

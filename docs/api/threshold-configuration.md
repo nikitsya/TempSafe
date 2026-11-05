@@ -7,17 +7,16 @@ not prove that the device has received or adopted it.
 
 ## Access and setup
 
-The two routes require `Authorization: Bearer <operator-token>`. Configure
+Both routes require a signed-in session assigned to the requested box and `Authorization: Bearer <operator-token>`.
+Configure
 `TEMSAFE_CONFIG_ADMIN_TOKEN` with a cryptographically random value of at least
 32 characters in the backend environment. Restart the backend after changing it.
 An absent or short configured token disables these routes (`503`); missing or
 incorrect client credentials return `401`. Use HTTPS when accessing a remote server.
 
-This token grants configuration access to **all boxes**. It is an interim operator
-credential, not user authentication or per-box role-based authorisation. Keep it
-out of Git, URLs, browser JavaScript and screenshots. Other existing API routes
-are not secured by this change. Before frontend integration, implement user
-sessions and permission checks rather than distributing the operator token.
+The operator token is a second credential for configuration changes and reads.
+Keep it in the operator environment and out of browser JavaScript. See the
+[authentication guide](api-contract.md#authentication) for account setup.
 
 For a fresh database, use the updated `database/schema.sql`. For an existing
 database, back up first and run
