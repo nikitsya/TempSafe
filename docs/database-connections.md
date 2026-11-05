@@ -145,6 +145,9 @@ snapshots, which were not inspected. Off-server copies, retention and successful
 restore tests remain **unverified**. A backup proposal in the design document is
 not evidence of a running backup job.
 
+On 5 November 2026 the [PyCharm access record](database-access-evidence.md) documented a read of hosted samples, the SSH
+forwarding command and the grants returned by the TempSafe AWS console.
+
 ## Remaining server checks
 
 Use an authorised SSH session to confirm:
@@ -153,9 +156,7 @@ Use an authorised SSH session to confirm:
    environment overrides. The service working directory and environment-file path
    are already confirmed above.
 2. Current AWS inbound rule sources. A listener check does not verify security groups.
-3. A successful PyCharm connection through the local SSH tunnel. Database access
-   inside the server has been verified.
-4. External backup services, off-server storage and a restore test. Host cron and
+3. External backup services, off-server storage and a restore test. Host cron and
    systemd timer checks are recorded above.
 
 This documentation change does not change server settings or introduce a backup job.

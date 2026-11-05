@@ -61,3 +61,23 @@ container. I use that port for **TempSafe Local** and port `13307` for **TempSaf
 ![Docker Desktop on the Mac showing the running temsafe and tempsafe-classroom Compose projects](assets/testing/database-access/local-docker-projects.png)
 
 *Figure 3. Local Compose projects in Docker Desktop.*
+
+## Checking the AWS account permissions
+
+On 5 November 2026 I ran these queries in the **TempSafe AWS** console in PyCharm:
+
+```sql
+SELECT CURRENT_USER();
+SHOW
+GRANTS FOR CURRENT_USER;
+```
+
+Figure 4 shows the grants for `temsafe`@`%`. The global `USAGE` entry grants no
+global privileges. The second entry grants `ALL PRIVILEGES` on `temsafe.*`,
+so this account can also create, alter and drop tables in the project database.
+These results describe the PyCharm session. The account used by the running
+FastAPI service still needs to be verified separately.
+
+![PyCharm TempSafe AWS console showing the global USAGE entry and ALL PRIVILEGES on the temsafe schema](assets/testing/database-access/pycharm-aws-grants.png)
+
+*Figure 4. MySQL grants for the account used by the TempSafe AWS connection.*
