@@ -70,15 +70,10 @@ class ReadingConsumer:
             LOGGER.warning("Acknowledgement not queued; an identical retry is safe")
 
 
-def main():
-    """Run separately from Uvicorn, with TLS verification and reconnect support."""
+def build_client():
+    """Connect MQTT callbacks to the shared database ingestion logic."""
     from temsafe.database import SessionLocal
     from temsafe.readings import save_reading
-
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    password = os.environ.get("MQTT_PASSWORD")
-    if not password:
-        raise ValueError("Set MQTT_PASSWORD for the backend-ingest account")
 
     consumer = ReadingConsumer(os.getenv("MQTT_BOX_ID", "TS-01"), SessionLocal, save_reading)
     client = mqtt.Client(
@@ -86,15 +81,26 @@ def main():
         client_id=os.getenv("MQTT_CLIENT_ID", "tempsafe-ingest-TS-01"),
         protocol=mqtt.MQTTv5,
     )
-    client.username_pw_set(os.getenv("MQTT_USERNAME", "backend-ingest"), password)
-    context = ssl.create_default_context(cafile=os.getenv("MQTT_CA_FILE") or None)
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    client.tls_set_context(context)
     client.connect_timeout = 10
     client.reconnect_delay_set(min_delay=1, max_delay=30)
     client.on_connect = consumer.on_connect
     client.on_subscribe = consumer.on_subscribe
     client.on_message = consumer.on_message
+
+    return client
+
+
+def main():
+    """Run separately from Uvicorn, with TLS verification and reconnect support."""
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    password = os.environ.get("MQTT_PASSWORD")
+    if not password:
+        raise ValueError("Set MQTT_PASSWORD for the backend-ingest account")
+    client = build_client()
+    client.username_pw_set(os.getenv("MQTT_USERNAME", "backend-ingest"), password)
+    context = ssl.create_default_context(cafile=os.getenv("MQTT_CA_FILE") or None)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    client.tls_set_context(context)
 
     def stop(signum, frame):
         client.disconnect()

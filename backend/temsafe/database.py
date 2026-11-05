@@ -22,7 +22,7 @@ SQLALCHEMY_DATABASE_URL = URL.create(
 # Connections open on the first query; check pooled connections before reusing them.
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
 
-# Follow the teaching example: create a separate session for each request.
+# Create a separate database session for each request.
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

@@ -1,0 +1,33 @@
+services:
+  mysql:
+    ports: !reset []
+    volumes:
+      - ./database/migrations/001_add_prototype_box.sql:/docker-entrypoint-initdb.d/002-box.sql:ro
+      - ./database/migrations/002_add_prototype_temperature_profile.sql:/docker-entrypoint-initdb.d/003-profile.sql:ro
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    volumes:
+      - ./deploy/mosquitto.local.conf:/mosquitto/config/mosquitto.conf:ro
+
+  fastapi_app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: temsafe
+      MYSQL_DATABASE: temsafe
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      TEMSAFE_LOCAL_MQTT: "1"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
