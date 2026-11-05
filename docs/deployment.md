@@ -39,10 +39,10 @@ broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions ar
 See the [frontend guide](../frontend/README.md) for application limitations and the
 [MQTT guide](mqtt.md) for FastMQTT deployment and device integration status.
 
-Caddy Basic Authentication was used during initial setup. It is a separate server access control,
-not application authentication. If it is removed, the API is publicly
-accessible, including reading submission. Use test data only; implement authentication and authorisation
-before handling real user or device data.
+This API release uses secure browser session cookies and separate credentials for HTTP
+device submissions. Before rollout, install the updated Python dependencies, apply migration
+004 to an existing database and provision an account assigned to the prototype box.
+Caddy supplies HTTPS. See the [authentication and setup guide](api/api-contract.md#authentication).
 
 For connection diagrams, PyCharm tunnel settings and the distinction between
 verified configuration and pending server checks, see [Database connections](database-connections.md).

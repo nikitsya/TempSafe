@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "TEMSAFE prototype backend API"
 requires-python = ">=3.11"
 dependencies = [
+    "argon2-cffi>=23,<26",
     "fastapi>=0.115,<1.0",
     "uvicorn>=0.30,<1.0",
     "jinja2>=3.1,<4.0",

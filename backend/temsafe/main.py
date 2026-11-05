@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
+from temsafe.api.auth import router as auth_router
 from temsafe.api.boxes import router as boxes_router
 from temsafe.api.configuration import router as configuration_router
 from temsafe.api.health import router as health_router
@@ -20,6 +21,7 @@ app = FastAPI(
 )
 
 # Add /api to API routes; page routes keep their existing frontend URLs.
+app.include_router(auth_router, prefix="/api")
 app.include_router(health_router, prefix="/api")
 app.include_router(boxes_router, prefix="/api")
 app.include_router(configuration_router, prefix="/api")
