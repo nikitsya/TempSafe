@@ -7,11 +7,10 @@ from datetime import datetime
 from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlalchemy import select, text
-from uuid import uuid4
-
 from temsafe.database import SessionLocal, get_db
 from temsafe.main import app
 from temsafe.models import Box, TemperatureSample, ThresholdProfile
+from uuid import uuid4
 
 
 def test_database_connection():
@@ -27,10 +26,11 @@ def test_database_connection():
         dependency.close()
 
 
-def test_measurement_is_written_and_read_back():
+def test_measurement_is_written_and_read_back(grant_boxes):
     """Commit one measurement, read it in a new session and remove the test data."""
 
     box_id = f"pytest-{uuid4()}"
+    grant_boxes(box_id)
     profile_id = str(uuid4())
     sample_id = str(uuid4())
     observed_at = datetime(2026, 1, 1, 12, 0, 0)
@@ -121,8 +121,9 @@ def test_measurement_is_written_and_read_back():
             db.commit()
 
 
-def test_missing_reading_returns_404():
+def test_missing_reading_returns_404(grant_boxes):
     """Return a clear HTTP error when the requested sample does not exist."""
+    grant_boxes()
     with TestClient(app) as client:
         response = client.get(f"/api/readings/{uuid4()}")
     assert response.status_code == 404

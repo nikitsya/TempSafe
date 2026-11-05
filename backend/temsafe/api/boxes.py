@@ -7,12 +7,13 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from temsafe import models
+from temsafe.api.auth import require_box
 from temsafe.database import get_db
 from temsafe.freshness import classify_freshness
 from temsafe.schemas import BoxResponse, LatestReadingResponse, ReadingResponse
 from temsafe.temperature import classify_temperature
 
-router = APIRouter(tags=["Boxes"])
+router = APIRouter(tags=["Boxes"], dependencies=[Depends(require_box)])
 
 
 @router.get("/boxes/{box_id}/readings", response_model=list[ReadingResponse])

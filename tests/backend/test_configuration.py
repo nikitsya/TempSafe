@@ -6,11 +6,10 @@ from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from uuid import uuid4
-
 from temsafe.database import engine, get_db
 from temsafe.main import app
 from temsafe.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
+from uuid import uuid4
 
 TOKEN = "test-configuration-token-32-characters-long"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
@@ -18,12 +17,13 @@ SETTINGS = {"lower_c": "0.00", "warning_c": "24.00", "upper_c": "25.00", "source
 
 
 @pytest.fixture
-def configured_api(monkeypatch):
+def configured_api(monkeypatch, grant_boxes):
     monkeypatch.setenv("TEMSAFE_CONFIG_ADMIN_TOKEN", TOKEN)
     with engine.connect() as connection:
         transaction = connection.begin()
         with Session(bind=connection, join_transaction_mode="create_savepoint") as db:
             box_id = f"pytest-{uuid4()}"
+            grant_boxes(box_id)
             db.add(Box(box_id=box_id, name="Configuration test"))
             db.commit()
 
@@ -39,7 +39,8 @@ def configured_api(monkeypatch):
         transaction.rollback()
 
 
-def test_configuration_requires_operator_key(monkeypatch):
+def test_configuration_requires_operator_key(monkeypatch, grant_boxes):
+    grant_boxes("TS-01")
     with TestClient(app) as client:
         monkeypatch.delenv("TEMSAFE_CONFIG_ADMIN_TOKEN", raising=False)
         assert client.get("/api/boxes/TS-01/configuration").status_code == 503

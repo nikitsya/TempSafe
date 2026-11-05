@@ -32,6 +32,16 @@ class AppUser(Base):
     password_hash: Mapped[str] = mapped_column(String(255))
 
 
+class UserSession(Base):
+    """Store the digest of each revocable browser session token."""
+
+    __tablename__ = "user_sessions"
+
+    token_hash: Mapped[str] = mapped_column(CHAR(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id", ondelete="CASCADE"))
+    expires_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), index=True)
+
+
 class BoxAccess(Base):
     """Record which users are assigned to which boxes."""
 

@@ -93,9 +93,12 @@ broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions ar
 See the [frontend guide](../frontend/README.md) for application limitations and the
 [MQTT guide](mqtt.md) for worker deployment and device integration status.
 
-Nginx terminates TLS and proxies the website and API to Uvicorn. Keep application
-authentication and box permissions in FastAPI. Use test data until the deployed
-revision has passed the access checks.
+Nginx terminates TLS and forwards requests to Uvicorn. FastAPI uses browser sessions
+to control access to each box and separate credentials for HTTP device submissions.
+Before deploying the protected API, install its dependencies, apply migration 004 to the
+existing database and provision a user with access to the prototype box. Verify that
+anonymous requests are rejected and that the assigned user can read the box’s data.
+See the [authentication and setup guide](api/api-contract.md#authentication).
 
 For connection diagrams, PyCharm tunnel settings and the distinction between
 verified configuration and pending server checks, see [Database connections](database-connections.md).
