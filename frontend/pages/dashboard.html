@@ -21,7 +21,13 @@
         <span class="muted">Box TS-01</span>
     </div>
 
+    <p class="banner error" hidden id="refresh-error" role="status"></p>
+
     <div id="dashboard"></div>
+
+    <!-- Screen readers hear only status changes, not every automatic refresh. -->
+    <p aria-live="polite" class="visually-hidden" id="status-announcer" role="status"></p>
+    <p aria-live="assertive" class="visually-hidden" id="alert-announcer" role="alert"></p>
 
     <a class="btn" href="history.html">History</a>
 

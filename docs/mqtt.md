@@ -1,15 +1,20 @@
 # MQTT ingestion
 
-The broker has been configured on AWS with TLS and separate device and backend accounts.
-The operator reported successful connectivity, authenticated message delivery in both directions,
-and refusal of device publishing to the acknowledgement topic and another box's topic.
-FastMQTT ingestion runs inside the FastAPI lifespan; AWS deployment and a real MQTT-to-MySQL test are still pending.
-The Raspberry Pi publisher and application acknowledgement handling are not implemented in this repository.
+The MQTT broker is configured on AWS with TLS and separate accounts for the device and backend.
 
-On 3 November 2026, the operator supplied broker configuration and a certificate-verified TLS test:
-`allow_anonymous false`, separate password-file accounts and the topic ACLs below. An anonymous MQTT v5
-connection returned `CONNACK (135): Not authorized`. This confirms anonymous rejection; Raspberry Pi
-connectivity through a hotspot and end-to-end ingestion remain to be verified.
+The Raspberry Pi publisher is implemented in `device/mqtt_publisher.py`. It sends readings from the local SQLite database and waits for the server's storage confirmation.
+
+The FastAPI service uses FastMQTT to receive readings and save them to MySQL. Deployment and an end-to-end check of this version on EC2 are pending.
+
+On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous connections were rejected. Broker topic permissions were also checked: the device account could not publish to the acknowledgement topic or another box's topic.
+
+## Integration check — 3 November 2026
+
+Real SCD41 readings were sent from the Raspberry Pi to the server through MQTT. The publisher received `stored` acknowledgements.
+
+A new reading recorded on 3 November 2026 at 23:02:57 UTC, with a temperature of 18.91°C, appeared on the History page.
+
+This check covered the Raspberry Pi, broker, standalone MQTT worker, MySQL and web application. Repeat it after deploying the FastMQTT subscriber.
 
 ## Connection and permissions
 

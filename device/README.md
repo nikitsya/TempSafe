@@ -12,6 +12,7 @@ single-colour LED and passive buzzer. They are separate from the FastAPI backend
 | `models.py`               | Defines the `readings` table for SQLAlchemy.                                                                                  | No; imported by the main script. |
 | `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds. | Yes                              |
 | `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                     | Yes                              |
+| `mqtt_publisher.py`             | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements.                                                     | Yes                              |
 
 Keep `temperature_readings.py`, `database.py` and `models.py` in the same
 directory when copying them to the Raspberry Pi.
@@ -25,7 +26,7 @@ directory when copying them to the Raspberry Pi.
 - The tested passive buzzer uses BCM GPIO17 (physical pin 11), two 220 ohm
   resistors in series (440 ohms total) and a shared ground connection.
 - Required Python packages are `gpiozero`, `adafruit-blinka` (provides
-  `board`), `adafruit-circuitpython-scd4x` and SQLAlchemy 2.x.
+  `board`), `adafruit-circuitpython-scd4x`, SQLAlchemy 2.x and paho-mqtt.
   The hardware libraries also require the appropriate Raspberry Pi system
   configuration; installing Python packages on Windows does not provide
   access to the Pi's GPIO or I2C hardware.
@@ -44,8 +45,15 @@ For an existing hardware environment that does not yet have SQLAlchemy:
 ```bash
 python -m pip install "SQLAlchemy>=2,<3"
 ```
+For MQTT support:
 
-Run only one hardware script at a time. Stop a running script with `Ctrl+C`
+```bash
+python -m pip install "paho-mqtt>=2,<3"
+```
+
+Run only one hardware script at a time. 
+The MQTT publisher runs separately and may run at the same time as temperature_readings.py.
+Stop a running script with `Ctrl+C`
 before starting another.
 
 ## Main temperature logger
@@ -82,7 +90,68 @@ stored with `quality="sensor_error"` and a NULL temperature. Database errors
 are reported separately in the terminal. A `Saved:` message appears only
 after the transaction commits.
 
-Current limitations:
+## MQTT publisher
+
+```bash
+python mqtt_publisher.py
+```
+The MQTT publisher runs separately from the temperature measurement script.
+
+It sends readings that have not yet been confirmed as stored by the backend.
+
+The publisher:
+
+selects records where uploaded = 0;
+
+connects to the MQTT broker using TLS with certificate and server-name verification;
+
+publishes readings to tempsafe/boxes/TS-01/readings;
+
+listens for acknowledgements on tempsafe/boxes/TS-01/acks;
+
+sets uploaded = 1 only after receiving a stored acknowledgement for the corresponding reading;
+
+keeps an unconfirmed reading in the local queue and retries it using the same identifiers;
+
+continues running after the current queue is empty and waits for new readings.
+
+The local SQLite database therefore acts as an offline queue between the sensor process and MQTT transmission.
+
+## Running the logger and publisher together
+
+Open two SSH terminals.
+
+In the first terminal, start temperature collection:
+
+```bash
+cd /home/user/scd41
+source .venv/bin/activate
+python temperature_readings.py
+```
+In the second terminal, activate the same environment and provide the MQTT password:
+
+```bash
+cd /home/user/scd41
+source .venv/bin/activate
+read -s -p "MQTT password: " MQTT_PASSWORD
+echo
+export MQTT_PASSWORD
+python mqtt_publisher.py
+```
+The MQTT password is entered without being displayed on the screen. It is not stored in the source code and is available only in the current terminal session.
+
+A message similar to:
+
+```bash
+Server confirmed storage: ...
+```
+
+
+means that the backend has confirmed that the reading was stored.
+
+Stop either process with Ctrl+C in its corresponding terminal.
+
+## Current limitations:
 
 - Sensor initialisation failures occur before the loop and are not recorded
   by its error handler.
@@ -90,8 +159,7 @@ Current limitations:
   set to 1 without an independent clock synchronisation check.
 - `BOX_ID` and `PROFILE_ID` are configured in the script and must match the
   intended backend records before integration.
-- MQTT transmission is not implemented. Records remain `uploaded=0`;
-  they are not yet sent to the backend MySQL database.
+- MQTT publishing is implemented, but automatic startup after Raspberry Pi reboot is not yet configured.;
 - Manual buzzer silencing is not implemented, so FR-15 is only partially
   implemented. Stopping the whole script is not a substitute for a silence control.
 
