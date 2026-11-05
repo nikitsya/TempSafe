@@ -1,5 +1,7 @@
 """FastAPI application entry point."""
 
+import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
@@ -10,8 +12,29 @@ from temsafe.api.health import router as health_router
 from temsafe.api.readings import router as readings_router
 from temsafe.pages import router as pages_router
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Run the local MQTT subscriber alongside the API."""
+    if os.getenv("TEMSAFE_LOCAL_MQTT") != "1":
+        yield
+        return
+
+    from temsafe.mqtt_worker import build_client
+
+    client = build_client()
+    client.connect_async("mosquitto", 1883)
+    client.loop_start()
+    try:
+        yield
+    finally:
+        client.disconnect()
+        client.loop_stop()
+
+
 # Create the application and set the information shown in the API documentation.
 app = FastAPI(
+    lifespan=lifespan,
     title="TEMSAFE API",
     description="Backend API for the TEMSAFE temperature monitoring prototype.",
     version="0.1.0",
