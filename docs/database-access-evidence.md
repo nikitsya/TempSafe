@@ -68,16 +68,31 @@ On 5 November 2026 I ran these queries in the **TempSafe AWS** console in PyChar
 
 ```sql
 SELECT CURRENT_USER();
-SHOW
-GRANTS FOR CURRENT_USER;
+SHOW GRANTS FOR CURRENT_USER;
 ```
 
 Figure 4 shows the grants for `temsafe`@`%`. The global `USAGE` entry grants no
 global privileges. The second entry grants `ALL PRIVILEGES` on `temsafe.*`,
 so this account can also create, alter and drop tables in the project database.
-These results describe the PyCharm session. The account used by the running
-FastAPI service still needs to be verified separately.
+Figure 4 records the privileges of the PyCharm session.
 
 ![PyCharm TempSafe AWS console showing the global USAGE entry and ALL PRIVILEGES on the temsafe schema](assets/testing/database-access/pycharm-aws-grants.png)
 
 *Figure 4. MySQL grants for the account used by the TempSafe AWS connection.*
+
+## Checking FastAPI separately
+
+On 5 November 2026 I opened a separate connection on EC2 using the deployed
+FastAPI database module and the environment of the active `tempsafe.service`
+process. MySQL returned `temsafe@%` for `CURRENT_USER()` and `temsafe` for
+`DATABASE()`. This account had the same schema-wide privileges shown in Figure 4.
+
+I then tested a separate account against a temporary local MySQL database.
+The account had table-specific grants for the API operations under test.
+Sign-in, sign-out, saving and reading a sample, and changing the selected
+threshold profile all succeeded. With only `SELECT` on `boxes`, MySQL
+rejected the locking read used during a threshold change. Granting `UPDATE`
+on that table allowed the change to complete. MySQL rejected attempts to
+create, alter and drop tables with error 1142. I removed the local test
+account and database afterwards. The hosted service still uses its original
+grants.

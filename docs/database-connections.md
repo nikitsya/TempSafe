@@ -148,15 +148,14 @@ not evidence of a running backup job.
 On 5 November 2026 the [PyCharm access record](database-access-evidence.md) documented a read of hosted samples, the SSH
 forwarding command and the grants returned by the TempSafe AWS console.
 
+The [FastAPI account check](database-access-evidence.md#checking-fastapi-separately) also confirmed the authenticated MySQL account and schema using the active service environment.
+
 ## Remaining server checks
 
 Use an authorised SSH session to confirm:
 
-1. Effective non-secret backend connection settings, including any systemd
-   environment overrides. The service working directory and environment-file path
-   are already confirmed above.
-2. Current AWS inbound rule sources. A listener check does not verify security groups.
-3. External backup services, off-server storage and a restore test. Host cron and
+1. Current AWS inbound rule sources. A listener check does not verify security groups.
+2. External backup services, off-server storage and a restore test. Host cron and
    systemd timer checks are recorded above.
 
 This documentation change does not change server settings or introduce a backup job.
