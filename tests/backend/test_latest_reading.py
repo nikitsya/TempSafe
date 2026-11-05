@@ -198,10 +198,36 @@ def test_box_history_order_and_limit(latest_reading_data, query, expected_sequen
     assert [row["sequence_no"] for row in readings] == expected_sequences
     assert all(row["box_id"] == box_ids[0] for row in readings)
     assert readings[0]["quality"] == "sensor_error"
+    assert readings[0]["temperature_state"] == "Unknown"
     assert readings[0]["temperature_c"] is None
     assert readings[0]["observed_at"] is None
     assert readings[0]["received_at"].endswith("Z")
     assert readings[1]["observed_at"] == "2026-01-01T12:01:00Z"
+
+
+def test_box_history_uses_each_recorded_profile(latest_reading_data):
+    client, db, box_ids, profile_ids = latest_reading_data
+    new_id = str(uuid4())
+    db.add(ThresholdProfile(
+        profile_id=new_id, box_id=box_ids[0], lower_c=Decimal("0.00"),
+        warning_c=Decimal("24.00"), upper_c=Decimal("25.00"),
+        source_note="Second test profile.",
+    ))
+    db.flush()
+    for sequence, profile_id in enumerate([profile_ids[0], new_id], start=1):
+        db.add(TemperatureSample(
+            sample_id=str(uuid4()), box_id=box_ids[0], sequence_no=sequence,
+            profile_id=profile_id, clock_reliable=False, temperature_c=Decimal("7.50"),
+            quality="valid",
+        ))
+    db.flush()
+
+    response = client.get(f"/api/boxes/{box_ids[0]}/readings")
+    assert response.status_code == 200
+    assert [
+               (row["profile"]["profile_id"], row["profile"]["warning_c"], row["temperature_state"])
+               for row in response.json()
+           ] == [(new_id, "24.00", "Normal"), (profile_ids[0], "7.00", "Warning")]
 
 
 def test_box_history_without_samples(latest_reading_data):
