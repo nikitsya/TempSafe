@@ -1,7 +1,7 @@
 # Core scenario mock-ups (Sprint 5)
 
 These screens follow the [Main Use Case](../requirements/main-use-case.md): Shannon reviews a temperature
-excursion after patient care, including the Should Have FR-13 summary. Values are synthetic; this Sprint 5 design
+excursion after patient care, including the FR-13 summary. Values are synthetic; this Sprint 5 design
 uses the colours and symbols below, which differ from the earlier HTML prototype.
 
 ## Screens
