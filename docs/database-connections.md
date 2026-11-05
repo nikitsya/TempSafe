@@ -29,8 +29,8 @@ configuration have not been independently verified. Secrets were not displayed.
 
 ```mermaid
 flowchart LR
-    Browser[Web browser] -->|HTTPS: TCP 443| Nginx[Nginx on EC2]
-    Nginx -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
+    Browser[Web browser] -->|HTTPS: TCP 443| Caddy[Caddy on EC2]
+    Caddy -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
     API -->|MySQL: 127.0.0.1:3307| Port[Docker host port]
     Port -->|Container TCP 3306| DB[(MySQL: temsafe)]
     DB --- Volume[Persistent mysql_data volume]
