@@ -34,7 +34,7 @@ python -m pytest tests/backend/test_save_reading.py -v
 | `test_readings.py`       | Reading lists and limit validation.                                                |
 | `test_latest_reading.py` | Latest readings, recorded profiles, UTC/freshness, box history and sequence order. |
 | `test_save_reading.py`   | Input validation, storage, retries, conflicts and POST responses.                  |
-| `test_mqtt_worker.py`    | MQTT validation, topic checks and acknowledgement after storage (mock storage).    |
+| `test_mqtt.py`           | MQTT validation, topic checks and acknowledgement after storage (mock storage).    |
 | `test_temperature.py`    | Temperature thresholds and sensor errors.                                          |
 
 A successful run has no failures or errors. If a test fails, inspect the error and

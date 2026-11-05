@@ -26,8 +26,9 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   frontend integration, per-user permissions and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
-- **MQTT:** TLS broker configured; ingestion worker implemented with validation and acknowledgements after storage.
-  A Raspberry Pi reading reached the hosted history page on 3 November 2026. See the [MQTT guide](docs/mqtt.md).
+- **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
+  A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
+  service. The FastMQTT deployment still needs a fresh device-to-server check. See the [MQTT guide](docs/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API. The dashboard polls every
