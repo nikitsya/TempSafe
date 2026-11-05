@@ -26,14 +26,13 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   frontend integration, per-user permissions and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
-- **MQTT:** TLS broker configured; FastMQTT ingestion integrated into FastAPI with validation and acknowledgements after
-  storage.
-  Updated application deployment and device-to-database integration testing remain pending. See
-  the [MQTT guide](docs/mqtt.md).
+- **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
+  A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
+  service. The FastMQTT deployment still needs a fresh device-to-server check. See the [MQTT guide](docs/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
-- **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API on page refresh.
-  Authentication, automatic refresh and device-contact status remain planned.
+- **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API. The dashboard polls every
+  five seconds. History refreshes when reopened.
 - **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
 
 See the [functional requirements](docs/requirements/functional-requirements.md) and
@@ -44,9 +43,48 @@ See the [functional requirements](docs/requirements/functional-requirements.md) 
 [Open TempSafe](https://tempsafe.app) or go directly to the
 [dashboard](https://tempsafe.app/pages/dashboard.html).
 
-Refresh dashboard and history to fetch new readings. Sign-in is not implemented; use test data only.
+The dashboard refreshes automatically. Reload history to fetch new readings. Sign-in is not implemented; use test data
+only.
 See the [frontend guide](frontend/README.md) for current behaviour and limitations, and the
 [deployment guide](docs/deployment.md) for server updates and service checks.
+
+## Run TempSafe locally with Docker Compose
+
+FastAPI subscribes to Mosquitto during application
+start-up and serves the dashboard on port 8000. TempSafe also stores readings in MySQL before
+acknowledging them. The broker is accessible within the Compose network. The hosted EC2 deployment
+uses its own authenticated TLS broker and separate ingestion service.
+
+Use Docker Compose 2.24.4 or later. Copy `.env.example` to `.env` if needed and set both MySQL
+passwords. Run these commands from the project root in the same shell:
+
+```sh
+tempsafe() { docker compose -p tempsafe-local -f compose.yaml -f compose.local.yaml "$@"; }
+tempsafe up --build -d --wait
+tempsafe ps
+```
+
+Open the [local dashboard](http://127.0.0.1:8000/pages/dashboard.html). A fresh database volume
+contains box `TS-01` and its demo profile. To check ingestion, run this subscriber in a broker shell:
+
+```sh
+tempsafe exec mosquitto mosquitto_sub -t tempsafe/boxes/TS-01/acks -q 1 -C 1
+```
+
+In a second terminal, define the same `tempsafe` function and publish a synthetic reading:
+
+```sh
+tempsafe exec mosquitto mosquitto_pub -q 1 -t tempsafe/boxes/TS-01/readings -m '{
+  "schema_version":1, "sample_id":"2e8a8349-8694-47b7-8abe-284adf85738a",
+  "box_id":"TS-01", "sequence_no":1, "profile_id":"e93a4368-e11a-4f27-8b31-d55d61392548",
+  "observed_at":"2026-11-03T12:00:00Z", "clock_reliable":true, "temperature_c":"23.45", "quality":"valid"
+}'
+```
+
+The subscriber should receive `stored` with the same sample ID. Open the [local history
+page](http://127.0.0.1:8000/pages/history.html) to find the 23.45°C reading. Its fixed date makes
+it suitable for checking retries. Publishing the same payload again should acknowledge the existing
+record. Run `tempsafe down` to stop the services and keep its database volume.
 
 ## Backend development
 

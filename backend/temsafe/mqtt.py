@@ -58,7 +58,7 @@ class ReadingConsumer:
 
 
 def create_mqtt():
-    """Build the application's TLS subscriber when explicitly enabled."""
+    """Build the subscriber for the local Compose broker or the authenticated TLS broker."""
     enabled = os.getenv("MQTT_ENABLED", "false").lower()
     if enabled not in {"true", "false"}:
         raise ValueError("MQTT_ENABLED must be true or false")
@@ -69,19 +69,24 @@ def create_mqtt():
     from temsafe.database import SessionLocal
     from temsafe.readings import save_reading
 
-    for name in ("MQTT_HOST", "MQTT_PASSWORD"):
-        if not os.getenv(name):
-            raise ValueError(f"Set {name} before enabling MQTT")
-    consumer = ReadingConsumer(os.getenv("MQTT_BOX_ID", "TS-01"), SessionLocal, save_reading)
-    context = ssl.create_default_context(cafile=os.getenv("MQTT_CA_FILE") or None)
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    mqtt = FastMQTT(
-        config=MQTTConfig(
+    if os.getenv("TEMSAFE_LOCAL_MQTT") == "1":
+        config = MQTTConfig(host="mosquitto", port=1883)
+    else:
+        for name in ("MQTT_HOST", "MQTT_PASSWORD"):
+            if not os.getenv(name):
+                raise ValueError(f"Set {name} before enabling MQTT")
+        context = ssl.create_default_context(cafile=os.getenv("MQTT_CA_FILE") or None)
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+        config = MQTTConfig(
             host=os.environ["MQTT_HOST"], port=int(os.getenv("MQTT_PORT", "8883")),
             username=os.getenv("MQTT_USERNAME", "backend-ingest"),
             password=os.environ["MQTT_PASSWORD"], ssl=context,
-            reconnect_retries=-1, reconnect_delay=6,
-        ),
+        )
+    config.reconnect_retries = -1
+    config.reconnect_delay = 6
+    consumer = ReadingConsumer(os.getenv("MQTT_BOX_ID", "TS-01"), SessionLocal, save_reading)
+    mqtt = FastMQTT(
+        config=config,
         client_id=os.getenv("MQTT_CLIENT_ID", "tempsafe-api-TS-01"),
         clean_session=True,
     )
@@ -112,7 +117,7 @@ def create_mqtt():
 
 @asynccontextmanager
 async def lifespan(app):
-    """Start and stop MQTT alongside FastAPI, as in the teaching example."""
+    """Start and stop MQTT alongside FastAPI."""
     mqtt = create_mqtt()
     app.state.mqtt = mqtt
     try:
