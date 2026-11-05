@@ -43,3 +43,9 @@ python -m uvicorn temsafe.main:app --reload
 - [Health check](http://127.0.0.1:8000/api/health) — returns `{"status":"ok"}`; it does not check MySQL.
 
 Keep the server running while using the site. Stop it with **Ctrl+C**.
+
+## MQTT lifecycle
+
+FastMQTT starts with FastAPI when `MQTT_ENABLED=true`. Leave it disabled for HTTP-only development.
+Configure broker credentials in the environment; see the [MQTT guide](../../docs/mqtt.md).
+Use one Uvicorn worker and no production reload. The separate MQTT worker service is no longer used.

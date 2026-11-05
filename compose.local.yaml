@@ -7,6 +7,11 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:2
+    healthcheck:
+      test: ["CMD", "mosquitto_pub", "-t", "health", "-n"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     volumes:
       - ./deploy/mosquitto.local.conf:/mosquitto/config/mosquitto.conf:ro
 
@@ -18,13 +23,14 @@ services:
       mysql:
         condition: service_healthy
       mosquitto:
-        condition: service_started
+        condition: service_healthy
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USER: temsafe
       MYSQL_DATABASE: temsafe
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+      MQTT_ENABLED: "true"
       TEMSAFE_LOCAL_MQTT: "1"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)"]
