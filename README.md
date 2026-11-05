@@ -23,7 +23,9 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
 - **Heartbeat settings:** an operator can read and update the desired heartbeat interval for each box.
-  Device delivery and authenticated heartbeat reporting are pending.
+  The TLS subscriber returns the interval in a single-use challenge and records contact on a valid device echo.
+  The Pi exchange and production broker permissions still require verification. See
+  the [heartbeat contract](docs/mqtt.md#device-heartbeat-contract).
 - **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
   frontend integration, per-user permissions and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).

@@ -67,8 +67,9 @@ heartbeat every two minutes, send:
 Existing and new boxes default to 60 seconds. PUT accepts whole JSON integers from
 1 to 65,535 seconds. Missing, extra or invalid fields return `422`. The box can
 have a heartbeat setting before any temperature profile is selected. Changing the
-interval preserves the profile, sampling rate and last contact time. Device
-delivery and heartbeat reporting are separate work.
+interval preserves the profile, sampling rate and last contact time. The TLS subscriber returns the desired interval in
+its
+[device challenge](../mqtt.md#device-heartbeat-contract).
 
 ## Versioning and concurrency
 
