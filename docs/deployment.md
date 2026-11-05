@@ -37,7 +37,7 @@ broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions ar
 ## Current limitations
 
 See the [frontend guide](../frontend/README.md) for application limitations and the
-[MQTT guide](mqtt.md) for worker deployment and device integration status.
+[MQTT guide](mqtt.md) for FastMQTT deployment and device integration status.
 
 Caddy Basic Authentication was used during initial setup. It is a separate server access control,
 not application authentication. If it is removed, the API is publicly
