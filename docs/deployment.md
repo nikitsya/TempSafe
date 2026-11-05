@@ -90,3 +90,47 @@ An Elastic IP can provide a stable address if configured later.
 
 Changes committed locally do not automatically update the server. Deploy application changes separately,
 apply any required database migrations and restart `tempsafe.service` after updating the backend.
+
+## Public endpoint hardening
+
+On 5 November 2026, unauthenticated requests to the public `/docs`, `/redoc` and
+`/openapi.json` endpoints returned 200. The three headers below were absent on the
+checked responses. To apply the prepared change after review, install the
+[site directives](../deploy/tempsafe-hardening.caddy) on EC2:
+
+```sh
+cd /home/ubuntu/Smart-Box
+sudo install -m 644 deploy/tempsafe-hardening.caddy /etc/caddy/tempsafe-hardening.caddy
+```
+
+Add `import /etc/caddy/tempsafe-hardening.caddy` inside the existing
+`tempsafe.app` site block. Keep the site's reverse proxy and any access controls.
+Validate the complete Caddyfile and reload using the service commands above.
+Check the public URLs from outside EC2:
+
+```sh
+for endpoint in docs redoc openapi.json api/health; do
+    curl -sS -o /dev/null -D - "https://tempsafe.app/$endpoint"
+done
+```
+
+Expect 404 for the three documentation paths and 200 for health. Check for
+`Strict-Transport-Security` with `max-age=31536000`, `X-Content-Type-Options: nosniff`
+and `X-Frame-Options: DENY` on the responses.
+
+## Stored data checks
+
+- **Credentials.** On 5 November 2026, the project's server-side `.env` belonged to
+  `ubuntu:ubuntu` with mode `600`. Check ownership and permissions with
+  `stat -c '%a %U:%G %n' /home/ubuntu/Smart-Box/.env` without printing its contents.
+- **Application passwords.** The schema stores user password hashes in
+  `app_users.password_hash`. The login implementation on the secure API branch uses
+  Argon2id. Check the deployed revision before claiming login is live.
+- **EBS encryption.** Verification is pending. In EC2, open the instance's Storage
+  tab and inspect the **Encrypted** field for the EBS volume backing the MySQL
+  Docker volume. Record the result for that volume. The account default alone
+  cannot confirm encryption on an existing volume.
+- **MQTT storage.** On 5 November the standalone MQTT service was active on EC2.
+  MySQL held 155 samples for TS-01, most recently received at 00:00:10 UTC that day.
+  For a fresh end-to-end check, match a new Pi sample ID to the worker's storage
+  acknowledgement and the same ID in MySQL.
