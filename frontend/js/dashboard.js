@@ -387,6 +387,12 @@ async function loadTemperature() {
             `${API_BASE}/boxes/TS-01/readings/latest`
         );
 
+        // Not signed in or the session has ended.
+        if (response.status === 401) {
+            goToSignIn();
+            return;
+        }
+
         // No readings available.
         if (response.status === 404) {
             const errorData = await response.json();

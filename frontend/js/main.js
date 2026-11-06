@@ -15,3 +15,18 @@ async function showApiStatus() {
 }
 
 document.addEventListener('DOMContentLoaded', showApiStatus);
+
+// Sign out: end the session on the server, then open the sign-in page.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-signout]').forEach((link) => {
+        link.addEventListener('click', async (event) => {
+            event.preventDefault();
+            try {
+                await fetch(`${API_BASE}/logout`, {method: 'POST'});
+            } catch (error) {
+                // Even if the request fails, leave the protected page.
+            }
+            goToSignIn('signed-out');
+        });
+    });
+});
