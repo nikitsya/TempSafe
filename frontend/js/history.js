@@ -385,6 +385,11 @@ async function loadHistory() {
             {headers: {Accept: 'application/json'}}
         );
 
+        // Not signed in or the session has ended.
+        if (response.status === 401) {
+            goToSignIn();
+            return;
+        }
         if (response.status === 404) {
             showMessage(container, 'error', 'Box not found',
                 'Ask your administrator to check the box.');
