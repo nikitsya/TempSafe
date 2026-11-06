@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, Strin
 from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
-from temsafe.database import Base
+from temsafe.db.session import Base
 
 
 class Box(Base):

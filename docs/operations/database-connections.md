@@ -3,7 +3,7 @@
 ## Verification status
 
 The repository configuration was checked on 4 November 2026 against
-[compose.yaml](../../compose.yaml), [database.py](../../backend/temsafe/database.py)
+[compose.yaml](../../compose.yaml), [session.py](../../backend/temsafe/db/session.py)
 and the non-secret local environment settings. The hosting paths and service names
 below are recorded in the [deployment guide](deployment.md).
 

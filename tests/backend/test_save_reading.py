@@ -7,10 +7,10 @@ from mysql.connector.errors import IntegrityError as MySQLIntegrityError
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
-from temsafe.database import SessionLocal
+from temsafe.db.session import SessionLocal
 from temsafe.main import app
-from temsafe.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.readings import save_reading
+from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from temsafe.monitoring.readings import save_reading
 from temsafe.schemas import ReadingCreate
 from uuid import uuid4
 

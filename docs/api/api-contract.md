@@ -27,8 +27,8 @@ The example grants access to the existing prototype box. Both inserts commit tog
 python - <<'PYTHON'
 from getpass import getpass
 from argon2 import PasswordHasher
-from temsafe.database import SessionLocal
-from temsafe.models import AppUser, BoxAccess
+from temsafe.db.session import SessionLocal
+from temsafe.db.models import AppUser, BoxAccess
 
 username = getpass("New username (hidden): ").strip()
 password = getpass("New password: ")
@@ -44,7 +44,7 @@ PYTHON
 
 ## Temperature classification
 
-[`temperature.py`](../../backend/temsafe/temperature.py) provides
+[`temperature.py`](../../backend/temsafe/monitoring/temperature.py) provides
 `classify_temperature(temperature_c, quality, profile)`.
 Pass the profile associated with the measurement. The function uses its stored
 limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
@@ -58,7 +58,7 @@ recorded temperature; it does not assess whether the reading is stale.
 ## Saving incoming readings
 
 `ReadingCreate` in [`schemas.py`](../../backend/temsafe/schemas.py) validates the incoming fields. Use
-`save_reading(db, reading)` from `temsafe.readings` with a validated `ReadingCreate`
+`save_reading(db, reading)` from `temsafe.monitoring.readings` with a validated `ReadingCreate`
 and a dedicated `SessionLocal()` session. The function checks the box and profile,
 then uses `add()`, `commit()` and `refresh()` to save the sample.
 

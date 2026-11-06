@@ -5,7 +5,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from temsafe.models import Box, TemperatureSample, ThresholdProfile
+from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
 from temsafe.schemas import ReadingCreate
 
 

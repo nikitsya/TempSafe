@@ -7,7 +7,7 @@ from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 # Read local settings without replacing variables already set in the environment.
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 # Build the URL without manually escaping special characters in the password.
 SQLALCHEMY_DATABASE_URL = URL.create(
