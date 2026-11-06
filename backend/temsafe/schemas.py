@@ -91,6 +91,13 @@ class LatestReadingResponse(ReadingResponse):
     freshness: Literal["fresh", "stale", "unknown"]
 
 
+class HeartbeatSettings(BaseModel):
+    """Represent the desired interval between device heartbeats."""
+
+    model_config = ConfigDict(extra="forbid")
+    heartbeat_interval_seconds: int = Field(strict=True, ge=1, le=65535)
+
+
 class ThresholdSettingsCreate(BaseModel):
     """Validate prototype limits before creating an immutable profile."""
 

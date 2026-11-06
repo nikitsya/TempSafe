@@ -22,6 +22,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   on AWS EC2, with Nginx providing HTTPS and a reverse proxy to FastAPI.
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
+- **Heartbeat settings:** an operator can read and update the desired heartbeat interval for each box.
+  Device delivery and authenticated heartbeat reporting are pending.
 - **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
   frontend integration, per-user permissions and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).
