@@ -43,4 +43,4 @@ On Windows PowerShell, use `npm.cmd` and `npx.cmd` if running scripts is disable
 |------------|-------------------|---------------------------------------------|---------------------|
 | 10/10/2026 | Maryna Hordiienko | Windows, Node v24.13.0, Playwright Chromium | 16 passed, 0 failed |
 
-![Browser test results](../assets/testing/browser-test-results.png)
+![Browser test results](../../assets/testing/browser-test-results.png)

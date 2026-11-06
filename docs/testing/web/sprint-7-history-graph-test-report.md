@@ -13,7 +13,7 @@ too cold
 
 Make past temperature problems easy to see on the history page. The paramedic should see when the box was too hot
 or too cold, for how long, and the highest or lowest temperature. This is the key information in our
-[main use case](../requirements/main-use-case.md).
+[main use case](../../requirements/main-use-case.md).
 
 ## 2. What was added
 
@@ -52,7 +52,7 @@ sensor error and a long break) were also in the database.
 | Too hot | 21:13 – no data      | at least 1 min | 26.0°C | No reading for over 90 seconds |
 | Too hot | 21:14 – sensor error | at least 1 min | 26.0°C | Ended by a sensor error        |
 
-![Alerts table](../assets/testing/history-graph/01-alerts-table.png)
+![Alerts table](../../assets/testing/history-graph/01-alerts-table.png)
 
 ### Test 2 — Graph
 
@@ -61,7 +61,7 @@ sensor error and a long break) were also in the database.
 The limit lines and the legend are shown. Points above 25°C are red. The line breaks at the sensor error and at the
 long break in the data, so a missing period is not drawn as a normal line.
 
-![Temperature graph](../assets/testing/history-graph/02-graph.png)
+![Temperature graph](../../assets/testing/history-graph/02-graph.png)
 
 ### Test 3 — Status of each reading
 
@@ -69,7 +69,7 @@ long break in the data, so a missing period is not drawn as a normal line.
 
 Each reading shows its own status. The sensor error shows "—" and "Sensor error", never 0°C or Normal.
 
-![Readings table with status](../assets/testing/history-graph/03-readings-status.png)
+![Readings table with status](../../assets/testing/history-graph/03-readings-status.png)
 
 ### Test 4 — Other cases (automated browser check)
 
@@ -95,7 +95,7 @@ Checked in Chromium with prepared test data:
 - The graph has a text summary for screen readers, and the readings table shows the same data (AC-07).
 - Colour is not the only signal: every status also has a word and a symbol.
 
-![Phone layout](../assets/testing/history-graph/04-phone-layout.png)
+![Phone layout](../../assets/testing/history-graph/04-phone-layout.png)
 
 ## 5. Known limits
 

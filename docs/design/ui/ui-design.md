@@ -1,12 +1,12 @@
 # TempSafe: user interface design
 
 Target UI behaviour and original mock-ups. The application now uses a shorter main card with a Details panel;
-see the [accessibility review](../testing/core-scenario-accessibility-review.md) and
+see the [accessibility review](../../testing/accessibility/core-scenario-accessibility-review.md) and
 [current wording](ui-wording.md). Graphs, authentication and phone notifications below remain planned.
 
 ## Planned platform
 
-The [project scope](../project/project-scope.md#application-platform) defines the web platform and planned PWA support.
+The [project scope](../../project-scope.md#application-platform) defines the web platform and planned PWA support.
 
 Home-screen access is a planned enhancement; the browser interface remains the baseline. A web app manifest will
 define the application name, icons, start URL and standalone display mode. The proposed Web Push channel will use
@@ -23,7 +23,7 @@ fields, a Sign in button and a generic failed-login message. Successful sign-in 
 an unassigned account sees an explicit no-access message. Sign out invalidates the server session. All box/history
 requests are authorised by the backend; hiding a button is not access control.
 
-![Sign-in and failed sign-in mock-ups](../assets/design/ui-signin.png)
+![Sign-in and failed sign-in mock-ups](../../assets/design/ui-signin.png)
 
 **Figure 1.** Sign-in screen (A) and failed sign-in (B). Fields have visible labels and a visible focus outline. A
 failed attempt shows one generic message ("The email/username or password is incorrect"), so the screen does not reveal
@@ -31,7 +31,7 @@ whether an account exists. The page is served only over HTTPS. A successful sign
 
 ## Current status
 
-![Current status mock-ups](../assets/design/ui-dashboard.png)
+![Current status mock-ups](../../assets/design/ui-dashboard.png)
 
 **Figure 2.** Current status screen for Warning (C), Normal with phone notifications denied (D) and Alert (E). Each
 state uses a colour, a symbol (! ✓ ✕) and a text label, so the state does not depend on colour alone. The screen shows
@@ -41,7 +41,7 @@ permission is denied (D), a banner explains that phone alerts are unavailable wh
 
 ## Temperature history
 
-![Temperature history mock-up](../assets/design/ui-history.png)
+![Temperature history mock-up](../../assets/design/ui-history.png)
 
 **Figure 3.** History screen. A From/To filter selects the time range. The graph shows the upper-limit and
 warning-threshold lines
@@ -52,7 +52,7 @@ found"; an invalid range (From after To) shows an error message.
 
 ## Required states
 
-![Error and empty state mock-ups](../assets/design/ui-states.png)
+![Error and empty state mock-ups](../../assets/design/ui-states.png)
 
 **Figure 4.** Error and empty states. F: Data stale. No new reading for longer than 90 s; the last value is labelled
 historical and "current conditions unknown". G: Sensor error. The failed sample is never shown as 0°C or Normal. H: Not
@@ -75,4 +75,4 @@ starting point of the design. They were replaced because they used out-of-scope 
 timer) and wording such as "Above safe limit".
 
 Related
-documents: [UI screen flow](ui-screen-flow.md), [UI wording guide](ui-wording.md), [UI style guide](ui-style-guide.md), [Accessibility acceptance criteria](accessibility-criteria.md), [Design principles](design-principles.md).
+documents: [UI screen flow](ui-screen-flow.md), [UI wording guide](ui-wording.md), [UI style guide](ui-style-guide.md), [Accessibility acceptance criteria](../accessibility/accessibility-criteria.md), [Design principles](../accessibility/design-principles.md).

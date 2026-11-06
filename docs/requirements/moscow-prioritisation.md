@@ -50,8 +50,8 @@ Items without an FR ID are follow-up ideas or exclusions. Implementation status 
   [history view](../../frontend/js/history.js).
 - **FR-06, FR-09 and FR-15.** The LED and buzzer respond locally. Deliberate network-loss testing and a manual
   buzzer silence control remain open. The SQLite queue retains unacknowledged readings, with the 24-hour outage,
-  restart and upload check still outstanding. See the [LED test](../testing/led-patterns.md),
-  [buzzer test](../testing/buzzer-alert.md) and [device queue](../../device/mqtt_publisher.py).
+  restart and upload check still outstanding. See the [LED test](../testing/hardware/led-patterns.md),
+  [buzzer test](../testing/hardware/buzzer-alert.md) and [device queue](../../device/mqtt_publisher.py).
 - **FR-13.** History shows an estimated duration and peak. With a 30-second sampling interval, high readings
   numbered 1 and 3 are joined when reading 2 is missing. If a delayed, in-range reading 2 arrives, reloading
   History splits the event in two. The missing observation should already break the period on the first view.
@@ -68,7 +68,7 @@ Items without an FR ID are follow-up ideas or exclusions. Implementation status 
 
 ## Universal Design justification
 
-The selected principles are documented in [design principles](../design/design-principles.md):
+The selected principles are documented in [design principles](../design/accessibility/design-principles.md):
 
 - **P3 - Simple and Intuitive Use:** keep the main journey clear and reduce unnecessary interaction.
 - **P4 - Perceptible Information:** communicate status through readable text, symbols and colour; distinguish current,
@@ -112,7 +112,7 @@ colour; the application uses green, amber and red with labels and symbols.
 ## Could Have
 
 A native mobile application is a possible follow-up, subject to team agreement. See the
-[platform scope](../project/project-scope.md#application-platform) for the web application and planned PWA.
+[platform scope](../project-scope.md#application-platform) for the web application and planned PWA.
 
 ## Won't Have This Time
 
@@ -133,7 +133,7 @@ A native mobile application is a possible follow-up, subject to team agreement. 
   before implementation
   is considered complete.
 - The buzzer remains Should Have. A passive buzzer and its sound pattern have been tested; manual silencing remains
-  outstanding. See the [buzzer test](../testing/buzzer-alert.md).
+  outstanding. See the [buzzer test](../testing/hardware/buzzer-alert.md).
 - Humidity and CO₂ reporting are outside this release, even though the SCD-41 can measure both.
 - The agreed demo profile uses a 0.00°C lower threshold, 24.00°C warning threshold and 25.00°C upper limit.
   Alert applies at or below 0°C and above 25°C; Warning applies from 24°C through 25°C. These are prototype settings,

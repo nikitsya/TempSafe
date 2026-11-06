@@ -101,10 +101,10 @@ Readings recorded on **19 October 2026**:
 
 ## 9. Evidence
 
-- [CSV log — temperature_readings.csv](../assets/testing/scd41/temperature_readings.csv)
-- ![SCD41 wiring photograph](../assets/testing/scd41/scd41_wiring.jpg)
+- [CSV log — temperature_readings.csv](../../assets/testing/scd41/temperature_readings.csv)
+- ![SCD41 wiring photograph](../../assets/testing/scd41/scd41_wiring.jpg)
 -
-    - [Python test script](../../device/scd41_basic_readings.py)
+    - [Python test script](../../../device/scd41_basic_readings.py)
 
 CSV output was used only to retain evidence for this standalone hardware test.
 The later device script stores readings in SQLite; see the additional test below. MQTT transmission to the backend

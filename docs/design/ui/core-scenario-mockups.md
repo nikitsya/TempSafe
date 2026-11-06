@@ -1,6 +1,6 @@
 # Core scenario mock-ups (Sprint 5)
 
-These screens follow the [Main Use Case](../requirements/main-use-case.md): Shannon reviews a temperature
+These screens follow the [Main Use Case](../../requirements/main-use-case.md): Shannon reviews a temperature
 excursion after patient care, including the FR-13 summary. Values are synthetic; this Sprint 5 design
 uses the colours and symbols below, which differ from the earlier HTML prototype.
 
@@ -14,7 +14,7 @@ uses the colours and symbols below, which differ from the earlier HTML prototype
 
 |                         1. Notification                         |                       2. Dashboard                        |                         3. Event details                          |
 |:---------------------------------------------------------------:|:---------------------------------------------------------:|:-----------------------------------------------------------------:|
-| ![Notification mock-up](../assets/design/core-notification.png) | ![Dashboard mock-up](../assets/design/core-dashboard.png) | ![Event details mock-up](../assets/design/core-event-details.png) |
+| ![Notification mock-up](../../assets/design/core-notification.png) | ![Dashboard mock-up](../../assets/design/core-dashboard.png) | ![Event details mock-up](../../assets/design/core-event-details.png) |
 
 ## Clickable prototype
 

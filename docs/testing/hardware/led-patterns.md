@@ -37,7 +37,7 @@ The test also verifies the double-flash pattern used to indicate a sensor error.
 | Physical pin 12 — GPIO18 | Connected through a 220 Ω resistor to the LED anode |
 | Physical pin 14 — GND    | Connected to the LED cathode                        |
 
-This test replaced the earlier GPIO17/1 kΩ LED design. The [wiring record](../hardware/prototype-wiring.md)
+This test replaced the earlier GPIO17/1 kΩ LED design. The [wiring record](../../hardware/prototype-wiring.md)
 was updated on 1 November to match the tested GPIO18/220 Ω assembly.
 
 ## 5. Temperature profile
@@ -57,7 +57,7 @@ without a network connection.
 - Python 3.
 - GPIO Zero library.
 - Main script: temperature_readings.py on the Raspberry Pi.
-- Repository copy: [Integrated temperature logger](../../device/temperature_readings.py).
+- Repository copy: [Integrated temperature logger](../../../device/temperature_readings.py).
 - Python virtual environment: .venv.
 - Editor: Vim.
 
@@ -108,16 +108,16 @@ For the sensor-error pattern, each flash is programmed for 0.2 seconds with a 0.
 
 ## 9. Evidence
 
-![SCD-41 temperature test using hot container](../assets/testing/led/LED-hot-testing.jpg)
+![SCD-41 temperature test using hot container](../../assets/testing/led/LED-hot-testing.jpg)
 
 **Figure 1.** SCD-41 temperature sensor placed near a container with hot water to increase the measured temperature and
 trigger the Warning and Alert states.
 
-![Terminal output showing temperature state](../assets/testing/led/terminal-temperature-state.png)
+![Terminal output showing temperature state](../../assets/testing/led/terminal-temperature-state.png)
 
 **Figure 2.** Raspberry Pi terminal showing the SCD-41 temperature reading and calculated temperature state.
 
-![Simulated sensor error in terminal](../assets/testing/led/sensor-error-terminal.png)
+![Simulated sensor error in terminal](../../assets/testing/led/sensor-error-terminal.png)
 
 **Figure 3.** Raspberry Pi terminal showing the simulated sensor error used to test the double-flash LED pattern.
 

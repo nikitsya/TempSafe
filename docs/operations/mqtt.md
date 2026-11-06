@@ -38,7 +38,7 @@ The subscriber additionally checks that the payload's box ID matches that topic.
 
 ## Message contract
 
-Publish the [ReadingCreate JSON payload](api/api-contract.md#saving-incoming-readings) to the device's
+Publish the [ReadingCreate JSON payload](../api/api-contract.md#saving-incoming-readings) to the device's
 readings topic, with a maximum MQTT payload of 4096 bytes. The box and profile must already exist in
 MySQL. Preserve the sample UUID, persistent sequence and observation time on every retry.
 
@@ -159,4 +159,4 @@ invalid JSON and quality, retained and oversized payloads, repeated unchanged de
 They use a mock storage boundary and do not replace the MQTT-to-MySQL integration test.
 
 HTTP publishers use a separate device key restricted to their assigned box.
-See the [API authentication guide](api/api-contract.md#authentication).
+See the [API authentication guide](../api/api-contract.md#authentication).

@@ -13,7 +13,7 @@ The document also explains composite constraints and historical threshold profil
 
 ## Hosted database access
 
-See [Database connections](../docs/database-connections.md) for the backend connection,
+See [Database connections](../docs/operations/database-connections.md) for the backend connection,
 PyCharm SSH tunnel, credentials, network boundaries and backup verification status.
 
 ## With Docker Compose

@@ -2,8 +2,8 @@
 
 ## Purpose
 
-Plan how to verify the [functional requirements](../requirements/functional-requirements.md) and
-selected [Universal Design principles](../design/design-principles.md). This document defines planned acceptance tests.
+Plan how to verify the [functional requirements](../../requirements/functional-requirements.md) and
+selected [Universal Design principles](../../design/accessibility/design-principles.md). This document defines planned acceptance tests.
 
 ## Equipment and prerequisites
 
@@ -114,7 +114,7 @@ participant notes.
 |-------------------------------------------|---------------|------------------|---------------|--------|------------------------|
 | Record each acceptance test when executed | —             | —                | -             | -      | —                      |
 
-Component and prototype results are linked from the [README](../../README.md#project-documentation).
+Component and prototype results are linked from the [README](../../../README.md#project-documentation).
 
 ## Planned PWA checks
 

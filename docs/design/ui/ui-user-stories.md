@@ -1,7 +1,7 @@
 # UI user stories
 
-UI stories for [Shannon Rice](../requirements/user-persona.md). Each story is linked to a functional requirement
-in [functional-requirements.md](../requirements/functional-requirements.md) and uses the same MoSCoW priority, so no new
+UI stories for [Shannon Rice](../../requirements/user-persona.md). Each story is linked to a functional requirement
+in [functional-requirements.md](../../requirements/functional-requirements.md) and uses the same MoSCoW priority, so no new
 features are added here.
 
 | ID       | User story                                                                                                                                     | Acceptance criteria                                                                     | Requirement        | Priority |
@@ -14,5 +14,5 @@ features are added here.
 | US-UI-06 | As a paramedic, I want to see past temperatures for a time range so that I can check what happened during a shift.                             | From/To filter, graph and table, gaps shown.                                            | FR-07              | Must     |
 | US-UI-07 | As a paramedic, I want phone notifications for Warning and Alert so that I do not need to keep the app open.                                   | Web Push after permission; banner if denied or unsupported.                             | FR-14              | Must     |
 | US-UI-08 | As a user without an assigned box, I want a clear message so that I know to ask for access.                                                    | No assigned box message; no other box data visible.                                     | FR-02              | Must     |
-| US-UI-09 | As a paramedic who uses only the keyboard or a screen reader, I want every feature to be accessible so that I can use the app without a mouse. | Criteria AC-03 to AC-07 in [accessibility-criteria.md](accessibility-criteria.md) pass. | FR-07, Principle 4 | Must     |
+| US-UI-09 | As a paramedic who uses only the keyboard or a screen reader, I want every feature to be accessible so that I can use the app without a mouse. | Criteria AC-03 to AC-07 in [accessibility-criteria.md](../accessibility/accessibility-criteria.md) pass. | FR-07, Principle 4 | Must     |
 | US-UI-10 | As a paramedic, I want the dashboard to update by itself so that I do not need to reload the page.                                             | New accepted data appears within about 5 s while online.                                | FR-11              | Should   |

@@ -58,9 +58,9 @@ The backend was started locally with MySQL in Docker. The page
 The rows appear in the same order as the API response (newest `sequence_no` first). The sensor error is not shown
 as 0°C, and neither reading is given an observation time because the device clock was not reliable.
 
-![History table](../assets/testing/history-table/01-history-table.png)
+![History table](../../assets/testing/history-table/01-history-table.png)
 
-![Readings API response](../assets/testing/history-table/02-readings-api-response.png)
+![Readings API response](../../assets/testing/history-table/02-readings-api-response.png)
 
 ### Test 2 — Other states
 

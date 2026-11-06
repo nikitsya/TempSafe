@@ -26,7 +26,7 @@ Installed and configured Docker Desktop with the WSL 2 backend.
 
 Verified that Docker Engine was running successfully.
 
-![Docker Desktop running](../assets/testing/frontend-api/11-docker-desktop-installed.png)
+![Docker Desktop running](../../assets/testing/frontend-api/11-docker-desktop-installed.png)
 
 ### 2.2 MySQL Database
 
@@ -42,7 +42,7 @@ The container `temsafe-mysql-1` started successfully and reported a healthy stat
 
 The database was available locally through port `3307`.
 
-![MySQL container healthy](../assets/testing/frontend-api/01-mysql-healthy.png)
+![MySQL container healthy](../../assets/testing/frontend-api/01-mysql-healthy.png)
 
 ### 2.3 Database Migrations
 
@@ -71,7 +71,7 @@ The temperature profile contained the following thresholds:
 | Warning threshold | 24°C        |
 | Upper limit       | 25°C        |
 
-![Database migrations](../assets/testing/frontend-api/15-migrations-run-in-terminal.png)
+![Database migrations](../../assets/testing/frontend-api/15-migrations-run-in-terminal.png)
 
 ---
 
@@ -137,7 +137,7 @@ The frontend handles:
 
 The page uses the existing TempSafe layout and CSS.
 
-![Frontend code in VS Code](../assets/testing/frontend-api/13-frontend-code-in-vscode.png)
+![Frontend code in VS Code](../../assets/testing/frontend-api/13-frontend-code-in-vscode.png)
 
 ---
 
@@ -159,7 +159,7 @@ Therefore, the dashboard displayed:
 
 This prevented an unreliable reading from being incorrectly labelled as Live.
 
-![Dashboard unknown status](../assets/testing/frontend-api/02-dashboard-unknown.png)
+![Dashboard unknown status](../../assets/testing/frontend-api/02-dashboard-unknown.png)
 
 ### Test 2 — No Observations: Database Setup
 
@@ -176,7 +176,7 @@ VALUES ('TS-TEST-EMPTY', 'Empty test box');
 
 The database confirmed that one row was inserted.
 
-![Empty test box SQL](../assets/testing/frontend-api/03-empty-box-sql.png)
+![Empty test box SQL](../../assets/testing/frontend-api/03-empty-box-sql.png)
 
 ### Test 3 — No Observations: API Response
 
@@ -196,7 +196,7 @@ The API returned:
 
 This confirmed that the backend correctly identified a box without temperature readings.
 
-![No data API response](../assets/testing/frontend-api/04-no-data-api.png)
+![No data API response](../../assets/testing/frontend-api/04-no-data-api.png)
 
 ### Test 4 — No Observations: Frontend
 
@@ -212,7 +212,7 @@ The dashboard correctly displayed:
 
 It did not display a misleading temperature or NORMAL status.
 
-![No observations dashboard](../assets/testing/frontend-api/05-no-data-dashboard.png)
+![No observations dashboard](../../assets/testing/frontend-api/05-no-data-dashboard.png)
 
 After testing, the dashboard endpoint was restored to the prototype box `TS-01`.
 
@@ -242,7 +242,7 @@ The dashboard correctly displayed:
 
 The dashboard did not display the missing temperature as `0°C` or `NORMAL`.
 
-![Sensor error dashboard](../assets/testing/frontend-api/06-sensor-error-dashboard.png)
+![Sensor error dashboard](../../assets/testing/frontend-api/06-sensor-error-dashboard.png)
 
 ### Test 6 — Duplicate Reading Conflict
 
@@ -266,7 +266,7 @@ A subsequent test used a new sample ID and sequence number, allowing the Sensor 
 
 This confirmed that the API rejects conflicting reading identifiers.
 
-![Duplicate sample response](../assets/testing/frontend-api/07-duplicate-sample-409.png)
+![Duplicate sample response](../../assets/testing/frontend-api/07-duplicate-sample-409.png)
 
 ### Test 7 — Backend Availability
 
@@ -284,7 +284,7 @@ Because the frontend and API were served by the same application, stopping FastA
 
 This test did not independently confirm the dashboard's in-page API error message.
 
-![Backend unavailable](../assets/testing/frontend-api/08-backend-unavailable.png)
+![Backend unavailable](../../assets/testing/frontend-api/08-backend-unavailable.png)
 
 ### Test 8 — Browser Developer Tools
 
@@ -298,7 +298,7 @@ The dashboard layout was also inspected at narrower viewport widths.
 
 However, the screenshots do not conclusively confirm the Loading message or a complete JavaScript Console check.
 
-![Browser Developer Tools](../assets/testing/frontend-api/09-browser-devtools.png)
+![Browser Developer Tools](../../assets/testing/frontend-api/09-browser-devtools.png)
 
 ---
 
@@ -393,7 +393,7 @@ New identifiers were used for the next test.
 
 ### Test report
 
-`docs/testing/sprint-6-dashboard-api-test-report.md`
+`docs/testing/web/sprint-6-dashboard-api-test-report.md`
 
 ### Screenshots
 

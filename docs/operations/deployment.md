@@ -22,7 +22,7 @@ the services. The EC2 instance must remain running for the site to be available.
 
 ## HTTPS on Ubuntu
 
-The [Nginx site](../deploy/tempsafe-nginx.conf) serves the public domain on 443.
+The [Nginx site](../../deploy/tempsafe-nginx.conf) serves the public domain on 443.
 It redirects HTTP to HTTPS and serves HTTP-01 certificate challenges for both
 `tempsafe.app` and `mqtt.tempsafe.app` from `/var/www/letsencrypt`. Mosquitto
 owns port 8883 and uses its own certificate and renewal hook.
@@ -90,7 +90,7 @@ broad All TCP or All traffic rule. Broker accounts, TLS and topic permissions ar
 
 ## Current limitations
 
-See the [frontend guide](../frontend/README.md) for application limitations and the
+See the [frontend guide](../../frontend/README.md) for application limitations and the
 [MQTT guide](mqtt.md) for FastMQTT deployment and device integration status.
 
 Nginx terminates TLS and forwards requests to Uvicorn. FastAPI uses browser sessions
@@ -98,7 +98,7 @@ to control access to each box and separate credentials for HTTP device submissio
 Before deploying the protected API, install its dependencies, apply migration 004 to the
 existing database and provision a user with access to the prototype box. Verify that
 anonymous requests are rejected and that the assigned user can read the box’s data.
-See the [authentication and setup guide](api/api-contract.md#authentication).
+See the [authentication and setup guide](../api/api-contract.md#authentication).
 
 For connection diagrams, PyCharm tunnel settings and the distinction between
 verified configuration and pending server checks, see [Database connections](database-connections.md).
@@ -160,7 +160,7 @@ apply any required database migrations and restart `tempsafe.service` after upda
   The EC2 console showed **Encrypted** for this 20 GiB volume with the KMS key
   alias `aws/ebs`. This confirms encryption at rest for MySQL data on that disk.
 
-  ![EC2 volume details showing the encryption status as Encrypted](assets/testing/ebs-volume-encryption.png)
+  ![EC2 volume details showing the encryption status as Encrypted](../assets/operations/ebs-volume-encryption.png)
 - **MQTT storage.** On 5 November the standalone MQTT service was active on EC2.
   MySQL held 155 samples for TS-01, most recently received at 00:00:10 UTC that day.
   For a fresh end-to-end check, match a new Pi sample ID to the worker's storage

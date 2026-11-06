@@ -7,7 +7,7 @@ configured limits; do not label medicines “safe” or “unsafe”.
 
 The main card shows status, temperature and observation time. Explanations and limits sit behind **Details**. Missing or
 unreliable current values show **Temperature unknown**; older recorded values
-may appear in Details. See the [frontend guide](../../frontend/README.md) for implementation limits.
+may appear in Details. See the [frontend guide](../../../frontend/README.md) for implementation limits.
 
 | Situation                 | Heading or label       | Supporting text                                                 |
 |---------------------------|------------------------|-----------------------------------------------------------------|

@@ -14,13 +14,13 @@ rewriting the text so that a paramedic can understand the box status in a few se
 Earlier decisions recorded in the design documents include:
 
 - **Plain status words.** The states are NORMAL, WARNING and ALERT, each with a symbol as well as a colour
-  ([ui-wording.md](../design/ui-wording.md), AC-01).
+  ([ui-wording.md](../../design/ui/ui-wording.md), AC-01).
 - **No clinical judgements.** The interface never says "safe" or "unsafe"; it only compares readings with the
   configured limits.
 - **Old or missing data is never shown as Normal.** Stale data, sensor errors and unreliable times each have their
   own state (AC-11).
 - **Accessibility criteria for every screen** based on WCAG 2.2 AA
-  ([accessibility-criteria.md](../design/accessibility-criteria.md)).
+  ([accessibility-criteria.md](../../design/accessibility/accessibility-criteria.md)).
 
 After testing how the information was perceived, the team agreed that the design described in section 4 is the most
 effective way to show the box status. The reasons are:
@@ -112,31 +112,31 @@ All screenshots are from the application served by FastAPI with test readings se
 
 **NORMAL**
 
-![NORMAL](../assets/testing/accessibility/01-normal.png)
+![NORMAL](../../assets/testing/accessibility/01-normal.png)
 
 **NORMAL with Details open**
 
-![NORMAL details](../assets/testing/accessibility/02-normal-details.png)
+![NORMAL details](../../assets/testing/accessibility/02-normal-details.png)
 
 **WARNING with Details open**
 
-![WARNING details](../assets/testing/accessibility/03-warning-details.png)
+![WARNING details](../../assets/testing/accessibility/03-warning-details.png)
 
 **ALERT**
 
-![ALERT](../assets/testing/accessibility/04-alert.png)
+![ALERT](../../assets/testing/accessibility/04-alert.png)
 
 **ALERT with Details open**
 
-![ALERT details](../assets/testing/accessibility/05-alert-details.png)
+![ALERT details](../../assets/testing/accessibility/05-alert-details.png)
 
 **SENSOR ERROR: no number is shown**
 
-![SENSOR ERROR](../assets/testing/accessibility/06-sensor-error.png)
+![SENSOR ERROR](../../assets/testing/accessibility/06-sensor-error.png)
 
 **SENSOR ERROR with Details open**
 
-![SENSOR ERROR details](../assets/testing/accessibility/07-sensor-error-details.png)
+![SENSOR ERROR details](../../assets/testing/accessibility/07-sensor-error-details.png)
 
 ## 7. Results by criterion
 
