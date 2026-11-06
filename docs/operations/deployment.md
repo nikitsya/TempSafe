@@ -110,7 +110,7 @@ Run these commands over SSH on the Ubuntu server:
 ```sh
 sudo systemctl status tempsafe nginx --no-pager
 cd /home/ubuntu/Smart-Box
-sudo docker compose ps
+sudo docker compose -p temsafe ps
 curl --fail http://127.0.0.1:8000/api/health
 ```
 

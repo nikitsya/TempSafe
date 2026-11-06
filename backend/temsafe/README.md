@@ -24,7 +24,7 @@ Create a **Python** run configuration:
 | Run target type   | `Module`                          |
 | Module name       | `uvicorn`                         |
 | Parameters        | `temsafe.main:app --reload`       |
-| Working directory | The Smart-Box project root        |
+| Working directory | The TempSafe project root         |
 
 Click **Run** and wait for `Application startup complete`.
 

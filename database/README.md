@@ -28,6 +28,9 @@ PyCharm SSH tunnel, credentials, network boundaries and backup verification stat
 docker compose up -d --wait mysql
 ```
 
+With the default project name, Docker Desktop shows the container as
+`tempsafe-mysql-1` and stores its data in `tempsafe_mysql_data`.
+
 On the first start, this creates the `temsafe` database, the `temsafe` database
 user and all eight tables. Connect using host `127.0.0.1`, port `3307` (unless changed
 in `.env`), user `temsafe` and your `MYSQL_PASSWORD`.

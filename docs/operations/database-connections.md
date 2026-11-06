@@ -120,9 +120,11 @@ problem by opening MySQL to the internet.
 
 ## Persistence, permissions and backups
 
-Compose stores MySQL data in the named volume `mysql_data` (normally
-`temsafe_mysql_data` with this project's Compose name). This survives container
-recreation but is not a backup or protection against loss of the EC2 disk.
+Compose derives the volume name from the project name. The local default
+`tempsafe` uses `tempsafe_mysql_data`. The EC2 project recorded above used
+`temsafe`, which gives `temsafe_mysql_data`. Keep that project name on EC2
+until its data has been migrated. The volume survives container recreation.
+Recovery from loss of the EC2 disk requires a separate backup.
 
 During this AWS inspection, the `temsafe` account had `ALL PRIVILEGES` on
 `temsafe.*`. It was not a narrowly restricted runtime account. Separating a
