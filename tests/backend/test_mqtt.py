@@ -3,11 +3,10 @@
 import json
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
+from temsafe.mqtt import ReadingConsumer
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 from uuid import uuid4
-
-from temsafe.mqtt import ReadingConsumer
 
 
 @pytest.fixture
@@ -94,7 +93,6 @@ def test_sensor_errors_and_unknown_times_are_preserved(consumer_data, unreliable
     assert ack is not None
 
 
-
 def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
     import asyncio
     import ssl
@@ -132,6 +130,7 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
         client.publish.reset_mock()
         await mqtt.client.on_message(subscription.topic, b"bad", 1, {})
         client.publish.assert_not_called()
+
     asyncio.run(scenario())
 
 
@@ -151,6 +150,7 @@ def test_lifespan_stops_mqtt_even_on_startup_failure(monkeypatch, failure):
         async with module.lifespan(app):
             assert app.state.mqtt is mqtt
             mqtt.mqtt_startup.assert_awaited_once()
+
     if failure:
         with pytest.raises(ConnectionError):
             asyncio.run(scenario())
