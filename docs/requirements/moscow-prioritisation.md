@@ -4,6 +4,37 @@ Feature status was last reviewed on **5 November 2026**. Of the 15 features, 5 a
 planned.
 See the [functional requirements](functional-requirements.md) for the acceptance criteria.
 
+## Feature priority matrix
+
+✓ marks the current priority. In the FR-13 row, ← points from its former priority to its current one.
+Items without an FR ID are follow-up ideas or exclusions. Implementation status is recorded in the sections below.
+
+| ID    | Feature                                                                              | Must Have | Should Have | Could Have | Won’t Have This Time |
+|-------|--------------------------------------------------------------------------------------|:---------:|:-----------:|:----------:|:--------------------:|
+| FR-01 | Sign in and sign out                                                                 |    ✓     |             |            |                      |
+| FR-02 | Restrict access to the assigned prototype box                                        |    ✓     |             |            |                      |
+| FR-03 | Measure and record internal temperature                                              |    ✓     |             |            |                      |
+| FR-04 | Show the latest temperature and its freshness                                        |    ✓     |             |            |                      |
+| FR-05 | Classify readings against a configured profile                                       |    ✓     |             |            |                      |
+| FR-06 | Provide a local LED warning                                                          |    ✓     |             |            |                      |
+| FR-07 | Display temperature history                                                          |    ✓     |             |            |                      |
+| FR-08 | Identify loss of device contact                                                      |    ✓     |             |            |                      |
+| FR-09 | Buffer readings while offline                                                        |    ✓     |             |            |                      |
+| FR-10 | Handle duplicate and delayed uploads                                                 |    ✓     |             |            |                      |
+| FR-11 | Refresh the dashboard automatically                                                  |           |     ✓      |            |                      |
+| FR-12 | Record review of a flagged sample                                                    |           |     ✓      |            |                      |
+| FR-13 | Estimate observed excursion periods                                                  |    ✓     |      ←      |            |                      |
+| FR-14 | Send phone notifications                                                             |    ✓     |             |            |                      |
+| FR-15 | Provide an audible buzzer alert                                                      |           |     ✓      |            |                      |
+| —     | Native mobile application                                                            |           |             |     ✓     |                      |
+| —     | Automatic cooling or temperature regulation                                          |           |             |            |          ✓          |
+| —     | GPS tracking and box-opening detection                                               |           |             |            |          ✓          |
+| —     | Humidity, weight measurement and a second sensor for external-temperature comparison |           |             |            |          ✓          |
+| —     | Integration with ambulance-service systems or ePCR                                   |           |             |            |          ✓          |
+| —     | Patient records, medication administration and controlled-drug accounting            |           |             |            |          ✓          |
+| —     | Automated clinical decisions about medicine use or disposal                          |           |             |            |          ✓          |
+| —     | Clinical deployment or testing with real medicines                                   |           |             |            |          ✓          |
+
 ## Decision rules
 
 - **Must Have:** without this feature, the core monitoring journey is incomplete or gives misleading information.
