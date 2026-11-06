@@ -12,7 +12,7 @@ State University and are promoted in Ireland by the National Disability Authorit
 ## Key principle: Principle 4 – Perceptible Information
 
 > *The design communicates necessary information effectively to the user, regardless of ambient conditions or the user's
-sensory abilities.*
+> sensory abilities.*
 
 ### Why we chose it
 

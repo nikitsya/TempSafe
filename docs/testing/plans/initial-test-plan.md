@@ -3,7 +3,8 @@
 ## Purpose
 
 Plan how to verify the [functional requirements](../../requirements/functional-requirements.md) and
-selected [Universal Design principles](../../design/accessibility/design-principles.md). This document defines planned acceptance tests.
+selected [Universal Design principles](../../design/accessibility/design-principles.md). This document defines planned
+acceptance tests.
 
 ## Equipment and prerequisites
 

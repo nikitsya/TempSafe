@@ -3,10 +3,11 @@
 import pytest
 from datetime import datetime, timedelta, timezone
 from fastapi.testclient import TestClient
+from unittest.mock import Mock
+
+from temsafe.db.models import Box
 from temsafe.db.session import get_db
 from temsafe.main import app
-from temsafe.db.models import Box
-from unittest.mock import Mock
 
 
 @pytest.fixture

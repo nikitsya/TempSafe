@@ -17,6 +17,6 @@ automated browser test plan (`docs/testing/plans/browser-test-plan.md`); UX IDs 
 | AC-07 | The graph has an equivalent data table.                                         | The history table lists the same readings as the graph.                    | BT-10, UX-04 |
 | AC-08 | Touch targets are at least 44 × 44 px.                                          | Measure buttons in the browser tools.                                      | UX-02        |
 | AC-09 | Pages work at 200% zoom and 320 px width without horizontal scrolling.          | Resize the browser window.                                                 | BT-12, UX-02 |
-| AC-10 | Error messages say what went wrong and how to fix it.                           | Review against [UI wording guide](../ui/ui-wording.md).                                            | BT-02, BT-09 |
+| AC-10 | Error messages say what went wrong and how to fix it.                           | Review against [UI wording guide](../ui/ui-wording.md).                    | BT-02, BT-09 |
 | AC-11 | Old or missing data is never shown as the current Normal state.                 | Stale, sensor error and offline states.                                    | BT-06        |
 | AC-12 | Time is shown with a clock time and an age (for example "14:17:30 · 12 s ago"). | Inspect the status card.                                                   | BT-04        |

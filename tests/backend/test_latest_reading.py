@@ -4,11 +4,12 @@ import pytest
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from fastapi.testclient import TestClient
-from temsafe.db.session import SessionLocal, get_db
-from temsafe.main import app
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
 from unittest.mock import Mock
 from uuid import uuid4
+
+from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from temsafe.db.session import SessionLocal, get_db
+from temsafe.main import app
 
 
 @pytest.fixture

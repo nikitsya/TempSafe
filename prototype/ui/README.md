@@ -17,7 +17,7 @@ prototype test results are not evidence of backend authentication or live device
 | `login.html`               | Sign in (test account `paramedic` / `demo`; `nobox` / `demo` shows denied access)                                |
 | `dashboard.html?state=...` | Current status. States: `normal`, `warning`, `alert`, `stale`, `sensor`, `offline`, `network`, `empty`, `denied` |
 | `history.html`             | History with time filter, graph, gaps and readings table                                                         |
-| `style.css`                | Shared styles from [`ui-style-guide.md`](../../docs/design/ui/ui-style-guide.md)                                    |
+| `style.css`                | Shared styles from [`ui-style-guide.md`](../../docs/design/ui/ui-style-guide.md)                                 |
 
 ## How to open
 

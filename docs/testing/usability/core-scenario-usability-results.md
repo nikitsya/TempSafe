@@ -2,15 +2,15 @@
 
 ## Test information
 
-| Item | Details |
-| --- | --- |
-| Date | 5 November 2026 |
-| Participants | Two proxy users, not paramedics |
-| Device | Laptop |
-| Interface | Working TempSafe website |
-| Scenario | Review the current box status and an earlier temperature excursion after patient care |
-| Script | [Usability Test Script](usability-test-script.md) |
-| Observation template | [Usability Observation Sheet](usability-observation-sheet.md) |
+| Item                 | Details                                                                               |
+|----------------------|---------------------------------------------------------------------------------------|
+| Date                 | 5 November 2026                                                                       |
+| Participants         | Two proxy users, not paramedics                                                       |
+| Device               | Laptop                                                                                |
+| Interface            | Working TempSafe website                                                              |
+| Scenario             | Review the current box status and an earlier temperature excursion after patient care |
+| Script               | [Usability Test Script](usability-test-script.md)                                     |
+| Observation template | [Usability Observation Sheet](usability-observation-sheet.md)                         |
 
 Before the sessions, the facilitator warmed and cooled the SCD41 sensor to
 prepare one event using real recorded readings. Both participants reviewed
@@ -26,19 +26,19 @@ Participants consented to written notes.
 Participants rated each question from 1 to 5, where 1 was very difficult or
 unclear and 5 was very easy or clear.
 
-| Question | Participant 1 | Participant 2 |
-| --- | ---: | ---: |
-| 1. Understand current temperature status | 5 | 5 |
-| 2. Understand current temperature display | 5 | 5 |
-| 3. Identify an excursion while away | 1 | 1 |
-| 4. Find previous temperature alerts | 5 | 5 |
-| 5. Use the History page | 4 | 5 |
-| 6. Understand event duration | 5 | 5 |
-| 7. Identify the date and time of an excursion | 2 | 3 |
-| 8. Understand peak temperature | 5 | 5 |
-| 9. Navigate between Current Status and History | 5 | 5 |
-| 10. Overall interface clarity | 5 | 4 |
-| 11. Confidence completing the task | 5 | 5 |
+| Question                                       | Participant 1 | Participant 2 |
+|------------------------------------------------|--------------:|--------------:|
+| 1. Understand current temperature status       |             5 |             5 |
+| 2. Understand current temperature display      |             5 |             5 |
+| 3. Identify an excursion while away            |             1 |             1 |
+| 4. Find previous temperature alerts            |             5 |             5 |
+| 5. Use the History page                        |             4 |             5 |
+| 6. Understand event duration                   |             5 |             5 |
+| 7. Identify the date and time of an excursion  |             2 |             3 |
+| 8. Understand peak temperature                 |             5 |             5 |
+| 9. Navigate between Current Status and History |             5 |             5 |
+| 10. Overall interface clarity                  |             5 |             4 |
+| 11. Confidence completing the task             |             5 |             5 |
 
 ## Findings and proposed changes
 
@@ -68,8 +68,8 @@ Afterwards, the facilitator asked about the section and the participants
 opened it. Both said that information repeated the main screen and did not
 find the section useful.
 
-Participants understood the difference between **Measured** and
-**Received**, but did not find both timestamps useful in the case shown,
+Participants understood the difference between **Measured** and **Received**, but did not find both timestamps useful in
+the case shown,
 where the times were almost the same.
 
 **Proposed change:** Review the contents of Details and remove unnecessary

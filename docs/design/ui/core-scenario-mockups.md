@@ -12,8 +12,8 @@ uses the colours and symbols below, which differ from the earlier HTML prototype
 | 2. Dashboard     | Current status Normal (23.5°C) with a card for the recorded event and a "View event" button.          |
 | 3. Event details | Ended event: 14:00–14:20, estimated 20 minutes above 25°C, maximum 28.1°C, graph with the 25°C limit. |
 
-|                         1. Notification                         |                       2. Dashboard                        |                         3. Event details                          |
-|:---------------------------------------------------------------:|:---------------------------------------------------------:|:-----------------------------------------------------------------:|
+|                          1. Notification                           |                         2. Dashboard                         |                           3. Event details                           |
+|:------------------------------------------------------------------:|:------------------------------------------------------------:|:--------------------------------------------------------------------:|
 | ![Notification mock-up](../../assets/design/core-notification.png) | ![Dashboard mock-up](../../assets/design/core-dashboard.png) | ![Event details mock-up](../../assets/design/core-event-details.png) |
 
 ## Clickable prototype

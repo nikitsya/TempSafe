@@ -28,7 +28,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
-  service. The FastMQTT deployment still needs a fresh device-to-server check. See the [MQTT guide](docs/operations/mqtt.md).
+  service. The FastMQTT deployment still needs a fresh device-to-server check. See
+  the [MQTT guide](docs/operations/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API. The dashboard polls every
@@ -106,27 +107,27 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 
 ## Code and development guides
 
-| Area                | Location / guide                                 |
-|---------------------|--------------------------------------------------|
-| Device scripts      | [device/](device/)                               |
-| Backend and API     | [Backend guide](backend/temsafe/README.md)       |
-| Database            | [Database setup](database/README.md)             |
-| Web interface       | [Frontend guide](frontend/README.md)             |
-| Clickable prototype | [Prototype guide](prototype/ui/README.md)        |
-| Backend tests       | [Test instructions](tests/backend/README.md)     |
+| Area                | Location / guide                                            |
+|---------------------|-------------------------------------------------------------|
+| Device scripts      | [device/](device/)                                          |
+| Backend and API     | [Backend guide](backend/temsafe/README.md)                  |
+| Database            | [Database setup](database/README.md)                        |
+| Web interface       | [Frontend guide](frontend/README.md)                        |
+| Clickable prototype | [Prototype guide](prototype/ui/README.md)                   |
+| Backend tests       | [Test instructions](tests/backend/README.md)                |
 | Deployment          | [Hosting and service checks](docs/operations/deployment.md) |
 
 ## Project documentation
 
-| Topic                          | Documents                                                                                                                                                                                                                                                        |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Scope and requirements         | [Project scope](docs/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                         |
-| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                                                               |
-| Interface and accessibility    | [UI design](docs/design/ui/ui-design.md) · [Core scenario mock-ups](docs/design/ui/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility/accessibility-criteria.md)                                                                                         |
-| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                            |
-| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                   |
+| Topic                          | Documents                                                                                                                                                                                                                                                                                               |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Scope and requirements         | [Project scope](docs/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                                                                        |
+| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                                                                                                      |
+| Interface and accessibility    | [UI design](docs/design/ui/ui-design.md) · [Core scenario mock-ups](docs/design/ui/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility/accessibility-criteria.md)                                                                                                            |
+| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                                                                   |
+| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                                                          |
 | Testing                        | [System test plan](docs/testing/plans/initial-test-plan.md) · [Browser test results](docs/testing/plans/browser-test-plan.md) · [Sensor test](docs/testing/hardware/scd41-basic-readings.md) · [LED test](docs/testing/hardware/led-patterns.md) · [Buzzer test](docs/testing/hardware/buzzer-alert.md) |
-| Assessment and project records | [October G-CA1 design](docs/iot-gca/tempsafe-iot-gca1.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                          |
+| Assessment and project records | [October G-CA1 design](docs/iot-gca/tempsafe-iot-gca1.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                                                                         |
 
 The Word design document, cover sheet and elevator pitch are October assessment artefacts, not current setup
 instructions. They retain earlier proposals such as Pi 400, GPIO17/1 kΩ LED wiring, a 15°C lower threshold

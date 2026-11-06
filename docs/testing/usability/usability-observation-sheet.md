@@ -20,11 +20,11 @@ participant gave up.
 **Assistance:** 0 = none; 1 = instruction repeated; 2 = hint given;
 3 = answer shown.
 
-| Task | Completed (Y / H / N) | Assistance (0–3) | Difficulties | Notes / participant comments |
-| --- | --- | --- | --- | --- |
-| T1 — Understand current status | | | | |
-| T2 — Check whether an excursion occurred | | | | |
-| T3 — Investigate the previous event | | | | |
+| Task                                     | Completed (Y / H / N) | Assistance (0–3) | Difficulties | Notes / participant comments |
+|------------------------------------------|-----------------------|------------------|--------------|------------------------------|
+| T1 — Understand current status           |                       |                  |              |                              |
+| T2 — Check whether an excursion occurred |                       |                  |              |                              |
+| T3 — Investigate the previous event      |                       |                  |              |                              |
 
 For T2, note separately whether the participant looked for an event and
 whether they were able to determine what happened. An attempt alone is not
@@ -43,19 +43,19 @@ the same as completing the task.
 Ask the participant to rate each question from **1 to 5**:
 **1 = very difficult or unclear; 5 = very easy or clear.**
 
-| Question | Rating |
-| --- | --- |
-| 1. How easy was it to understand the current temperature status? | |
-| 2. How clear was the current temperature display? | |
-| 3. How easy was it to identify whether a temperature excursion happened while you were away? | |
-| 4. How easy was it to find previous temperature alerts? | |
-| 5. How easy was it to use the History page? | |
-| 6. How clear was the duration of a temperature event? | |
-| 7. How easy was it to identify the date and time of a temperature excursion? | |
-| 8. How clear was the peak temperature information? | |
-| 9. How easy was it to navigate between Current Status and History? | |
-| 10. How clear was the TempSafe interface overall? | |
-| 11. How confident did you feel completing the task? | |
+| Question                                                                                     | Rating |
+|----------------------------------------------------------------------------------------------|--------|
+| 1. How easy was it to understand the current temperature status?                             |        |
+| 2. How clear was the current temperature display?                                            |        |
+| 3. How easy was it to identify whether a temperature excursion happened while you were away? |        |
+| 4. How easy was it to find previous temperature alerts?                                      |        |
+| 5. How easy was it to use the History page?                                                  |        |
+| 6. How clear was the duration of a temperature event?                                        |        |
+| 7. How easy was it to identify the date and time of a temperature excursion?                 |        |
+| 8. How clear was the peak temperature information?                                           |        |
+| 9. How easy was it to navigate between Current Status and History?                           |        |
+| 10. How clear was the TempSafe interface overall?                                            |        |
+| 11. How confident did you feel completing the task?                                          |        |
 
 ## Open feedback
 
