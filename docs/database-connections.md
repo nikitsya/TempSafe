@@ -148,7 +148,8 @@ not evidence of a running backup job.
 On 5 November 2026 the [PyCharm access record](database-access-evidence.md) documented a read of hosted samples, the SSH
 forwarding command and the grants returned by the TempSafe AWS console.
 
-The [FastAPI account check](database-access-evidence.md#checking-fastapi-separately) also confirmed the authenticated MySQL account and schema using the active service environment.
+The [FastAPI account check](database-access-evidence.md#checking-fastapi-separately) also confirmed the authenticated
+MySQL account and schema using the active service environment.
 
 ## Remaining server checks
 

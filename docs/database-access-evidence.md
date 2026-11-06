@@ -68,7 +68,8 @@ On 5 November 2026 I ran these queries in the **TempSafe AWS** console in PyChar
 
 ```sql
 SELECT CURRENT_USER();
-SHOW GRANTS FOR CURRENT_USER;
+SHOW
+GRANTS FOR CURRENT_USER;
 ```
 
 Figure 4 shows the grants for `temsafe`@`%`. The global `USAGE` entry grants no
