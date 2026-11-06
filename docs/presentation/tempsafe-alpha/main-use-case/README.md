@@ -17,10 +17,10 @@ The pictures below show how each step changed from the early concept to Figma an
 
 | Figma | Website |
 |---|---|
-| ![Notification in Figma](01-notification-figma.png) | Not built yet. Phone alerts (FR-14) are planned for Sprint 8. |
+| ![Notification in Figma](01-notification-figma.png) | ![Alert on the website](01-notification-website.png) |
 
-**What it shows:** The alert on Shannon's lock screen: "ALERT: Drug Box 26.2°C, above 25°C limit, 14:00".
-**What changed:** One short line with an icon, a word and the temperature, so she understands it in one glance. Today, the box shows the alert with a red LED.
+**What it shows:** The alert: "ALERT: Drug Box 26.2°C, above 25°C limit, 14:00".
+**What changed:** On the website, the alert is shown on the Current status page with an icon, the word ALERT and the temperature, so she understands it in one glance.
 
 ## Step 2: Current status
 
@@ -57,5 +57,5 @@ The pictures below show how each step changed from the early concept to Figma an
 ## DoD
 
 - [x] The pictures show each step of the main use case: notification, current status, event details and history.
-- [x] Each step has a Figma picture and a website screenshot, where one exists. The notification is not on the website yet.
+- [x] Each step has a Figma picture and a website screenshot.
 - [x] Each picture has a short caption: what it shows and what changed.
