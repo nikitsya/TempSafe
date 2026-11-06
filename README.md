@@ -124,7 +124,7 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 | Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                            |
 | Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                   |
 | Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) · [Buzzer test](docs/testing/buzzer-alert.md) |
-| Assessment and project records | [October G-CA1 design](docs/iot-gca/smart-box-iot-gca1-design.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                          |
+| Assessment and project records | [October G-CA1 design](docs/iot-gca/tempsafe-iot-gca1.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                          |
 
 The Word design document, cover sheet and elevator pitch are October assessment artefacts, not current setup
 instructions. They retain earlier proposals such as Pi 400, GPIO17/1 kΩ LED wiring, a 15°C lower threshold
