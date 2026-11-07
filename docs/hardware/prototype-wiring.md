@@ -80,5 +80,5 @@ the centre gap. Row 11 provides the shared LED/buzzer ground through A11
 to physical pin 14. Sensor wiring must use separate junctions from the
 output circuits except for intentional shared ground connections.
 
-See the [LED test](../testing/led-patterns.md) and
-[buzzer test](../testing/buzzer-alert.md) for the recorded results.
+See the [LED test](../testing/hardware/led-patterns.md) and
+[buzzer test](../testing/hardware/buzzer-alert.md) for the recorded results.

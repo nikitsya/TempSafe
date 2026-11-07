@@ -23,7 +23,7 @@ See the [wiring record](prototype-wiring.md) for the current connections.
 | Plastic prototype box       | One simple plastic storage box for temperature monitoring and local feedback. No real controlled drugs will be used.                                                                                                       | To be purchased; final size to be confirmed         | TBD            |
 
 The tested buzzer circuit also uses two 220 Ω resistors in series. See the
-[buzzer test](../testing/buzzer-alert.md) for the recorded connections and limitations.
+[buzzer test](../testing/hardware/buzzer-alert.md) for the recorded connections and limitations.
 
 ## Feedback logic
 
@@ -42,4 +42,4 @@ and permission; they are separate from the local hardware feedback.
 
 The LED and buzzer are output devices; the SCD-41 is the sensor. See the
 [device guide](../../device/README.md#main-temperature-logger) for implemented feedback and the
-[project scope](../project/project-scope.md) for included and excluded features.
+[project scope](../project-scope.md) for included and excluded features.

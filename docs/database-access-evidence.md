@@ -39,7 +39,7 @@ I keep that terminal open while I use PyCharm. The `-N` option opens the tunnel
 without starting a remote shell, so the terminal can stay quiet. PyCharm connects
 to `127.0.0.1:13307` on my Mac. SSH carries that connection to EC2, where the
 destination `127.0.0.1:3307` refers to the EC2 instance itself.
-The [database connection record](database-connections.md) includes the port
+The [database connection record](operations/database-connections.md) includes the port
 mapping observed on EC2.
 
 ## Viewing local services in Docker Desktop

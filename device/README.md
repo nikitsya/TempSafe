@@ -192,9 +192,9 @@ and releases it when the test finishes.
 
 ## Test evidence
 
-- [SCD41 readings, SQLite storage and simulated sensor error test](../docs/testing/scd41-basic-readings.md)
-- [LED tests](../docs/testing/led-patterns.md)
-- [Temperature-triggered buzzer test](../docs/testing/buzzer-alert.md)
+- [SCD41 readings, SQLite storage and simulated sensor error test](../docs/testing/hardware/scd41-basic-readings.md)
+- [LED tests](../docs/testing/hardware/led-patterns.md)
+- [Temperature-triggered buzzer test](../docs/testing/hardware/buzzer-alert.md)
 
 The sensor error test used a temporary software exception. Normal readings
 were verified after removing that exception and restarting the script.
