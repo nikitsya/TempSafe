@@ -67,8 +67,8 @@ def create_mqtt():
         LOGGER.info("MQTT ingestion disabled; set MQTT_ENABLED=true to enable it")
         return None
 
-    from temsafe.database import SessionLocal
-    from temsafe.readings import save_reading
+    from temsafe.db.session import SessionLocal
+    from temsafe.monitoring.readings import save_reading
 
     local_broker = os.getenv("TEMSAFE_LOCAL_MQTT") == "1"
     if local_broker:

@@ -5,10 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from temsafe import models
 from temsafe.api.auth import AllowedBoxes, require_device
-from temsafe.database import get_db
-from temsafe.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
+from temsafe.db import models
+from temsafe.db.session import get_db
+from temsafe.monitoring.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
 from temsafe.schemas import ReadingCreate, ReadingResponse
 
 router = APIRouter(tags=["Readings"])

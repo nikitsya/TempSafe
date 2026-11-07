@@ -25,14 +25,15 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Heartbeat settings:** an operator can read and update the desired heartbeat interval for each box.
   The TLS subscriber returns the interval in a single-use challenge and records contact on a valid device echo.
   The Pi exchange and production broker permissions still require verification. See
-  the [heartbeat contract](docs/mqtt.md#device-heartbeat-contract).
+  the [heartbeat contract](docs/operations/mqtt.md#device-heartbeat-contract).
 - **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
   frontend integration, per-user permissions and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
-  service. The FastMQTT deployment still needs a fresh device-to-server check. See the [MQTT guide](docs/mqtt.md).
+  service. The FastMQTT deployment still needs a fresh device-to-server check. See
+  the [MQTT guide](docs/operations/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API. The dashboard polls every
@@ -47,10 +48,12 @@ See the [functional requirements](docs/requirements/functional-requirements.md) 
 [Open TempSafe](https://tempsafe.app) or go directly to the
 [dashboard](https://tempsafe.app/pages/dashboard.html).
 
+<img src="docs/tempsafe-qr.png" width="165" height="165" alt="Scan to open the TempSafe website">
+
 The dashboard refreshes automatically. Reload history to fetch new readings. Sign-in is not implemented; use test data
 only.
 See the [frontend guide](frontend/README.md) for current behaviour and limitations, and the
-[deployment guide](docs/deployment.md) for server updates and service checks.
+[deployment guide](docs/operations/deployment.md) for server updates and service checks.
 
 ## Run TempSafe locally with Docker Compose
 
@@ -108,27 +111,27 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 
 ## Code and development guides
 
-| Area                | Location / guide                                 |
-|---------------------|--------------------------------------------------|
-| Device scripts      | [device/](device/)                               |
-| Backend and API     | [Backend guide](backend/temsafe/README.md)       |
-| Database            | [Database setup](database/README.md)             |
-| Web interface       | [Frontend guide](frontend/README.md)             |
-| Clickable prototype | [Prototype guide](prototype/ui/README.md)        |
-| Backend tests       | [Test instructions](tests/backend/README.md)     |
-| Deployment          | [Hosting and service checks](docs/deployment.md) |
+| Area                | Location / guide                                            |
+|---------------------|-------------------------------------------------------------|
+| Device scripts      | [device/](device/)                                          |
+| Backend and API     | [Backend guide](backend/temsafe/README.md)                  |
+| Database            | [Database setup](database/README.md)                        |
+| Web interface       | [Frontend guide](frontend/README.md)                        |
+| Clickable prototype | [Prototype guide](prototype/ui/README.md)                   |
+| Backend tests       | [Test instructions](tests/backend/README.md)                |
+| Deployment          | [Hosting and service checks](docs/operations/deployment.md) |
 
 ## Project documentation
 
-| Topic                          | Documents                                                                                                                                                                                                                                                        |
-|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Scope and requirements         | [Project scope](docs/project/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                         |
-| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                                                               |
-| Interface and accessibility    | [UI design](docs/design/ui-design.md) · [Core scenario mock-ups](docs/design/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility-criteria.md)                                                                                         |
-| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                            |
-| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                   |
-| Testing                        | [System test plan](docs/testing/initial-test-plan.md) · [Browser test results](docs/testing/browser-test-plan.md) · [Sensor test](docs/testing/scd41-basic-readings.md) · [LED test](docs/testing/led-patterns.md) · [Buzzer test](docs/testing/buzzer-alert.md) |
-| Assessment and project records | [October G-CA1 design](docs/iot-gca/smart-box-iot-gca1-design.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                          |
+| Topic                          | Documents                                                                                                                                                                                                                                                                                               |
+|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Scope and requirements         | [Project scope](docs/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                                                                        |
+| Users and scenario             | [Persona](docs/requirements/user-persona.md) · [Main use case](docs/requirements/main-use-case.md)                                                                                                                                                                                                      |
+| Interface and accessibility    | [UI design](docs/design/ui/ui-design.md) · [Core scenario mock-ups](docs/design/ui/core-scenario-mockups.md) · [Accessibility criteria](docs/design/accessibility/accessibility-criteria.md)                                                                                                            |
+| Hardware                       | [Parts list](docs/hardware/hardware-parts-list.md) · [Wiring and Fritzing diagram](docs/hardware/prototype-wiring.md)                                                                                                                                                                                   |
+| Research                       | [Sensor research](docs/research/sensor-research.md) · [Database research](docs/research/database-research.md) · [All research](docs/research/)                                                                                                                                                          |
+| Testing                        | [System test plan](docs/testing/plans/initial-test-plan.md) · [Browser test results](docs/testing/plans/browser-test-plan.md) · [Sensor test](docs/testing/hardware/scd41-basic-readings.md) · [LED test](docs/testing/hardware/led-patterns.md) · [Buzzer test](docs/testing/hardware/buzzer-alert.md) |
+| Assessment and project records | [October G-CA1 design](docs/iot-gca/tempsafe-iot-gca1.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                                                                         |
 
 The Word design document, cover sheet and elevator pitch are October assessment artefacts, not current setup
 instructions. They retain earlier proposals such as Pi 400, GPIO17/1 kΩ LED wiring, a 15°C lower threshold

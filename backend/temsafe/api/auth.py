@@ -12,8 +12,8 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 from typing import Annotated
 
-from temsafe.database import get_db
-from temsafe.models import AppUser, BoxAccess, UserSession
+from temsafe.db.models import AppUser, BoxAccess, UserSession
+from temsafe.db.session import get_db
 
 router = APIRouter(tags=["Authentication"])
 COOKIE = "__Host-tempsafe_session"

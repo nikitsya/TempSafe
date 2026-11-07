@@ -102,8 +102,8 @@ records the temperature excursion. With connectivity and permission, a phone Ale
 
 > **Alert: Controlled Drug Box temperature has exceeded 25°C.**
 >
-The Must Have excursion summary (FR-13) shows an estimated period and maximum
-temperature, for example:
+> The Must Have excursion summary (FR-13) shows an estimated period and maximum
+> temperature, for example:
 
 > **ESTIMATED EXCURSION – 12 min – max 27.4°C**
 
@@ -194,4 +194,4 @@ TempSafe supports the existing work of the Advanced Paramedic instead of requiri
 technology.
 
 > **TempSafe is an automatic IoT monitoring system for a Controlled Drug Box that tracks temperature over time and gives
-clear visual, audible and phone-notification feedback when storage conditions require attention.**
+> clear visual, audible and phone-notification feedback when storage conditions require attention.**

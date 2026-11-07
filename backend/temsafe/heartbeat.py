@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
-from temsafe.models import Box
+from temsafe.db.models import Box
 
 LOGGER = logging.getLogger(__name__)
 

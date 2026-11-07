@@ -69,7 +69,7 @@ Existing and new boxes default to 60 seconds. PUT accepts whole JSON integers fr
 have a heartbeat setting before any temperature profile is selected. Changing the
 interval preserves the profile, sampling rate and last contact time. The TLS subscriber returns the desired interval in
 its
-[device challenge](../mqtt.md#device-heartbeat-contract).
+[device challenge](../operations/mqtt.md#device-heartbeat-contract).
 
 ## Versioning and concurrency
 

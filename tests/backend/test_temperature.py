@@ -3,8 +3,8 @@
 import pytest
 from decimal import Decimal
 
-from temsafe.models import ThresholdProfile
-from temsafe.temperature import classify_temperature
+from temsafe.db.models import ThresholdProfile
+from temsafe.monitoring.temperature import classify_temperature
 
 
 @pytest.fixture

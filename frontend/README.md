@@ -2,8 +2,8 @@
 
 The web interface of TempSafe, built with plain HTML, CSS and JavaScript (no build step).
 The latest layout changes are recorded in
-the [accessibility review](../docs/testing/core-scenario-accessibility-review.md).
-The [UI mock-ups](../docs/design/ui-design.md) describe the wider target design.
+the [accessibility review](../docs/testing/accessibility/core-scenario-accessibility-review.md).
+The [UI mock-ups](../docs/design/ui/ui-design.md) describe the wider target design.
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
 application frontend under development, served by the FastAPI backend in `backend/temsafe`.
 Authentication is not implemented. The dashboard and history load readings for prototype box `TS-01`
@@ -11,7 +11,7 @@ from the backend API when each page opens. The dashboard polls every five second
 
 The hosted application is available at [tempsafe.app](https://tempsafe.app).
 Use the [dashboard link](https://tempsafe.app/pages/dashboard.html) to view the application;
-the sign-in form does not authenticate users. See the [deployment notes](../docs/deployment.md).
+the sign-in form does not authenticate users. See the [deployment notes](../docs/operations/deployment.md).
 
 ## Structure
 

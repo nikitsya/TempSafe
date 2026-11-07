@@ -27,8 +27,8 @@ The example grants access to the existing prototype box. Both inserts commit tog
 python - <<'PYTHON'
 from getpass import getpass
 from argon2 import PasswordHasher
-from temsafe.database import SessionLocal
-from temsafe.models import AppUser, BoxAccess
+from temsafe.db.session import SessionLocal
+from temsafe.db.models import AppUser, BoxAccess
 
 username = getpass("New username (hidden): ").strip()
 password = getpass("New password: ")
@@ -44,21 +44,21 @@ PYTHON
 
 ## Temperature classification
 
-[`temperature.py`](../../backend/temsafe/temperature.py) provides
+[`temperature.py`](../../backend/temsafe/monitoring/temperature.py) provides
 `classify_temperature(temperature_c, quality, profile)`.
 Pass the profile associated with the measurement. The function uses its stored
 limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
 is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
 temperatures and sensor errors return `Unknown`.
 
-The latest-reading endpoint loads the sample's recorded profile and uses this
-function to add `temperature_state` to its response. This state describes the
-recorded temperature; it does not assess whether the reading is stale.
+The latest-reading and box history endpoints classify each sample using its recorded profile.
+Use each history row’s `temperature_state` and `profile` for the table, graph and excursion periods.
+A later change to the box’s limits preserves the interpretation of earlier readings.
 
 ## Saving incoming readings
 
 `ReadingCreate` in [`schemas.py`](../../backend/temsafe/schemas.py) validates the incoming fields. Use
-`save_reading(db, reading)` from `temsafe.readings` with a validated `ReadingCreate`
+`save_reading(db, reading)` from `temsafe.monitoring.readings` with a validated `ReadingCreate`
 and a dedicated `SessionLocal()` session. The function checks the box and profile,
 then uses `add()`, `commit()` and `refresh()` to save the sample.
 
@@ -101,27 +101,28 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 
 ### Endpoints and fields available now
 
-| GET endpoint                            | Successful response                                                                                                                                 |
-|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                                |
-| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                     |
-| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; no `temperature_state`, `profile` or `freshness`. Default limit 20, allowed 1–100. Empty history: `[]`. |
+| GET endpoint                            | Successful response                                                                                                                                             |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                                            |
+| `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                                 |
+| `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; each includes its recorded `profile` and `temperature_state`. Default limit 20, allowed 1–100. Empty history: `[]`. |
 
 Use the box-specific endpoints for the dashboard, not `/api/readings`, which mixes boxes and sorts by receipt time.
 
-| Sample field                        | JSON type                  | Meaning / frontend handling                                                                                          |
-|-------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `sample_id`, `box_id`, `profile_id` | string                     | Sample, box and recorded profile identifiers.                                                                        |
-| `sequence_no`                       | integer                    | Measurement order within a box; do not reorder by upload time.                                                       |
-| `temperature_c`                     | decimal string or `null`   | Celsius. Check for `null` before `Number(value)`; never turn a missing value into zero.                              |
-| `quality`                           | string                     | `valid` or `sensor_error`; an error means temperature is unknown.                                                    |
-| `observed_at`                       | timestamp string or `null` | Measurement time; `null` when the device clock is unreliable.                                                        |
-| `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                                            |
-| `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                                          |
-| `temperature_state`                 | string                     | Latest endpoint only: `Normal`, `Warning`, `Alert` or `Unknown`. Recorded temperature classification, not freshness. |
-| `freshness`                         | string                     | Latest endpoint only: `fresh`, `stale` or `unknown`, calculated from observation time when requested.                |
+| Sample field                        | JSON type                  | Meaning / frontend handling                                                                           |
+|-------------------------------------|----------------------------|-------------------------------------------------------------------------------------------------------|
+| `sample_id`, `box_id`, `profile_id` | string                     | Sample, box and recorded profile identifiers.                                                         |
+| `sequence_no`                       | integer                    | Measurement order within a box; do not reorder by upload time.                                        |
+| `temperature_c`                     | decimal string or `null`   | Celsius. Check for `null` before `Number(value)`; never turn a missing value into zero.               |
+| `quality`                           | string                     | `valid` or `sensor_error`; an error means temperature is unknown.                                     |
+| `observed_at`                       | timestamp string or `null` | Measurement time; `null` when the device clock is unreliable.                                         |
+| `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                             |
+| `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                           |
+| `temperature_state`                 | string                     | Latest and history endpoints: `Normal`, `Warning`, `Alert` or `Unknown`.                              |
+| `freshness`                         | string                     | Latest endpoint only: `fresh`, `stale` or `unknown`, calculated from observation time when requested. |
 
-`profile` is an object on the latest response only: `profile_id` is a string; `lower_c`, `warning_c` and `upper_c`
+`profile` accompanies the latest reading and each box history row: `profile_id` is a string; `lower_c`, `warning_c` and
+`upper_c`
 are decimal strings in Celsius. It matches the reading’s `profile_id`, including for sensor errors.
 
 ### Example responses
@@ -191,7 +192,7 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
   This describes sample age, not sensor health: a recent sensor error can be `fresh` with `temperature_state: Unknown`.
   It is evaluated on each request; the frontend must refresh or age the display rather than keep a cached result live.
 - Intended contact rule: more than 180 seconds without authenticated contact means not reporting.
-  The [MQTT challenge exchange](../mqtt.md#device-heartbeat-contract) records server UTC on a valid echo;
+  The [MQTT challenge exchange](../operations/mqtt.md#device-heartbeat-contract) records server UTC on a valid echo;
   `last_seen_at: null` means contact is unknown, not proof that the device is offline.
 - Sensor errors remain explicit even when stale or not reporting. Receipt of an old buffered sample does not make it
   fresh.

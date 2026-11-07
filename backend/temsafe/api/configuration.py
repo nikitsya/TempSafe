@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 from uuid import uuid4
 
-from temsafe.admin import require_configuration_admin
+from temsafe.api.admin import require_configuration_admin
 from temsafe.api.auth import require_box
-from temsafe.database import get_db
-from temsafe.models import Box, BoxConfiguration, ThresholdProfile
+from temsafe.db.models import Box, BoxConfiguration, ThresholdProfile
+from temsafe.db.session import get_db
 from temsafe.schemas import HeartbeatSettings, ThresholdSettingsCreate, ThresholdSettingsResponse
 
 router = APIRouter(tags=["Configuration"], dependencies=[Depends(require_box), Depends(require_configuration_admin)])

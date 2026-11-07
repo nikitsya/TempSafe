@@ -9,9 +9,9 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.orm import Session
 
-from temsafe.database import engine
+from temsafe.db.session import engine
 from temsafe.heartbeat import HeartbeatConsumer
-from temsafe.models import Box
+from temsafe.db.models import Box
 
 
 @pytest.fixture

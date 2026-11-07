@@ -83,11 +83,16 @@ class ReadingProfileResponse(BaseModel):
     upper_c: Decimal
 
 
-class LatestReadingResponse(ReadingResponse):
+class HistoryReadingResponse(ReadingResponse):
     """Include the recorded profile and calculated temperature state."""
 
     temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
     profile: ReadingProfileResponse
+
+
+class LatestReadingResponse(HistoryReadingResponse):
+    """Include the freshness of the latest observation."""
+
     freshness: Literal["fresh", "stale", "unknown"]
 
 
