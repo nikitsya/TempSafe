@@ -7,7 +7,9 @@ CREATE TABLE boxes
 (
     box_id       VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
     name         VARCHAR(100) NOT NULL,
-    last_seen_at DATETIME(6)  NULL
+    last_seen_at               DATETIME(6)       NULL,
+    heartbeat_interval_seconds SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+    CONSTRAINT ck_box_heartbeat_interval CHECK (heartbeat_interval_seconds >= 1)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_as_cs;

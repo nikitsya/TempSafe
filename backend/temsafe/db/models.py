@@ -3,7 +3,7 @@
 from datetime import datetime
 from decimal import Decimal
 from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, String, Text, UniqueConstraint, text
-from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM
+from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM, SMALLINT
 from sqlalchemy.orm import Mapped, mapped_column
 
 from temsafe.db.session import Base
@@ -17,6 +17,7 @@ class Box(Base):
     box_id: Mapped[str] = mapped_column(String(64), primary_key=True)
     name: Mapped[str] = mapped_column(String(100))
     last_seen_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    heartbeat_interval_seconds: Mapped[int] = mapped_column(SMALLINT(unsigned=True), server_default=text("60"))
 
 
 class AppUser(Base):
