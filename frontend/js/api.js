@@ -16,3 +16,9 @@ async function apiGet(path) {
     }
     return response.json();
 }
+
+// Open the sign-in page, for example when the API says the session has ended (401).
+function goToSignIn(reason = 'expired') {
+    const page = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+    window.location.href = `${page}?reason=${reason}`;
+}
