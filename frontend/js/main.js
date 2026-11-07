@@ -17,16 +17,33 @@ async function showApiStatus() {
 document.addEventListener('DOMContentLoaded', showApiStatus);
 
 // Sign out: end the session on the server, then open the sign-in page.
+// The session cookie is HttpOnly, so only the server can remove it. If the
+// server does not confirm sign-out, the user stays on this page and can try again.
 document.addEventListener('DOMContentLoaded', () => {
+    const errorBanner = document.getElementById('signout-error');
+
     document.querySelectorAll('[data-signout]').forEach((link) => {
         link.addEventListener('click', async (event) => {
             event.preventDefault();
+            if (link.getAttribute('aria-disabled') === 'true') return;
+
+            link.setAttribute('aria-disabled', 'true');
+            if (errorBanner) errorBanner.hidden = true;
+
             try {
-                await fetch(`${API_BASE}/logout`, {method: 'POST'});
+                const response = await fetch(`${API_BASE}/logout`, {method: 'POST'});
+                if (!response.ok) {
+                    throw new Error(`Sign out failed: ${response.status}`);
+                }
+                goToSignIn('signed-out');
             } catch (error) {
-                // Even if the request fails, leave the protected page.
+                console.error(error);
+                if (errorBanner) {
+                    errorBanner.textContent = "We couldn't confirm that you've signed out. Please try again.";
+                    errorBanner.hidden = false;
+                }
+                link.removeAttribute('aria-disabled');
             }
-            goToSignIn('signed-out');
         });
     });
 });
