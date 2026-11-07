@@ -28,6 +28,7 @@ The sign-in page now uses the real login endpoint (`POST /api/login`). Only sign
 | 6 | Sign out | Session ends, sign-in page shows "You have signed out." | ✅ Pass |
 | 7 | Open the dashboard after sign out | Goes back to the sign-in page | ✅ Pass |
 | 8 | Sign out when the server cannot be reached | User stays on the page, sees an error, can try again | ✅ Pass |
+| 9 | Sign out when the server returns HTTP 500 | User stays on the page, sees an error, can try again | ✅ Pass |
 
 ## Test 1: Wrong login
 
@@ -57,7 +58,7 @@ I clicked Sign in with both fields empty. The page showed "Enter your email or u
 
 ## Test 6: Sign out
 
-I signed in and clicked Sign out. The session ended, and the sign-in page showed "You have signed out."
+I signed in and clicked Sign out. The server log showed `POST /api/logout 204 No Content`. The session ended, and the sign-in page showed "You have signed out." The page shows this message only after a 204 response.
 
 The browser filled in the saved username and password by itself. This is the browser's password manager, not the website.
 
@@ -77,6 +78,21 @@ The session cookie is HttpOnly, so only the server can end the session. The page
 
 ![Sign out not confirmed](../assets/testing/sign-in/07-signout-failed.png)
 
+## Test 9: Sign out returns HTTP 500
+
+I signed in and, in the DevTools Console, made `POST /api/logout` return HTTP 500 for this page only:
+
+```js
+const realFetch = window.fetch;
+window.fetch = (url, options) => String(url).endsWith('/logout')
+    ? Promise.resolve(new Response(null, {status: 500}))
+    : realFetch(url, options);
+```
+
+I clicked Sign out. The page stayed open and showed "We couldn't confirm that you've signed out. Please try again." The status code was not shown to the user. After a page reload (which removes the test code), Sign out opened the sign-in page with "You have signed out."
+
+![Sign out with HTTP 500](../assets/testing/sign-in/08-signout-500.png)
+
 ## Problems found during testing
 
 - After the update, Sign out did not show its message at first, because the browser used old JavaScript files from its cache. In a private window, the new files loaded and it worked. Users may need to reload the page once after the update.
@@ -88,4 +104,4 @@ The session cookie is HttpOnly, so only the server can end the session. The page
 
 ## Result
 
-All 8 local tests pass. The DoD items for #71290 are met locally. The last item, "It works on tempsafe.app", is checked after the pull request is merged and the server is updated.
+All 9 local tests pass. The DoD items for #71290 are met locally. The last item, "It works on tempsafe.app", is checked after the pull request is merged and the server is updated.

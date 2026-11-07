@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const response = await fetch(`${API_BASE}/logout`, {method: 'POST'});
-                if (!response.ok) {
+                // The backend answers 204 No Content when the session has ended.
+                if (response.status !== 204) {
                     throw new Error(`Sign out failed: ${response.status}`);
                 }
                 goToSignIn('signed-out');
