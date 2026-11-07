@@ -1,76 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 810" width="1440" height="810" role="img" aria-labelledby="title description">
-  <title id="title">TempSafe system architecture</title>
-  <desc id="description">The Raspberry Pi reads the SCD41 sensor, controls a local LED and buzzer, and saves samples
-    to SQLite. A separate Pi publisher retries queued samples until the server confirms storage. Over TLS, an MQTT
-    broker forwards each reading to a worker that stores it in MySQL. A stored acknowledgement returns through the
-    broker. The browser requests dashboard and history data over HTTPS through Nginx and FastAPI. The broker,
-    worker, web services and MySQL share one EC2 instance. The MySQL host port is bound to localhost.
-    Database credentials come from the server .env file. The account schema stores password hashes.
-  </desc>
-  <defs>
-    <marker id="write" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#087466"/></marker>
-    <marker id="read" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#3559a2"/></marker>
-    <style>
-      text { font-family: Arial, Helvetica, sans-serif; fill: #172e38 }
-      .heading { font-size: 46px; font-weight: 700 }
-      .region { font-size: 18px; font-weight: 700; letter-spacing: 1px }
-      .name { font-size: 25px; font-weight: 700 }
-      .detail { font-size: 19px }
-      .wire { fill: none; stroke-width: 3 }
-      .ingest { stroke: #087466; marker-end: url(#write) }
-      .query { stroke: #3559a2; marker-end: url(#read) }
-      .node { fill: white; stroke: #bacacb; stroke-width: 2 }
-    </style>
-  </defs>
-  <rect width="1440" height="810" fill="#fafbf8"/>
-  <text x="48" y="100" class="heading">TempSafe system architecture</text>
-  <rect x="390" y="170" width="1002" height="495" rx="18" fill="#ecf2f1" stroke="#a1b6b7" stroke-width="2"/>
-  <text x="420" y="214" class="region">AWS EC2   /   UBUNTU SERVER</text>
-  <text x="49" y="214" class="region">MEDICATION BOX</text>
-  <rect x="48" y="240" width="240" height="241" rx="12" class="node"/>
-  <text x="68" y="276" class="name">Raspberry Pi 5</text>
-  <text x="68" y="306" class="detail">SCD41 sensor via I²C</text>
-  <text x="68" y="335" class="detail">Local LED and buzzer</text>
-  <text x="68" y="364" class="detail">Save samples to SQLite</text>
-  <path d="M68 381 H266" stroke="#c9d5d3"/>
-  <text x="68" y="414" class="name">MQTT publisher</text>
-  <text x="68" y="443" class="detail">Retry until confirmed</text>
-  <rect x="430" y="277" width="225" height="126" rx="12" class="node"/>
-  <text x="450" y="327" class="name">MQTT broker</text>
-  <text x="450" y="363" class="detail">TLS · port 8883</text>
-  <rect x="746" y="277" width="220" height="126" rx="12" class="node"/>
-  <text x="766" y="327" class="name">MQTT worker</text>
-  <text x="766" y="363" class="detail">Validate and store</text>
-  <rect x="1104" y="354" width="245" height="162" rx="12" class="node"/>
-  <text x="1126" y="413" class="name">MySQL 8.4</text>
-  <text x="1126" y="452" class="detail">Docker Compose</text>
-  <text x="1126" y="480" class="detail">Persistent volume</text>
-  <text x="1104" y="548" class="detail">Host access: 127.0.0.1:3307</text>
-  <text x="1104" y="578" class="detail">DB credentials: server .env</text>
-  <text x="1104" y="608" class="detail">User accounts: password hashes</text>
-  <path class="wire ingest" d="M288 405 H337 V324 H426"/>
-  <path class="wire ingest" d="M655 324 H742"/>
-  <path class="wire ingest" d="M966 324 H1034 V390 H1100"/>
-  <path class="wire ingest" stroke-dasharray="7 5" d="M746 376 H659"/>
-  <path class="wire ingest" stroke-dasharray="7 5" d="M430 376 H360 V443 H292"/>
-  <text x="48" y="512" class="region">WEB CLIENT</text>
-  <rect x="48" y="528" width="240" height="122" rx="12" class="node"/>
-  <text x="68" y="562" class="name">Browser</text>
-  <text x="68" y="594" class="detail">Dashboard: 5 s polling</text>
-  <text x="68" y="624" class="detail">History on page load</text>
-  <rect x="430" y="510" width="225" height="115" rx="12" class="node"/>
-  <text x="450" y="555" class="name">Nginx</text>
-  <text x="450" y="590" class="detail">HTTPS · port 443</text>
-  <rect x="746" y="510" width="220" height="115" rx="12" class="node"/>
-  <text x="766" y="555" class="name">FastAPI</text>
-  <text x="766" y="590" class="detail">HTTP · 127.0.0.1:8000</text>
-  <path class="wire query" d="M288 565 H426"/>
-  <path class="wire query" d="M655 565 H742"/>
-  <path class="wire query" d="M966 565 H1034 V480 H1100"/>
-  <path class="wire ingest" d="M50 728 H104"/>
-  <text x="118" y="735" class="detail">Reading sent for storage</text>
-  <path class="wire ingest" stroke-dasharray="7 5" d="M454 728 H508"/>
-  <text x="522" y="735" class="detail">Storage confirmed to the Pi</text>
-  <path class="wire query" d="M924 728 H978"/>
-  <text x="992" y="735" class="detail">Request for stored readings</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 810" width="1440" height="810" role="img"
+     aria-labelledby="title description">
+    <title id="title">TempSafe system architecture</title>
+    <desc id="description">The Raspberry Pi reads the SCD41 sensor, controls a local LED and buzzer, and saves samples
+        to SQLite. A separate Pi publisher retries queued samples until the server confirms storage. Over TLS, an MQTT
+        broker forwards each reading to a worker that stores it in MySQL. A stored acknowledgement returns through the
+        broker. The browser requests dashboard and history data over HTTPS through Nginx and FastAPI. The broker,
+        worker, web services and MySQL share one EC2 instance. The MySQL host port is bound to localhost.
+        Database credentials come from the server .env file. The account schema stores password hashes.
+    </desc>
+    <defs>
+        <marker id="write" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L10 5 L0 10Z" fill="#087466"/>
+        </marker>
+        <marker id="read" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0 0 L10 5 L0 10Z" fill="#3559a2"/>
+        </marker>
+        <style>
+            text { font-family: Arial, Helvetica, sans-serif; fill: #172e38 }
+            .heading { font-size: 46px; font-weight: 700 }
+            .region { font-size: 18px; font-weight: 700; letter-spacing: 1px }
+            .name { font-size: 25px; font-weight: 700 }
+            .detail { font-size: 19px }
+            .wire { fill: none; stroke-width: 3 }
+            .ingest { stroke: #087466; marker-end: url(#write) }
+            .query { stroke: #3559a2; marker-end: url(#read) }
+            .node { fill: white; stroke: #bacacb; stroke-width: 2 }
+        </style>
+    </defs>
+    <rect width="1440" height="810" fill="#fafbf8"/>
+    <text x="48" y="100" class="heading">TempSafe system architecture</text>
+    <rect x="390" y="170" width="1002" height="495" rx="18" fill="#ecf2f1" stroke="#a1b6b7" stroke-width="2"/>
+    <text x="420" y="214" class="region">AWS EC2 / UBUNTU SERVER</text>
+    <text x="49" y="214" class="region">MEDICATION BOX</text>
+    <rect x="48" y="240" width="240" height="241" rx="12" class="node"/>
+    <text x="68" y="276" class="name">Raspberry Pi 5</text>
+    <text x="68" y="306" class="detail">SCD41 sensor via I²C</text>
+    <text x="68" y="335" class="detail">Local LED and buzzer</text>
+    <text x="68" y="364" class="detail">Save samples to SQLite</text>
+    <path d="M68 381 H266" stroke="#c9d5d3"/>
+    <text x="68" y="414" class="name">MQTT publisher</text>
+    <text x="68" y="443" class="detail">Retry until confirmed</text>
+    <rect x="430" y="277" width="225" height="126" rx="12" class="node"/>
+    <text x="450" y="327" class="name">MQTT broker</text>
+    <text x="450" y="363" class="detail">TLS · port 8883</text>
+    <rect x="746" y="277" width="220" height="126" rx="12" class="node"/>
+    <text x="766" y="327" class="name">MQTT worker</text>
+    <text x="766" y="363" class="detail">Validate and store</text>
+    <rect x="1104" y="354" width="245" height="162" rx="12" class="node"/>
+    <text x="1126" y="413" class="name">MySQL 8.4</text>
+    <text x="1126" y="452" class="detail">Docker Compose</text>
+    <text x="1126" y="480" class="detail">Persistent volume</text>
+    <text x="1104" y="548" class="detail">Host access: 127.0.0.1:3307</text>
+    <text x="1104" y="578" class="detail">DB credentials: server .env</text>
+    <text x="1104" y="608" class="detail">User accounts: password hashes</text>
+    <path class="wire ingest" d="M288 405 H337 V324 H426"/>
+    <path class="wire ingest" d="M655 324 H742"/>
+    <path class="wire ingest" d="M966 324 H1034 V390 H1100"/>
+    <path class="wire ingest" stroke-dasharray="7 5" d="M746 376 H659"/>
+    <path class="wire ingest" stroke-dasharray="7 5" d="M430 376 H360 V443 H292"/>
+    <text x="48" y="512" class="region">WEB CLIENT</text>
+    <rect x="48" y="528" width="240" height="122" rx="12" class="node"/>
+    <text x="68" y="562" class="name">Browser</text>
+    <text x="68" y="594" class="detail">Dashboard: 5 s polling</text>
+    <text x="68" y="624" class="detail">History on page load</text>
+    <rect x="430" y="510" width="225" height="115" rx="12" class="node"/>
+    <text x="450" y="555" class="name">Nginx</text>
+    <text x="450" y="590" class="detail">HTTPS · port 443</text>
+    <rect x="746" y="510" width="220" height="115" rx="12" class="node"/>
+    <text x="766" y="555" class="name">FastAPI</text>
+    <text x="766" y="590" class="detail">HTTP · 127.0.0.1:8000</text>
+    <path class="wire query" d="M288 565 H426"/>
+    <path class="wire query" d="M655 565 H742"/>
+    <path class="wire query" d="M966 565 H1034 V480 H1100"/>
+    <path class="wire ingest" d="M50 728 H104"/>
+    <text x="118" y="735" class="detail">Reading sent for storage</text>
+    <path class="wire ingest" stroke-dasharray="7 5" d="M454 728 H508"/>
+    <text x="522" y="735" class="detail">Storage confirmed to the Pi</text>
+    <path class="wire query" d="M924 728 H978"/>
+    <text x="992" y="735" class="detail">Request for stored readings</text>
 </svg>

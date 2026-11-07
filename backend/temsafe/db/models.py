@@ -1,0 +1,128 @@
+"""SQLAlchemy models for the TEMSAFE database tables."""
+
+from datetime import datetime
+from decimal import Decimal
+from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, String, Text, UniqueConstraint, text
+from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM
+from sqlalchemy.orm import Mapped, mapped_column
+
+from temsafe.db.session import Base
+
+
+class Box(Base):
+    """Represent the box to which measurements and profiles belong."""
+
+    __tablename__ = "boxes"
+
+    box_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    name: Mapped[str] = mapped_column(String(100))
+    last_seen_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+
+
+class AppUser(Base):
+    """Represent an application user and their stored password hash."""
+
+    __tablename__ = "app_users"
+
+    # MySQL assigns the ID when a new user is saved.
+    user_id: Mapped[int] = mapped_column(
+        BIGINT(unsigned=True), primary_key=True, autoincrement=True
+    )
+    auth_subject: Mapped[str] = mapped_column(String(191), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+
+
+class UserSession(Base):
+    """Store the digest of each revocable browser session token."""
+
+    __tablename__ = "user_sessions"
+
+    token_hash: Mapped[str] = mapped_column(CHAR(64), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id", ondelete="CASCADE"))
+    expires_at: Mapped[datetime] = mapped_column(DATETIME(fsp=6), index=True)
+
+
+class BoxAccess(Base):
+    """Record which users are assigned to which boxes."""
+
+    __tablename__ = "box_access"
+
+    # Together these fields identify one assignment, matching the SQL primary key.
+    user_id: Mapped[int] = mapped_column(ForeignKey("app_users.user_id"), primary_key=True)
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"), primary_key=True)
+
+
+class ThresholdProfile(Base):
+    """Represent the limits associated with a box's measurements."""
+
+    __tablename__ = "threshold_profiles"
+    __table_args__ = (UniqueConstraint("profile_id", "box_id"),)
+
+    profile_id: Mapped[str] = mapped_column(CHAR(36), primary_key=True)
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"))
+    lower_c: Mapped[Decimal] = mapped_column(Numeric(5, 2))
+    upper_c: Mapped[Decimal] = mapped_column(Numeric(5, 2))
+    warning_c: Mapped[Decimal] = mapped_column(Numeric(5, 2))
+    source_note: Mapped[str] = mapped_column(Text)
+    is_demo: Mapped[bool] = mapped_column(Boolean, server_default=text("1"))
+    created_at: Mapped[datetime] = mapped_column(
+        DATETIME(fsp=6), server_default=text("CURRENT_TIMESTAMP(6)")
+    )
+
+
+class TemperatureSample(Base):
+    """Represent one sample attempt in the existing temperature_samples table."""
+
+    __tablename__ = "temperature_samples"
+
+    # The profile and measurement must belong to the same box.
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["profile_id", "box_id"],
+            ["threshold_profiles.profile_id", "threshold_profiles.box_id"],
+        ),
+    )
+
+    sample_id: Mapped[str] = mapped_column(CHAR(36), primary_key=True)
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"))
+    sequence_no: Mapped[int] = mapped_column(BIGINT(unsigned=True))
+    profile_id: Mapped[str] = mapped_column(CHAR(36))
+    observed_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
+    clock_reliable: Mapped[bool] = mapped_column(Boolean)
+    received_at: Mapped[datetime] = mapped_column(
+        DATETIME(fsp=6), server_default=text("CURRENT_TIMESTAMP(6)")
+    )
+    temperature_c: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
+    quality: Mapped[str] = mapped_column(ENUM("valid", "sensor_error"))
+
+
+class SampleReview(Base):
+    """Store the latest acknowledgement of a sample and the user who reviewed it."""
+
+    __tablename__ = "sample_reviews"
+
+    sample_id: Mapped[str] = mapped_column(
+        ForeignKey("temperature_samples.sample_id"), primary_key=True
+    )
+    reviewed_by: Mapped[int] = mapped_column(ForeignKey("app_users.user_id"))
+    reviewed_at: Mapped[datetime] = mapped_column(
+        DATETIME(fsp=6), server_default=text("CURRENT_TIMESTAMP(6)")
+    )
+
+
+# Create tables using database/schema.sql; these models map the existing tables.
+
+
+class BoxConfiguration(Base):
+    """Select one desired threshold profile without rewriting sample history."""
+
+    __tablename__ = "box_configuration"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["profile_id", "box_id"],
+            ["threshold_profiles.profile_id", "threshold_profiles.box_id"],
+        ),
+    )
+
+    box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"), primary_key=True)
+    profile_id: Mapped[str] = mapped_column(CHAR(36))

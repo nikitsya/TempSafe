@@ -1,4 +1,4 @@
-// Automated UI tests for the TempSafe prototype (see docs/testing/browser-test-plan.md).
+// Automated UI tests for the TempSafe prototype (see docs/testing/plans/browser-test-plan.md).
 const {test, expect} = require('@playwright/test');
 const path = require('path');
 
