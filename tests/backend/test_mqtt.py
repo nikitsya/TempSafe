@@ -3,11 +3,10 @@
 import json
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
+from temsafe.mqtt import ReadingConsumer
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock
 from uuid import uuid4
-
-from temsafe.mqtt import ReadingConsumer
 
 
 @pytest.fixture
