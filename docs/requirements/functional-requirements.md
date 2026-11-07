@@ -4,7 +4,7 @@ Priority reasons, Universal Design links and proposed scope decisions are docume
 the [MoSCoW prioritisation](moscow-prioritisation.md). The hardware and notification priorities reflect the clarified
 project direction.
 
-Platform and release boundaries are defined in the [project scope](../project/project-scope.md).
+Platform and release boundaries are defined in the [project scope](../project-scope.md).
 These requirements describe the target system; implementation status is tracked in the README.
 
 ## 1. Users and context (UTSE)
@@ -131,7 +131,7 @@ be tested. Phone delivery is not guaranteed during an outage; local LED feedback
 ## 5. Traceability and testing
 
 Detailed preconditions, actions, expected results and an execution record are provided in
-the [Initial Test Plan](../testing/initial-test-plan.md).
+the [Initial Test Plan](../testing/plans/initial-test-plan.md).
 
 | Use case | Requirements                      | Planned evidence                                                                                              |
 |----------|-----------------------------------|---------------------------------------------------------------------------------------------------------------|

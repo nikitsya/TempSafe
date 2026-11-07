@@ -2,14 +2,14 @@
 
 import asyncio
 import json
-from contextlib import asynccontextmanager
-from fastapi_mqtt import FastMQTT, MQTTConfig
-from starlette.concurrency import run_in_threadpool
 import logging
 import os
 import re
 import ssl
+from contextlib import asynccontextmanager
+from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
+from starlette.concurrency import run_in_threadpool
 
 from temsafe.schemas import ReadingCreate
 
@@ -66,8 +66,8 @@ def create_mqtt():
         LOGGER.info("MQTT ingestion disabled; set MQTT_ENABLED=true to enable it")
         return None
 
-    from temsafe.database import SessionLocal
-    from temsafe.readings import save_reading
+    from temsafe.db.session import SessionLocal
+    from temsafe.monitoring.readings import save_reading
 
     if os.getenv("TEMSAFE_LOCAL_MQTT") == "1":
         config = MQTTConfig(host="mosquitto", port=1883)

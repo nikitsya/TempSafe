@@ -6,7 +6,7 @@ See the [API contract](../../docs/api/api-contract.md) for endpoints, fields, ex
 
 The application at [tempsafe.app](https://tempsafe.app) runs this backend as the `tempsafe`
 systemd service on AWS EC2. Nginx forwards HTTPS requests to Uvicorn on `127.0.0.1:8000`.
-See the [deployment notes](../../docs/deployment.md) for service checks.
+See the [deployment notes](../../docs/operations/deployment.md) for service checks.
 The commands below are for local development; the hosted service runs without `--reload`.
 
 ## Setup
@@ -24,7 +24,7 @@ Create a **Python** run configuration:
 | Run target type   | `Module`                          |
 | Module name       | `uvicorn`                         |
 | Parameters        | `temsafe.main:app --reload`       |
-| Working directory | The Smart-Box project root        |
+| Working directory | The TempSafe project root         |
 
 Click **Run** and wait for `Application startup complete`.
 
@@ -47,5 +47,5 @@ Keep the server running while using the site. Stop it with **Ctrl+C**.
 ## MQTT lifecycle
 
 FastMQTT starts with FastAPI when `MQTT_ENABLED=true`. Leave it disabled for HTTP-only development.
-Configure broker credentials in the environment; see the [MQTT guide](../../docs/mqtt.md).
+Configure broker credentials in the environment; see the [MQTT guide](../../docs/operations/mqtt.md).
 Use one Uvicorn worker and no production reload. The separate MQTT worker service is no longer used.

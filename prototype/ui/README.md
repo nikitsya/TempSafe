@@ -17,7 +17,7 @@ prototype test results are not evidence of backend authentication or live device
 | `login.html`               | Sign in (test account `paramedic` / `demo`; `nobox` / `demo` shows denied access)                                |
 | `dashboard.html?state=...` | Current status. States: `normal`, `warning`, `alert`, `stale`, `sensor`, `offline`, `network`, `empty`, `denied` |
 | `history.html`             | History with time filter, graph, gaps and readings table                                                         |
-| `style.css`                | Shared styles from [`ui-style-guide.md`](../../docs/design/ui-style-guide.md)                                    |
+| `style.css`                | Shared styles from [`ui-style-guide.md`](../../docs/design/ui/ui-style-guide.md)                                 |
 
 ## How to open
 
@@ -25,7 +25,7 @@ Use the live link above, or open `login.html` in a browser from a downloaded cop
 
 ## Automated tests
 
-See [`browser-test-plan.md`](../../docs/testing/browser-test-plan.md). The tests are in `tests/ui.spec.js`.
+See [`browser-test-plan.md`](../../docs/testing/plans/browser-test-plan.md). The tests are in `tests/ui.spec.js`.
 
 ```bash
 cd prototype/ui

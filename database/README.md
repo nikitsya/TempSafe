@@ -13,7 +13,7 @@ The document also explains composite constraints and historical threshold profil
 
 ## Hosted database access
 
-See [Database connections](../docs/database-connections.md) for the backend connection,
+See [Database connections](../docs/operations/database-connections.md) for the backend connection,
 PyCharm SSH tunnel, credentials, network boundaries and backup verification status.
 
 ## With Docker Compose
@@ -27,6 +27,9 @@ PyCharm SSH tunnel, credentials, network boundaries and backup verification stat
 ```sh
 docker compose up -d --wait mysql
 ```
+
+With the default project name, Docker Desktop shows the container as
+`tempsafe-mysql-1` and stores its data in `tempsafe_mysql_data`.
 
 On the first start, this creates the `temsafe` database, the `temsafe` database
 user and all eight tables. Connect using host `127.0.0.1`, port `3307` (unless changed
