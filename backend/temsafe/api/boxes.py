@@ -1,10 +1,11 @@
 """Routes for retrieving box information."""
 
 from datetime import UTC, datetime
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
 
 from temsafe.api.auth import require_box
 from temsafe.db import models

@@ -2,9 +2,10 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
 from typing import Annotated, Literal
 from uuid import UUID
+
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 
 def as_utc(value: datetime) -> datetime:

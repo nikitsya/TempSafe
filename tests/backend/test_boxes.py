@@ -1,9 +1,10 @@
 """Check box responses using a substituted database session."""
 
-import pytest
 from datetime import datetime, timedelta, timezone
-from fastapi.testclient import TestClient
 from unittest.mock import Mock
+
+import pytest
+from fastapi.testclient import TestClient
 
 from temsafe.db.models import Box
 from temsafe.db.session import get_db

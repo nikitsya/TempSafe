@@ -1,9 +1,10 @@
 """Routes for storing and retrieving temperature readings."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
 
 from temsafe.api.auth import AllowedBoxes, require_device
 from temsafe.db import models

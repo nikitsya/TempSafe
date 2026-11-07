@@ -1,10 +1,11 @@
 """Check the reading list's HTTP responses without requiring a MySQL server."""
 
-import pytest
 from datetime import datetime
 from decimal import Decimal
-from fastapi.testclient import TestClient
 from unittest.mock import Mock
+
+import pytest
+from fastapi.testclient import TestClient
 
 from temsafe.db.models import TemperatureSample
 from temsafe.db.session import get_db

@@ -1,11 +1,12 @@
 """Exercise authentication through HTTPS requests and a transactional MySQL session."""
 
-import pytest
 import secrets
 from datetime import timedelta
+from uuid import uuid4
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from uuid import uuid4
 
 from temsafe.api.auth import COOKIE, hasher, token_digest, utc_now
 from temsafe.db.models import AppUser, Box, BoxAccess, TemperatureSample, ThresholdProfile, UserSession

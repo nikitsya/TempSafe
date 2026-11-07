@@ -1,10 +1,11 @@
 """Operator-only routes for a box's desired configuration."""
 
+from typing import Annotated
+from uuid import uuid4
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from typing import Annotated
-from uuid import uuid4
 
 from temsafe.api.admin import require_configuration_admin
 from temsafe.api.auth import require_box

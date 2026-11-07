@@ -1,8 +1,9 @@
 """FastAPI application entry point."""
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from pathlib import Path
 
 from temsafe.api.auth import router as auth_router
 from temsafe.api.boxes import router as boxes_router

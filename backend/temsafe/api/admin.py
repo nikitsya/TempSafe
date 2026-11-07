@@ -2,9 +2,10 @@
 
 import os
 import secrets
+from typing import Annotated
+
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from typing import Annotated
 
 bearer = HTTPBearer(auto_error=False)
 

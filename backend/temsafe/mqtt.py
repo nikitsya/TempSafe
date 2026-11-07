@@ -7,6 +7,7 @@ import os
 import re
 import ssl
 from contextlib import asynccontextmanager
+
 from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.concurrency import run_in_threadpool

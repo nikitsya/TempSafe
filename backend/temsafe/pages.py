@@ -1,8 +1,9 @@
 """Routes for the web pages."""
 
+from pathlib import Path
+
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
 
 # Group page routes so main.py can register them on the application together.
 router = APIRouter()
