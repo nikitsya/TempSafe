@@ -1,4 +1,4 @@
-name: temsafe
+name: tempsafe
 
 services:
   mysql:

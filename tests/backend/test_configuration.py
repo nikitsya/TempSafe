@@ -6,10 +6,11 @@ from decimal import Decimal
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from temsafe.database import engine, get_db
-from temsafe.main import app
-from temsafe.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
 from uuid import uuid4
+
+from temsafe.db.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
+from temsafe.db.session import engine, get_db
+from temsafe.main import app
 
 TOKEN = "test-configuration-token-32-characters-long"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
