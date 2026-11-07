@@ -1,6 +1,6 @@
 # TempSafe database ERD
 
-Figure 1 shows the seven MySQL tables defined in [schema.sql](../../database/schema.sql).
+Figure 1 shows the eight MySQL tables defined in [schema.sql](../../database/schema.sql).
 It describes stored data and constraints, not whether every related application feature
 has been implemented.
 
@@ -11,6 +11,7 @@ erDiagram
     boxes ||--o| box_configuration: selects
     threshold_profiles ||--o| box_configuration: selected_by
     app_users ||--o{ box_access: has
+    app_users ||--o{ user_sessions: has
     boxes ||--o{ box_access: permits
     boxes ||--o{ threshold_profiles: has
     boxes ||--o{ temperature_samples: records
@@ -26,6 +27,11 @@ erDiagram
         BIGINT user_id PK "Unsigned; auto-increment"
         VARCHAR auth_subject UK "191 characters"
         VARCHAR password_hash "255 characters"
+    }
+    user_sessions {
+        CHAR token_hash PK "64 characters"
+        BIGINT user_id FK "Unsigned"
+        DATETIME expires_at "Indexed for expiry checks"
     }
     boxes {
         VARCHAR box_id PK "64 characters"
@@ -75,6 +81,8 @@ listed below rather than marking their individual columns as independently uniqu
 - `app_users` stores account identifiers and password hashes. `box_access` links
   users to boxes: a user can access several boxes, and a box can have several users.
   The pair `(user_id, box_id)` is the primary key, preventing duplicate permissions.
+- Each `user_sessions` row belongs to one account. An account can have several
+  sessions. MySQL deletes its sessions when the account is deleted.
 - `threshold_profiles` stores temperature limits for one box. Its check constraint
   requires `lower_c < warning_c < upper_c`.
 - `temperature_samples` stores measurements and sensor errors. Each sample belongs
