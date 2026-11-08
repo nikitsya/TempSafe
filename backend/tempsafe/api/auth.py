@@ -12,9 +12,9 @@ from pydantic import BaseModel, SecretStr
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from tempsafe.settings import project_setting
 from tempsafe.db.models import AppUser, BoxAccess, UserSession
 from tempsafe.db.session import get_db
+from tempsafe.settings import project_setting
 
 router = APIRouter(tags=["Authentication"])
 COOKIE = "__Host-tempsafe_session"

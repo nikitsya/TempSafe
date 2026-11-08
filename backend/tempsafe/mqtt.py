@@ -12,8 +12,8 @@ from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
-from tempsafe.settings import project_setting
 from tempsafe.schemas import ReadingCreate
+from tempsafe.settings import project_setting
 
 LOGGER = logging.getLogger(__name__)
 MAX_PAYLOAD_BYTES = 4096

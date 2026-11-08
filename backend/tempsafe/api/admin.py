@@ -7,6 +7,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from tempsafe.settings import project_setting
+
 bearer = HTTPBearer(auto_error=False)
 
 
