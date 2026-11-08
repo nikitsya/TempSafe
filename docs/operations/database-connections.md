@@ -3,7 +3,7 @@
 ## Verification status
 
 The repository configuration was checked on 4 November 2026 against
-[compose.yaml](../../compose.yaml), [session.py](../../backend/temsafe/db/session.py)
+[compose.yaml](../../compose.yaml), [session.py](../../backend/tempsafe/db/session.py)
 and the non-secret local environment settings. The hosting paths and service names
 below are recorded in the [deployment guide](deployment.md).
 
@@ -22,16 +22,20 @@ Some subsequent SSH connections still timed out, so the verification is partial.
 | Database grants         | `ALL PRIVILEGES` on `temsafe.*`                                       |
 | Scheduled backups       | No MySQL backup timer or database-related cron job found              |
 
-The effective backend environment, current AWS rule sources and off-server backup
-configuration have not been independently verified. Secrets were not displayed.
+The 5 November [FastAPI account check](../testing/database/database-access-evidence.md#checking-fastapi-separately)
+subsequently verified the effective database account and schema. On 8 November, the service,
+container, loopback mapping, session/configuration tables and heartbeat column were rechecked.
+The hosted database also contains a `temperature_history` table outside the current eight-table
+baseline; its purpose was not established and no table was removed. Current AWS rule sources
+and off-server backup configuration remain unverified. Secrets were not displayed.
 
 ## Figure 1. Application connection
 
 ```mermaid
 flowchart LR
     Browser[Web browser] -->|HTTPS: TCP 443| Nginx[Nginx on EC2]
-    Nginx -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
-    API -->|MySQL: 127.0.0.1:3307| Port[Docker host port]
+    Nginx -->|HTTP: 127 . 0 . 0 . 1:8000| API[FastAPI on EC2]
+    API -->|MySQL: 127 . 0 . 0 . 1:3307| Port[Docker host port]
     Port -->|Container TCP 3306| DB[(MySQL: temsafe)]
     DB --- Volume[Persistent mysql_data volume]
 ```
@@ -64,9 +68,9 @@ protects browser traffic, while SSH protects the remote administration tunnel.
 
 ```mermaid
 flowchart LR
-    IDE[PyCharm on Mac] -->|127.0.0.1:13307| Tunnel[Local SSH tunnel]
+    IDE[PyCharm on Mac] -->|127 . 0 . 0 . 1:13307| Tunnel[Local SSH tunnel]
     Tunnel -->|Encrypted SSH: EC2 TCP 22| SSH[SSH server on EC2]
-    SSH -->|127.0.0.1:3307| DB[(MySQL via Docker)]
+    SSH -->|127 . 0 . 0 . 1:3307| DB[(MySQL via Docker)]
 ```
 
 Start the tunnel in a Mac terminal and keep it open:
@@ -101,11 +105,10 @@ stop the website or database.
 
 ## Network access and troubleshooting
 
-The recorded AWS rules allow website ports 80/443, MQTT TLS port 8883 and SSH port
-
-22. SSH should be restricted to the operator's current public IP (`/32`). MySQL
-    ports 3306/3307 and backend port 8000 should not be publicly exposed. The current
-    security group rules still need live verification; see [Network access](deployment.md#network-access).
+The recorded AWS rules allow website ports 80/443, MQTT TLS port 8883 and SSH port 22.
+SSH should be restricted to the operator’s current public IP (`/32`). MySQL ports
+3306/3307 and backend port 8000 should not be publicly exposed. The current
+security group rules still need live verification; see [Network access](deployment.md#network-access).
 
 | Symptom                            | What to check                                                               |
 |------------------------------------|-----------------------------------------------------------------------------|
@@ -141,23 +144,30 @@ Backup checks on 4 November 2026 found:
 - No backup candidates matching the inspected names and dump extensions under
   `/var/backups`, `/home/ubuntu/Smart-Box`, `/home/ubuntu/backups` or `/opt`.
 
-These checks found no evidence of an operational application database backup on
-the host. They do not rule out custom jobs elsewhere or external AWS Backup/EBS
+Those 4 November checks found no evidence of an operational application database backup on
+the host. Manual SQL backups were subsequently created before both deployments on 7 November
+under `/home/ubuntu/tempsafe-deploy-backups/`; see the
+[backup record](deployment.md#deployment-backups). They remain on the same server. They do not rule out custom jobs
+elsewhere or external AWS Backup/EBS
 snapshots, which were not inspected. Off-server copies, retention and successful
 restore tests remain **unverified**. A backup proposal in the design document is
 not evidence of a running backup job.
+
+On 5 November 2026 the [PyCharm access record](../testing/database/database-access-evidence.md) documented a read of
+hosted samples, the
+SSH
+forwarding command and the grants returned by the TempSafe AWS console.
+
+The [FastAPI account check](../testing/database/database-access-evidence.md#checking-fastapi-separately) also confirmed
+the authenticated
+MySQL account and schema using the active service environment.
 
 ## Remaining server checks
 
 Use an authorised SSH session to confirm:
 
-1. Effective non-secret backend connection settings, including any systemd
-   environment overrides. The service working directory and environment-file path
-   are already confirmed above.
-2. Current AWS inbound rule sources. A listener check does not verify security groups.
-3. A successful PyCharm connection through the local SSH tunnel. Database access
-   inside the server has been verified.
-4. External backup services, off-server storage and a restore test. Host cron and
+1. Current AWS inbound rule sources. A listener check does not verify security groups.
+2. External backup services, off-server storage and a restore test. Host cron and
    systemd timer checks are recorded above.
 
 This documentation change does not change server settings or introduce a backup job.

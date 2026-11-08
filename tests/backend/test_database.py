@@ -5,13 +5,14 @@ Start the configured MySQL server before running this test.
 
 from datetime import datetime
 from decimal import Decimal
-from fastapi.testclient import TestClient
-from sqlalchemy import select, text
 from uuid import uuid4
 
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.db.session import SessionLocal, get_db
-from temsafe.main import app
+from fastapi.testclient import TestClient
+from sqlalchemy import select, text
+
+from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.db.session import SessionLocal, get_db
+from tempsafe.main import app
 
 
 def test_database_connection():

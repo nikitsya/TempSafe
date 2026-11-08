@@ -1,4 +1,4 @@
-// Dashboard for TEMSAFE.
+// Dashboard for TEMPSAFE.
 // Get temperature data from the backend API.
 
 const STATUS_VIEW = {
@@ -387,6 +387,12 @@ async function loadTemperature() {
             `${API_BASE}/boxes/TS-01/readings/latest`
         );
 
+        // Not signed in or the session has ended.
+        if (response.status === 401) {
+            goToSignIn();
+            return;
+        }
+
         // No readings available.
         if (response.status === 404) {
             const errorData = await response.json();
@@ -442,7 +448,7 @@ async function loadTemperature() {
 document.addEventListener('DOMContentLoaded', () => {
     loadTemperature();
 
-    // Ask the API for new data every 30 seconds.
+    // Ask the API for new data every five seconds.
     setInterval(loadTemperature, REFRESH_SECONDS * 1000);
 
     // Update the age every 5 seconds without a new request.

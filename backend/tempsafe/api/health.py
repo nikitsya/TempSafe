@@ -1,8 +1,9 @@
 """Application liveness endpoint."""
 
+from typing import Literal
+
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Literal
 
 # Group this endpoint under Health in the interactive API documentation.
 router = APIRouter(tags=["Health"])

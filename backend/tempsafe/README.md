@@ -11,7 +11,10 @@ The commands below are for local development; the hosted service runs without `-
 
 ## Setup
 
-First, complete the [backend setup](../../README.md#backend-development).
+First, complete the [backend setup](../../README.md#backend-development) and
+[database setup](../../database/README.md), including outstanding migrations.
+Provision a user with access to `TS-01` using the
+[authentication guide](../../docs/api/api-contract.md#provision-a-prototype-account).
 
 ## In PyCharm
 
@@ -23,7 +26,7 @@ Create a **Python** run configuration:
 | Interpreter       | Python from the project's `.venv` |
 | Run target type   | `Module`                          |
 | Module name       | `uvicorn`                         |
-| Parameters        | `temsafe.main:app --reload`       |
+| Parameters        | `tempsafe.main:app --reload`      |
 | Working directory | The TempSafe project root         |
 
 Click **Run** and wait for `Application startup complete`.
@@ -33,7 +36,7 @@ Click **Run** and wait for `Application startup complete`.
 From the project root, with `.venv` activated, run:
 
 ```sh
-python -m uvicorn temsafe.main:app --reload
+python -m uvicorn tempsafe.main:app --reload
 ```
 
 ## Open in your browser

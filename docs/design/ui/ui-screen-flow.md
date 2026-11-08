@@ -3,7 +3,9 @@
 Author: Maryna Hordiienko
 
 This diagram shows the intended flow between TempSafe screens. The target system must check every box and history
-request in the backend; those access checks are not yet implemented. Hiding a button is not access control.
+request in the backend; session and box-assignment checks are now implemented. The diagram also
+includes target states: dedicated no-access messaging, contact timeout, history filters and phone
+notifications remain outstanding. See the [frontend guide](../../../frontend/README.md).
 
 ```mermaid
 flowchart TD

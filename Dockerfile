@@ -4,4 +4,4 @@ COPY pyproject.toml ./
 COPY backend/ backend/
 RUN python -m pip install --no-cache-dir .
 COPY frontend/ frontend/
-CMD ["python", "-m", "uvicorn", "temsafe.main:app", "--app-dir", "backend", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "uvicorn", "tempsafe.main:app", "--app-dir", "backend", "--host", "0.0.0.0", "--port", "8000"]

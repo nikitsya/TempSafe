@@ -9,7 +9,9 @@ Complete the [backend setup](../../README.md#backend-development) and
 [database setup](../../database/README.md). Use the project's `.venv` and configure
 `.env`. MySQL must be running for the full suite.
 
-Database tests create temporary records and remove them through rollback or explicit cleanup.
+Use an isolated development database, never the hosted database. Database tests create
+temporary records and remove them through rollback or explicit cleanup. Set `MQTT_ENABLED=false`
+for this suite; MQTT tests mock storage and do not require the production broker.
 
 ## Run the tests
 
@@ -29,6 +31,8 @@ python -m pytest tests/backend/test_save_reading.py -v
 
 | File                     | Coverage                                                                           |
 |--------------------------|------------------------------------------------------------------------------------|
+| `test_auth.py`           | Login, session expiry/revocation, box assignments and device credentials.          |
+| `test_configuration.py`  | Operator access, versioned thresholds and per-box heartbeat settings.              |
 | `test_database.py`       | Database connection, stored reading retrieval and missing readings.                |
 | `test_boxes.py`          | Box responses and unknown boxes.                                                   |
 | `test_readings.py`       | Reading lists and limit validation.                                                |

@@ -2,8 +2,8 @@
 
 import pytest
 
-from temsafe.api.auth import accessible_boxes
-from temsafe.main import app
+from tempsafe.api.auth import accessible_boxes
+from tempsafe.main import app
 
 
 @pytest.fixture

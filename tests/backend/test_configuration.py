@@ -1,16 +1,17 @@
 """Check operator configuration and historical integrity against isolated MySQL."""
 
-import pytest
 from datetime import datetime
 from decimal import Decimal
+from uuid import uuid4
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from uuid import uuid4
 
-from temsafe.db.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
-from temsafe.db.session import engine, get_db
-from temsafe.main import app
+from tempsafe.db.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
+from tempsafe.db.session import engine, get_db
+from tempsafe.main import app
 
 TOKEN = "test-configuration-token-32-characters-long"
 HEADERS = {"Authorization": f"Bearer {TOKEN}"}
@@ -19,7 +20,7 @@ SETTINGS = {"lower_c": "0.00", "warning_c": "24.00", "upper_c": "25.00", "source
 
 @pytest.fixture
 def configured_api(monkeypatch, grant_boxes):
-    monkeypatch.setenv("TEMSAFE_CONFIG_ADMIN_TOKEN", TOKEN)
+    monkeypatch.setenv("TEMPSAFE_CONFIG_ADMIN_TOKEN", TOKEN)
     with engine.connect() as connection:
         transaction = connection.begin()
         with Session(bind=connection, join_transaction_mode="create_savepoint") as db:
@@ -43,9 +44,9 @@ def configured_api(monkeypatch, grant_boxes):
 def test_configuration_requires_operator_key(monkeypatch, grant_boxes):
     grant_boxes("TS-01")
     with TestClient(app) as client:
-        monkeypatch.delenv("TEMSAFE_CONFIG_ADMIN_TOKEN", raising=False)
+        monkeypatch.delenv("TEMPSAFE_CONFIG_ADMIN_TOKEN", raising=False)
         assert client.get("/api/boxes/TS-01/configuration").status_code == 503
-        monkeypatch.setenv("TEMSAFE_CONFIG_ADMIN_TOKEN", TOKEN)
+        monkeypatch.setenv("TEMPSAFE_CONFIG_ADMIN_TOKEN", TOKEN)
         for headers in [{}, {"Authorization": "Bearer incorrect"}]:
             assert client.put("/api/boxes/TS-01/configuration", json=SETTINGS, headers=headers).status_code == 401
 
@@ -94,3 +95,46 @@ def test_change_preserves_history_and_identical_retry(configured_api):
     assert history["temperature_state"] == "Warning"
     assert db.get(ThresholdProfile, original["profile_id"]).upper_c == Decimal("25")
     assert db.scalar(select(func.count()).select_from(ThresholdProfile).where(ThresholdProfile.box_id == box_id)) == 2
+
+
+def test_heartbeat_settings_are_independent_per_box(configured_api, grant_boxes):
+    client, db, first_id = configured_api
+    second_id = f"pytest-{uuid4()}"
+    grant_boxes(first_id, second_id)
+    db.add(Box(box_id=second_id, name="Second box"))
+    db.commit()
+    first = f"/api/boxes/{first_id}/configuration/heartbeat"
+    second = f"/api/boxes/{second_id}/configuration/heartbeat"
+    default = {"heartbeat_interval_seconds": 60}
+    changed = {"heartbeat_interval_seconds": 120}
+
+    assert client.get(second, headers=HEADERS).json() == default
+    for _ in range(2):
+        result = client.put(second, headers=HEADERS, json=changed)
+        assert result.status_code == 200
+        assert result.json() == changed
+    response = client.put(f"/api/boxes/{second_id}/configuration", headers=HEADERS, json=SETTINGS)
+    assert response.status_code == 200
+    assert client.get(first, headers=HEADERS).json() == default
+    assert client.get(second, headers=HEADERS).json() == changed
+    assert client.get(f"/api/boxes/{second_id}").json()["last_seen_at"] is None
+
+
+@pytest.mark.parametrize("value", [0, -1, 65536, 1.5, True, "120", None])
+def test_invalid_heartbeat_preserves_setting(configured_api, value):
+    client, _, box_id = configured_api
+    path = f"/api/boxes/{box_id}/configuration/heartbeat"
+    result = client.put(path, headers=HEADERS, json={"heartbeat_interval_seconds": value})
+    assert result.status_code == 422
+    assert client.get(path, headers=HEADERS).json() == {"heartbeat_interval_seconds": 60}
+
+
+def test_heartbeat_requires_operator_and_box_access(configured_api):
+    client, _, box_id = configured_api
+    settings = {"heartbeat_interval_seconds": 120}
+    path = f"/api/boxes/{box_id}/configuration/heartbeat"
+    assert client.get(path).status_code == 401
+    assert client.put(path, json=settings).status_code == 401
+    other = "/api/boxes/unassigned/configuration/heartbeat"
+    assert client.get(other, headers=HEADERS).status_code == 404
+    assert client.put(other, headers=HEADERS, json=settings).status_code == 404

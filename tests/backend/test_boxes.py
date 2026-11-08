@@ -1,13 +1,14 @@
 """Check box responses using a substituted database session."""
 
-import pytest
 from datetime import datetime, timedelta, timezone
-from fastapi.testclient import TestClient
 from unittest.mock import Mock
 
-from temsafe.db.models import Box
-from temsafe.db.session import get_db
-from temsafe.main import app
+import pytest
+from fastapi.testclient import TestClient
+
+from tempsafe.db.models import Box
+from tempsafe.db.session import get_db
+from tempsafe.main import app
 
 
 @pytest.fixture

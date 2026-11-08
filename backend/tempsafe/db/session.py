@@ -1,8 +1,9 @@
-"""Configure SQLAlchemy sessions for the TEMSAFE MySQL database."""
+"""Configure SQLAlchemy sessions for the TEMPSAFE MySQL database."""
 
 import os
-from dotenv import load_dotenv
 from pathlib import Path
+
+from dotenv import load_dotenv
 from sqlalchemy import URL, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
@@ -12,11 +13,11 @@ load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 # Build the URL without manually escaping special characters in the password.
 SQLALCHEMY_DATABASE_URL = URL.create(
     "mysql+mysqlconnector",
-    username=os.getenv("MYSQL_USER", "temsafe"),
+    username=os.getenv("MYSQL_USER", "tempsafe"),
     password=os.environ["MYSQL_PASSWORD"],
     host=os.getenv("MYSQL_HOST", "127.0.0.1"),
     port=int(os.getenv("MYSQL_PORT", "3307")),
-    database=os.getenv("MYSQL_DATABASE", "temsafe"),
+    database=os.getenv("MYSQL_DATABASE", "tempsafe"),
 )
 
 # Connections open on the first query; check pooled connections before reusing them.

@@ -2,7 +2,9 @@
 
 Target UI behaviour and original mock-ups. The application now uses a shorter main card with a Details panel;
 see the [accessibility review](../../testing/accessibility/core-scenario-accessibility-review.md) and
-[current wording](ui-wording.md). Graphs, authentication and phone notifications below remain planned.
+[current wording](ui-wording.md). The graph and session-based authentication are implemented. Time-range filtering,
+dedicated no-access messaging, device-contact states, PWA support and phone notifications remain targets.
+The mock-ups below describe that wider design, not a claim that every pictured control is live.
 
 ## Planned platform
 

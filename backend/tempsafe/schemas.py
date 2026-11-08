@@ -2,9 +2,10 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
-from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
 from typing import Annotated, Literal
 from uuid import UUID
+
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 
 def as_utc(value: datetime) -> datetime:
@@ -83,12 +84,24 @@ class ReadingProfileResponse(BaseModel):
     upper_c: Decimal
 
 
-class LatestReadingResponse(ReadingResponse):
+class HistoryReadingResponse(ReadingResponse):
     """Include the recorded profile and calculated temperature state."""
 
     temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
     profile: ReadingProfileResponse
+
+
+class LatestReadingResponse(HistoryReadingResponse):
+    """Include the freshness of the latest observation."""
+
     freshness: Literal["fresh", "stale", "unknown"]
+
+
+class HeartbeatSettings(BaseModel):
+    """Represent the desired interval between device heartbeats."""
+
+    model_config = ConfigDict(extra="forbid")
+    heartbeat_interval_seconds: int = Field(strict=True, ge=1, le=65535)
 
 
 class ThresholdSettingsCreate(BaseModel):

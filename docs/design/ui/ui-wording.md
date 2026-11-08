@@ -27,19 +27,26 @@ may appear in Details. See the [frontend guide](../../../frontend/README.md) for
 The low-alert explanation should be **At or below the lower limit ({lower}°C)** to match the API's
 inclusive lower boundary. The current dashboard wording at equality remains a known defect.
 
-Sign-in currently checks empty fields and explains that authentication is not available. The Sign out
-link only returns to the sign-in page.
+Sign-in validates empty fields and submits credentials to the backend. Current messages are:
+
+| Situation                  | Message                                                                        |
+|----------------------------|--------------------------------------------------------------------------------|
+| Invalid credentials        | Sign-in failed. The email/username or password is incorrect. Please try again. |
+| Missing or expired session | Please sign in to continue.                                                    |
+| Confirmed sign-out         | You have signed out.                                                           |
+| Sign-out failure           | We couldn’t confirm that you’ve signed out. Please try again.                  |
+
+Sign out revokes the session. The confirmation is shown only after a 204 response;
+a failed request leaves the user on the page with an error and a retry opportunity.
 
 ## Planned features
 
-These messages are design targets, not working authentication, contact detection or notification features:
+These messages are design targets for remaining interface features:
 
 | Situation             | Proposed wording                                                      |
 |-----------------------|-----------------------------------------------------------------------|
 | Device contact lost   | NO CONNECTION — The box is not sending data.                          |
 | No access             | No assigned box available. Ask your administrator for access.         |
-| Invalid credentials   | Sign-in failed. The email/username or password is incorrect.          |
-| Session expired       | Your session has ended. Please sign in again.                         |
 | Invalid history range | The start time must be before the end time.                           |
 | Empty history range   | No observations found for this period.                                |
 | Phone warning         | TempSafe: Box TS-01 WARNING — 24.6°C at 14:17. Open the app to check. |

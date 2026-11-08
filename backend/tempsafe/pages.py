@@ -1,8 +1,9 @@
 """Routes for the web pages."""
 
+from pathlib import Path
+
 from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
 
 # Group page routes so main.py can register them on the application together.
 router = APIRouter()
@@ -22,11 +23,11 @@ def signin(request: Request):
 
 @router.get("/pages/dashboard.html", include_in_schema=False, name="dashboard")
 def dashboard(request: Request):
-    """Render the dashboard, whose JavaScript currently displays sample readings."""
+    """Render the dashboard; its JavaScript requests authenticated API readings."""
     return templates.TemplateResponse(request, "pages/dashboard.html")
 
 
 @router.get("/pages/history.html", include_in_schema=False, name="history")
 def history(request: Request):
-    """Render the history page, ready for a later connection to the readings API."""
+    """Render the history page; its JavaScript requests authenticated sample history."""
     return templates.TemplateResponse(request, "pages/history.html")

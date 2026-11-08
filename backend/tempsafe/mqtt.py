@@ -7,11 +7,13 @@ import os
 import re
 import ssl
 from contextlib import asynccontextmanager
+
 from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.concurrency import run_in_threadpool
 
-from temsafe.schemas import ReadingCreate
+from tempsafe.schemas import ReadingCreate
+from tempsafe.settings import project_setting
 
 LOGGER = logging.getLogger(__name__)
 MAX_PAYLOAD_BYTES = 4096
@@ -66,10 +68,10 @@ def create_mqtt():
         LOGGER.info("MQTT ingestion disabled; set MQTT_ENABLED=true to enable it")
         return None
 
-    from temsafe.db.session import SessionLocal
-    from temsafe.monitoring.readings import save_reading
+    from tempsafe.db.session import SessionLocal
+    from tempsafe.monitoring.readings import save_reading
 
-    if os.getenv("TEMSAFE_LOCAL_MQTT") == "1":
+    if project_setting("TEMPSAFE_LOCAL_MQTT") == "1":
         config = MQTTConfig(host="mosquitto", port=1883)
     else:
         for name in ("MQTT_HOST", "MQTT_PASSWORD"):

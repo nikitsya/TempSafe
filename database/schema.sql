@@ -1,13 +1,15 @@
--- TEMSAFE initial core schema: MySQL 8.4 or later, in an empty database.
+-- TEMPSAFE initial core schema: MySQL 8.4 or later, in an empty database.
 -- Run with strict SQL mode enabled. Use UTC on every application connection.
 -- This is a baseline, not an upgrade script; existing tables deliberately cause errors.
 SET SESSION time_zone = '+00:00';
 
 CREATE TABLE boxes
 (
-    box_id       VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
-    name         VARCHAR(100) NOT NULL,
-    last_seen_at DATETIME(6)  NULL
+    box_id                     VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+    name                       VARCHAR(100)      NOT NULL,
+    last_seen_at               DATETIME(6)       NULL,
+    heartbeat_interval_seconds SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+    CONSTRAINT ck_box_heartbeat_interval CHECK (heartbeat_interval_seconds >= 1)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_as_cs;

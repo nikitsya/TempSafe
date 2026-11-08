@@ -2,11 +2,14 @@
 
 The MQTT broker is configured on AWS with TLS and separate accounts for the device and backend.
 
-The Raspberry Pi publisher is implemented in `device/mqtt_publisher.py`. It sends readings from the local SQLite
+The Raspberry Pi publisher is implemented in [`device/mqtt_publisher.py`](../../device/mqtt_publisher.py). It sends
+readings from the local SQLite
 database and waits for the server's storage confirmation.
 
-The FastAPI service uses FastMQTT to receive readings and save them to MySQL. Deployment and an end-to-end check of this
-version on EC2 are pending.
+The FastAPI service uses FastMQTT to receive readings and save them to MySQL. This version was
+deployed on EC2 on 7 November 2026, replacing the standalone MQTT worker. The broker connection
+was observed during start-up; a fresh Pi-to-MySQL reading and storage acknowledgement still need
+verification. See the [deployment record](deployment.md#current-deployment--verified-8-november-2026).
 
 On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous
 connections were rejected. Broker topic permissions were also checked: the device account could not publish to the
@@ -19,8 +22,8 @@ acknowledgements.
 
 A new reading recorded on 3 November 2026 at 23:02:57 UTC, with a temperature of 18.91°C, appeared on the History page.
 
-This check covered the Raspberry Pi, broker, standalone MQTT worker, MySQL and web application. Repeat it after
-deploying the FastMQTT subscriber.
+This check covered the Raspberry Pi, broker, standalone MQTT worker, MySQL and web application.
+It predates the FastMQTT deployment and does not verify the current ingestion service.
 
 ## Connection and permissions
 
@@ -31,7 +34,8 @@ deploying the FastMQTT subscriber.
 - Device publishes to `tempsafe/boxes/TS-01/readings` and subscribes to `tempsafe/boxes/TS-01/acks`.
 - Backend permissions are the reverse. No wildcard access is required.
 - Use QoS 1 and `retain=false` for readings and acknowledgements.
-- AWS permits TCP 8883 from `0.0.0.0/0` so the Pi can change Wi-Fi networks or use a mobile hotspot.
+- The AWS rules recorded on 3 November allow TCP 8883 from `0.0.0.0/0`, supporting
+  devices that change Wi-Fi networks or use a mobile hotspot.
   TLS, device credentials and topic ACLs remain mandatory. See [network rules](deployment.md#network-access).
 
 The broker ACL is the identity boundary: the subscriber cannot see the original publisher's username.
@@ -68,7 +72,18 @@ generating replacement identifiers. Retained messages are not supported.
 
 ## Deploy on the existing EC2 server
 
-First transfer the reviewed code to `/home/ubuntu/Smart-Box` and install its dependencies:
+The hosted service is already configured. On 8 November, verification found:
+
+- `tempsafe.service` runs FastAPI with one Uvicorn worker; the old standalone
+  `tempsafe-mqtt.service` is disabled.
+- `/etc/systemd/system/tempsafe.service.d/mqtt.conf` enables MQTT and loads
+  `/etc/tempsafe/mqtt.env`, owned by `root:root` with mode `600`.
+- The broker resolves to `127.0.0.1` on EC2, while TLS still verifies
+  `mqtt.tempsafe.app`. The configured client ID is `tempsafe-ingest-TS-01`.
+
+For future updates or reconstruction, follow the
+[application update procedure](deployment.md#updating-the-application), including database backups
+and required migrations. Deploy the reviewed commit to `/home/ubuntu/Smart-Box` and install its dependencies:
 
 ```bash
 cd /home/ubuntu/Smart-Box
@@ -85,7 +100,8 @@ In `/etc/hosts` on EC2 only, add the following mapping if it is not already pres
 Keep public DNS pointing to the EC2 public address. Verify the server's local resolution with
 `getent ahostsv4 mqtt.tempsafe.app`. This avoids depending on access to the public port from the server itself.
 
-Create `/etc/tempsafe/mqtt.env`, owned by root with mode 600, containing:
+Preserve the existing `/etc/tempsafe/mqtt.env` and its credentials. If rebuilding the service,
+create that file with root ownership and mode 600 using the following settings:
 
 ```dotenv
 MQTT_HOST=mqtt.tempsafe.app
@@ -93,19 +109,16 @@ MQTT_PORT=8883
 MQTT_USERNAME=backend-ingest
 MQTT_PASSWORD=replace-with-the-backend-mqtt-password
 MQTT_BOX_ID=TS-01
-MQTT_CLIENT_ID=tempsafe-api-TS-01
+MQTT_CLIENT_ID=tempsafe-ingest-TS-01
 ```
 
 Use the existing project's `.env` for MySQL credentials. Configure the existing FastAPI systemd service to read both
 files as shown below.
 Never commit either real environment file, password files or certificate private keys.
 
-Add these settings to `/etc/tempsafe/mqtt.env` alongside the credentials above:
-
-```dotenv
-MQTT_ENABLED=true
-MQTT_CLIENT_ID=tempsafe-api-TS-01
-```
+The systemd override below sets `MQTT_ENABLED=true`. Keep that switch in the override
+and avoid conflicting values in the environment files.
+Keep the client ID unique; another client using it can disconnect the running subscriber.
 
 FastMQTT starts and stops with FastAPI using `lifespan`, and registers the readings handler with
 `@mqtt.subscribe(...)`. Database writes run in a thread so they do not block HTTP requests.
@@ -120,15 +133,17 @@ sudo systemctl disable --now tempsafe-mqtt.service
 ```
 
 If systemd reports that the old unit does not exist, continue. Do not run both consumers.
-Run `sudo systemctl edit tempsafe.service` and add:
+Edit `/etc/systemd/system/tempsafe.service.d/mqtt.conf` with `sudoedit` to match the following
+override. On a new host, create the `tempsafe.service.d` directory first:
 
 ```ini
 [Service]
-EnvironmentFile=/etc/tempsafe/mqtt.env
-ExecStart=
-ExecStart=/home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn temsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
-Restart=on-failure
-RestartSec=5
+EnvironmentFile = /etc/tempsafe/mqtt.env
+Environment = MQTT_ENABLED=true
+ExecStart =
+ExecStart = /home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn tempsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart = on-failure
+RestartSec = 5
 ```
 
 Keep the existing working directory and database environment settings. Use exactly one Uvicorn worker
@@ -141,16 +156,33 @@ sudo systemctl status tempsafe --no-pager -l
 sudo journalctl -u tempsafe -n 30 --no-pager
 ```
 
-For local HTTP-only development, leave `MQTT_ENABLED=false` in `.env`. To test ingestion locally,
-set it to `true` and supply the MQTT settings using a separate authorised client identity; do not
-connect using the production client ID while the server is running.
+For local HTTP-only development, leave `MQTT_ENABLED=false` in `.env`. The
+[local Compose setup](../../README.md#run-tempsafe-locally-with-docker-compose) instead enables MQTT
+against an isolated broker inside the Compose network. To connect a development subscriber to
+the hosted TLS broker, use separately authorised settings and a unique client ID; do not reuse
+`tempsafe-ingest-TS-01` while the server is running.
 
-Expected log: `Subscribed to tempsafe/boxes/TS-01/readings`. A running service alone does not prove
-successful ingestion. Submit a valid test record, observe `stored`, check the same sample in MySQL,
-and repeat the identical message to verify that there is only one database record. Also verify a
-database failure produces no `stored`, followed by a successful unchanged retry after recovery.
+The application emits `Subscribed to tempsafe/boxes/TS-01/readings` at INFO level when the broker
+accepts the subscription. Whether it appears in the journal depends on the application logging
+configuration. A broker connection or running service alone does not prove successful ingestion.
 
 ## Validation and remaining work
+
+The current deployment still needs the following device integration checks:
+
+1. Send a fresh Pi reading and match its sample ID to a `stored` acknowledgement,
+   the MySQL record and the signed-in history view.
+2. Retry that identical payload and confirm another acknowledgement but only one
+   database record.
+3. Interrupt and restore the device connection, then confirm pending SQLite
+   records are retried and marked uploaded only after storage acknowledgement.
+
+Test database failures in an isolated environment, not by stopping the hosted database.
+Confirm there is no `stored` acknowledgement on failure and that an unchanged retry
+succeeds after recovery.
+
+Run the focused backend unit tests with the project's development dependencies and
+required environment configured:
 
 ```bash
 .venv/bin/python -m pytest tests/backend/test_mqtt.py -q
@@ -159,6 +191,10 @@ database failure produces no `stored`, followed by a successful unchanged retry 
 Unit tests cover storage before acknowledgement, failure without acknowledgement, mismatched box/topic,
 invalid JSON and quality, retained and oversized payloads, repeated unchanged delivery, and wildcard configuration.
 They use a mock storage boundary and do not replace the MQTT-to-MySQL integration test.
+
+Heartbeat interval settings are stored by the API, but the current MQTT implementation only
+handles readings and storage acknowledgements. Delivery of that setting and authenticated
+heartbeat reporting are not implemented in this deployed revision.
 
 HTTP publishers use a separate device key restricted to their assigned box.
 See the [API authentication guide](../api/api-contract.md#authentication).

@@ -22,18 +22,25 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   on AWS EC2, with Nginx providing HTTPS and a reverse proxy to FastAPI.
 - **Backend:** reading submission and retrieval, box information, validation, retry handling and temperature
   classification.
-- **Threshold settings:** operator-token-protected backend API creates and selects versioned demo profiles;
-  frontend integration, per-user permissions and device delivery remain pending. See the
+- **Authentication:** browser sign-in and sign-out use server-side sessions. Reading access is restricted
+  to boxes assigned to the user; accounts are provisioned by an operator.
+- **Heartbeat settings:** the API can read and update the desired heartbeat interval for each box,
+  defaulting to 60 seconds. Device delivery and authenticated heartbeat reporting are pending.
+- **Threshold settings:** the API creates and selects versioned demo profiles. Both configuration APIs
+  require a signed-in user assigned to the box and a configured operator bearer token. Frontend settings,
+  application roles and device delivery remain pending. See the
   [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
-  service. The FastMQTT deployment still needs a fresh device-to-server check. See
+  service. FastMQTT was deployed on 7 November 2026 and connected to the hosted broker; a fresh
+  device-to-server storage and acknowledgement check is still pending. See
   the [MQTT guide](docs/operations/mqtt.md).
 - **Hardware:** Raspberry Pi 5 reads the SCD-41, controls the single-colour LED and passive buzzer, and saves
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
-- **Frontend:** dashboard and accessible history table load readings for `TS-01` from the API. The dashboard polls every
-  five seconds. History refreshes when reopened.
+- **Frontend:** signed-in users with access to `TS-01` can view its dashboard, temperature graph,
+  excursion estimates and accessible history table. The dashboard polls every five seconds. History
+  loads up to 100 readings when opened or reloaded.
 - **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
 
 See the [functional requirements](docs/requirements/functional-requirements.md) and
@@ -46,8 +53,9 @@ See the [functional requirements](docs/requirements/functional-requirements.md) 
 
 <img src="docs/tempsafe-qr.png" width="165" height="165" alt="Scan to open the TempSafe website">
 
-The dashboard refreshes automatically. Reload history to fetch new readings. Sign-in is not implemented; use test data
-only.
+Sign in with an account assigned to `TS-01`. Opening the dashboard or history without a valid session
+redirects to the sign-in page. Accounts are created by an operator; there is no self-registration form.
+The dashboard refreshes automatically. Reload history to fetch new readings. Use test data only.
 See the [frontend guide](frontend/README.md) for current behaviour and limitations, and the
 [deployment guide](docs/operations/deployment.md) for server updates and service checks.
 
@@ -56,7 +64,7 @@ See the [frontend guide](frontend/README.md) for current behaviour and limitatio
 FastAPI subscribes to Mosquitto during application
 start-up and serves the dashboard on port 8000. TempSafe also stores readings in MySQL before
 acknowledging them. The broker is accessible within the Compose network. The hosted EC2 deployment
-uses its own authenticated TLS broker and separate ingestion service.
+uses its own authenticated TLS broker, with FastMQTT ingestion running inside FastAPI.
 
 Use Docker Compose 2.24.4 or later. Copy `.env.example` to `.env` if needed and set both MySQL
 passwords. Run these commands from the project root in the same shell:
@@ -67,8 +75,21 @@ tempsafe up --build -d --wait
 tempsafe ps
 ```
 
-Open the [local dashboard](http://127.0.0.1:8000/pages/dashboard.html). A fresh database volume
-contains box `TS-01` and its demo profile. To check ingestion, run this subscriber in a broker shell:
+A fresh database volume contains box `TS-01` and its demo profile, but no application users.
+To create an account with access to this box, open a shell in the application container:
+
+```sh
+tempsafe exec fastapi_app sh
+```
+
+Run the Python account-provisioning example from the
+[authentication guide](docs/api/api-contract.md#provision-a-prototype-account) inside that shell,
+then type `exit` to return to your host terminal. The container already has the dependencies and
+MySQL connection settings. Open the [local sign-in page](http://127.0.0.1:8000/) and use the account
+you created. The session cookie has the `Secure` attribute; use local HTTPS if your browser does not
+accept it on the loopback address.
+
+To check ingestion, run this subscriber in a broker shell:
 
 ```sh
 tempsafe exec mosquitto mosquitto_sub -t tempsafe/boxes/TS-01/acks -q 1 -C 1
@@ -103,14 +124,14 @@ On Windows, create the environment with `py -3.11 -m venv .venv` and activate it
 `.venv\Scripts\Activate.ps1` in PowerShell.
 
 Follow the [database setup guide](database/README.md) to configure `.env`, create the tables and add the prototype box
-and profile. Then follow the [backend guide](backend/temsafe/README.md) to start the server and try the API.
+and profile. Then follow the [backend guide](backend/tempsafe/README.md) to start the server and try the API.
 
 ## Code and development guides
 
 | Area                | Location / guide                                            |
 |---------------------|-------------------------------------------------------------|
 | Device scripts      | [device/](device/)                                          |
-| Backend and API     | [Backend guide](backend/temsafe/README.md)                  |
+| Backend and API     | [Backend guide](backend/tempsafe/README.md)                 |
 | Database            | [Database setup](database/README.md)                        |
 | Web interface       | [Frontend guide](frontend/README.md)                        |
 | Clickable prototype | [Prototype guide](prototype/ui/README.md)                   |
@@ -118,6 +139,10 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 | Deployment          | [Hosting and service checks](docs/operations/deployment.md) |
 
 ## Project documentation
+
+See the [consistency review](docs/reviews/project-consistency-review.md) for the
+8 November audit, verified checks and outstanding implementation gaps. Assessment
+documents retain dated content.
 
 | Topic                          | Documents                                                                                                                                                                                                                                                                                               |
 |--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -129,7 +154,7 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 | Testing                        | [System test plan](docs/testing/plans/initial-test-plan.md) · [Browser test results](docs/testing/plans/browser-test-plan.md) · [Sensor test](docs/testing/hardware/scd41-basic-readings.md) · [LED test](docs/testing/hardware/led-patterns.md) · [Buzzer test](docs/testing/hardware/buzzer-alert.md) |
 | Assessment and project records | [October G-CA1 design](docs/iot-gca/tempsafe-iot-gca1.docx) · [Presentation materials](docs/presentation/) · [AI chat log](docs/AI_Chat_Log.md)                                                                                                                                                         |
 
-The Word design document, cover sheet and elevator pitch are October assessment artefacts, not current setup
+The October G-CA1 design document and elevator pitch are historical assessment artefacts, not current setup
 instructions. They retain earlier proposals such as Pi 400, GPIO17/1 kΩ LED wiring, a 15°C lower threshold
 and client-certificate MQTT authentication. Current hardware, thresholds and broker access are documented
 in the guides above; the original assessment files are preserved as historical records.

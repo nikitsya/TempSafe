@@ -1,10 +1,11 @@
 """Check temperature classification without connecting to MySQL."""
 
-import pytest
 from decimal import Decimal
 
-from temsafe.db.models import ThresholdProfile
-from temsafe.monitoring.temperature import classify_temperature
+import pytest
+
+from tempsafe.db.models import ThresholdProfile
+from tempsafe.monitoring.temperature import classify_temperature
 
 
 @pytest.fixture

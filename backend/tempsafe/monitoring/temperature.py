@@ -3,7 +3,7 @@
 from decimal import Decimal
 from typing import Literal
 
-from temsafe.db.models import ThresholdProfile
+from tempsafe.db.models import ThresholdProfile
 
 
 def classify_temperature(
