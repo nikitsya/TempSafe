@@ -1,6 +1,6 @@
 # TempSafe deployment
 
-TempSafe was deployed on 2 November 2026 at
+TempSafe was first deployed on 2 November 2026 at
 [https://tempsafe.app](https://tempsafe.app).
 
 ## Hosting setup
@@ -68,11 +68,37 @@ External checks returned 200 for the home page and `/api/health`, 308 for the
 HTTP redirect and 404 for `/docs`, `/redoc` and `/openapi.json`. The health
 response identified Nginx and carried all three security headers. The box’s latest
 reading still returned 200 without a session on the deployed revision. Confirm
-per-box authorisation when deploying the protected API.
+per-box authorisation when deploying the protected API. This records the old revision;
+the checks below describe the deployed session-based API.
 
 On EC2, Nginx listened on ports 80 and 443 and Mosquitto listened on 8883.
 Certbot successfully simulated renewal for both domains. The website renewal
 hook passed its configuration test and reloaded Nginx.
+
+## Current deployment — verified 8 November 2026
+
+The server runs commit `3578cfe77c6738fe2e08366337ec8de4776a58ad`, deployed on
+7 November. This includes the sign-in integration from PR #25 and heartbeat settings
+from PR #21. The checkout is detached at that commit; it does not track new commits
+automatically. The server directory remains `/home/ubuntu/Smart-Box`.
+
+- `tempsafe`, `nginx` and `mosquitto` are active; the MySQL container is healthy.
+- FastMQTT runs inside FastAPI with one Uvicorn worker. The previous
+  `tempsafe-mqtt.service` was stopped and disabled during the update.
+- `box_configuration` and `user_sessions` exist. Migration 005 added
+  `boxes.heartbeat_interval_seconds`, with a default of 60 seconds.
+- External HTTPS checks returned 200 for the home page and `/api/health`, 401
+  for anonymous latest-reading, history and heartbeat-configuration requests,
+  and 404 for `/docs`.
+
+Sign-in and sign-out are deployed. Application accounts are provisioned separately
+from MySQL accounts and require a box assignment. Passwords are stored as Argon2id
+hashes. The checks above confirm anonymous access is rejected; they do not replace
+an authenticated browser check with an assigned account.
+
+The deployment logs confirmed an MQTT broker connection. A fresh Pi-to-MySQL
+reading and matching storage acknowledgement still need verification. Configuring
+a heartbeat interval does not yet deliver it to the Pi or prove device contact.
 
 ## Network access
 
@@ -95,9 +121,10 @@ See the [frontend guide](../../frontend/README.md) for application limitations a
 
 Nginx terminates TLS and forwards requests to Uvicorn. FastAPI uses browser sessions
 to control access to each box and separate credentials for HTTP device submissions.
-Before deploying the protected API, install its dependencies, apply migration 004 to the
-existing database and provision a user with access to the prototype box. Verify that
-anonymous requests are rejected and that the assigned user can read the box’s data.
+For a new installation, install the dependencies, create the current schema and
+provision a user with access to the prototype box. For an existing database, check
+which migrations are missing before applying them. Verify that anonymous requests
+are rejected and that the assigned user can read the box’s data.
 See the [authentication and setup guide](../api/api-contract.md#authentication).
 
 For connection diagrams, PyCharm tunnel settings and the distinction between
@@ -108,7 +135,7 @@ verified configuration and pending server checks, see [Database connections](dat
 Run these commands over SSH on the Ubuntu server:
 
 ```sh
-sudo systemctl status tempsafe nginx --no-pager
+sudo systemctl status tempsafe nginx mosquitto --no-pager
 cd /home/ubuntu/Smart-Box
 sudo docker compose -p temsafe ps
 curl --fail http://127.0.0.1:8000/api/health
@@ -116,7 +143,8 @@ curl --fail http://127.0.0.1:8000/api/health
 
 The services should be active and the MySQL container healthy. The health endpoint returns
 `{"status":"ok"}`, but does not test the database connection. The Compose health check separately
-checks MySQL access and the presence of the `sample_reviews` table.
+checks MySQL access and the presence of the `sample_reviews` table. It does not
+verify that all application migrations have been applied.
 
 To inspect recent logs:
 
@@ -135,7 +163,10 @@ sudo nginx -t && sudo systemctl reload nginx
 
 Database credentials are stored in the server's `.env` file. Keep that file, SSH private keys and
 access credentials out of Git. The backend service definition is stored at
-`/etc/systemd/system/tempsafe.service`; the Nginx site is enabled through `/etc/nginx/sites-enabled/tempsafe`.
+`/etc/systemd/system/tempsafe.service`, with the MQTT override at
+`/etc/systemd/system/tempsafe.service.d/mqtt.conf`. The service also reads
+`/etc/tempsafe/mqtt.env`; the override enables MQTT and selects one Uvicorn worker.
+The Nginx site is enabled through `/etc/nginx/sites-enabled/tempsafe`.
 
 The Docker volume preserves database data when containers are recreated. It is not a backup;
 do not run `docker compose down -v` unless the stored data should be deleted.
@@ -144,8 +175,42 @@ The initial deployment uses an automatically assigned public IPv4 address. After
 the EC2 instance, check its address and update the Cloudflare A record if it has changed.
 An Elastic IP can provide a stable address if configured later.
 
-Changes committed locally do not automatically update the server. Deploy application changes separately,
-apply any required database migrations and restart `tempsafe.service` after updating the backend.
+## Updating the application
+
+Changes committed locally or pushed to GitHub do not automatically update the server.
+For each deployment:
+
+1. Check the server working tree and record its current commit. Select the reviewed
+   target commit explicitly; do not assume the detached checkout follows `master`.
+2. Back up the database and any configuration files that will change. Keep the
+   previous commit available for rollback.
+3. Review the target's dependencies and migrations. The current schema includes
+   migrations 003, 004 and 005; apply each only if its table or column is missing.
+   See the [database guide](../../database/README.md#apply-migrations). Do not run
+   the baseline schema over an existing database.
+4. Deploy the selected code and install changed dependencies with
+   `.venv/bin/python -m pip install -e .`. Preserve `.env`, MQTT credentials and
+   the Compose project name `temsafe`, which selects the existing database volume.
+5. Restart `tempsafe.service` and check the services, logs, HTTPS responses and
+   authenticated access. Check MQTT storage separately with a real device reading.
+
+If application checks fail, restore the previous code and restart the service.
+Confirm that it is compatible with any applied migration before rollback; switching
+commits does not undo database changes. Do not automatically restore an old database
+snapshot over readings received since the backup.
+
+## Deployment backups
+
+The two updates on 7 November created restricted backup directories on the server:
+
+- `/home/ubuntu/tempsafe-deploy-backups/20261107T232839Z`
+- `/home/ubuntu/tempsafe-deploy-backups/20261107T235655Z`
+
+Each contains a database SQL dump and the previous revision. The first also contains
+copies of the service definition and MQTT environment file. These are manual backups
+on the same server, not evidence of scheduled or off-server backups. Restore testing
+and off-server copies remain unverified. Keep the dumps and configuration copies
+private; they contain account data or credentials.
 
 ## Stored data checks
 
@@ -153,8 +218,8 @@ apply any required database migrations and restart `tempsafe.service` after upda
   `ubuntu:ubuntu` with mode `600`. Check ownership and permissions with
   `stat -c '%a %U:%G %n' /home/ubuntu/Smart-Box/.env` without printing its contents.
 - **Application passwords.** The schema stores user password hashes in
-  `app_users.password_hash`. The login implementation on the secure API branch uses
-  Argon2id. Check the deployed revision before claiming login is live.
+  `app_users.password_hash`. The deployed login implementation uses Argon2id;
+  credentials are not stored as plaintext application passwords.
 - **EBS encryption.** On 6 November 2026, a check on the EC2 host traced the
   MySQL container's data directory to the root EBS volume, `vol-00d71e3f3b6db9d09`.
   The EC2 console showed **Encrypted** for this 20 GiB volume with the KMS key
@@ -163,5 +228,6 @@ apply any required database migrations and restart `tempsafe.service` after upda
   ![EC2 volume details showing the encryption status as Encrypted](../assets/operations/ebs-volume-encryption.png)
 - **MQTT storage.** On 5 November the standalone MQTT service was active on EC2.
   MySQL held 155 samples for TS-01, most recently received at 00:00:10 UTC that day.
-  For a fresh end-to-end check, match a new Pi sample ID to the worker's storage
+  That was the previous ingestion service. FastMQTT replaced it on 7 November.
+  For a fresh end-to-end check, match a new Pi sample ID to FastMQTT's storage
   acknowledgement and the same ID in MySQL.
