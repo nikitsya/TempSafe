@@ -39,7 +39,7 @@ Items without an FR ID are follow-up ideas or exclusions. Implementation status 
 
 - **FR-01.** Sign-in and sign-out are integrated and deployed. Failed logout now stays on the page
   with an error; only a 204 response shows the signed-out confirmation. See the
-  [sign-in report](../testing/sign-in-test-report.md) and [authentication tests](../../tests/backend/test_auth.py).
+  [sign-in report](../testing/web/sign-in-test-report.md) and [authentication tests](../../tests/backend/test_auth.py).
 - **FR-02.** The API enforces box assignments, including multiple users sharing a box. An unassigned
   user receives no readings, but the dashboard still shows a generic loading error rather than the
   intended no-access explanation. That interface work remains outstanding.

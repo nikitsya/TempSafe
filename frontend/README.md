@@ -61,7 +61,7 @@ Other current limitations:
   error rather than a dedicated no-access explanation.
 - The interface is fixed to `TS-01`; there is no box selector or settings form.
 
-See the [consistency review](../docs/testing/project-consistency-review.md) for reproducible examples.
+See the [consistency review](../docs/reviews/project-consistency-review.md) for reproducible examples.
 
 ## How to run
 

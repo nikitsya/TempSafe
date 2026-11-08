@@ -2,7 +2,8 @@
 
 The MQTT broker is configured on AWS with TLS and separate accounts for the device and backend.
 
-The Raspberry Pi publisher is implemented in [`device/mqtt_publisher.py`](../../device/mqtt_publisher.py). It sends readings from the local SQLite
+The Raspberry Pi publisher is implemented in [`device/mqtt_publisher.py`](../../device/mqtt_publisher.py). It sends
+readings from the local SQLite
 database and waits for the server's storage confirmation.
 
 The FastAPI service uses FastMQTT to receive readings and save them to MySQL. This version was
@@ -137,12 +138,12 @@ override. On a new host, create the `tempsafe.service.d` directory first:
 
 ```ini
 [Service]
-EnvironmentFile=/etc/tempsafe/mqtt.env
-Environment=MQTT_ENABLED=true
-ExecStart=
-ExecStart=/home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn temsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
-Restart=on-failure
-RestartSec=5
+EnvironmentFile = /etc/tempsafe/mqtt.env
+Environment = MQTT_ENABLED=true
+ExecStart =
+ExecStart = /home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn temsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart = on-failure
+RestartSec = 5
 ```
 
 Keep the existing working directory and database environment settings. Use exactly one Uvicorn worker

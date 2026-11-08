@@ -34,8 +34,8 @@ and off-server backup configuration remain unverified. Secrets were not displaye
 ```mermaid
 flowchart LR
     Browser[Web browser] -->|HTTPS: TCP 443| Nginx[Nginx on EC2]
-    Nginx -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
-    API -->|MySQL: 127.0.0.1:3307| Port[Docker host port]
+    Nginx -->|HTTP: 127 . 0 . 0 . 1:8000| API[FastAPI on EC2]
+    API -->|MySQL: 127 . 0 . 0 . 1:3307| Port[Docker host port]
     Port -->|Container TCP 3306| DB[(MySQL: temsafe)]
     DB --- Volume[Persistent mysql_data volume]
 ```
@@ -68,9 +68,9 @@ protects browser traffic, while SSH protects the remote administration tunnel.
 
 ```mermaid
 flowchart LR
-    IDE[PyCharm on Mac] -->|127.0.0.1:13307| Tunnel[Local SSH tunnel]
+    IDE[PyCharm on Mac] -->|127 . 0 . 0 . 1:13307| Tunnel[Local SSH tunnel]
     Tunnel -->|Encrypted SSH: EC2 TCP 22| SSH[SSH server on EC2]
-    SSH -->|127.0.0.1:3307| DB[(MySQL via Docker)]
+    SSH -->|127 . 0 . 0 . 1:3307| DB[(MySQL via Docker)]
 ```
 
 Start the tunnel in a Mac terminal and keep it open:
@@ -153,7 +153,8 @@ snapshots, which were not inspected. Off-server copies, retention and successful
 restore tests remain **unverified**. A backup proposal in the design document is
 not evidence of a running backup job.
 
-On 5 November 2026 the [PyCharm access record](../database-access-evidence.md) documented a read of hosted samples, the SSH
+On 5 November 2026 the [PyCharm access record](../database-access-evidence.md) documented a read of hosted samples, the
+SSH
 forwarding command and the grants returned by the TempSafe AWS console.
 
 The [FastAPI account check](../database-access-evidence.md#checking-fastapi-separately) also confirmed the authenticated

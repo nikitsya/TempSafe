@@ -64,7 +64,9 @@ and operator token. Both return the desired interval as a JSON object. To reques
 heartbeat every two minutes, send:
 
 ```json
-{"heartbeat_interval_seconds": 120}
+{
+  "heartbeat_interval_seconds": 120
+}
 ```
 
 Existing and new boxes default to 60 seconds. PUT accepts whole JSON integers from
