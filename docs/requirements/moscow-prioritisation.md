@@ -1,7 +1,7 @@
 # TempSafe - MoSCoW Feature Prioritisation
 
-Feature status was checked against `master` on **6 November 2026**. Of the 15 features, 3 are complete, 10 are in
-progress and 2 are planned.
+Feature status was checked against `master` on **8 November 2026**. Of the 15 features, 4 are complete, 9 are in
+progress and 2 are planned. Priorities are unchanged; FR-13 remains the only recorded priority change.
 See the [functional requirements](functional-requirements.md) for the acceptance criteria.
 
 ## Feature priority matrix
@@ -37,10 +37,12 @@ Items without an FR ID are follow-up ideas or exclusions. Implementation status 
 
 ## What the implementation review found
 
-- **FR-01 and FR-02.** The API creates and revokes sessions and checks box assignments. The sign-in form on
-  `master` is still a placeholder. In [PR #25](https://github.com/nikitsya/TempSafe/pull/25), successful sign-in
-  and sign-out work, but a failed logout also displays “You have signed out.” A signed-in user can still retrieve
-  box data after that message.
+- **FR-01.** Sign-in and sign-out are integrated and deployed. Failed logout now stays on the page
+  with an error; only a 204 response shows the signed-out confirmation. See the
+  [sign-in report](../testing/sign-in-test-report.md) and [authentication tests](../../tests/backend/test_auth.py).
+- **FR-02.** The API enforces box assignments, including multiple users sharing a box. An unassigned
+  user receives no readings, but the dashboard still shows a generic loading error rather than the
+  intended no-access explanation. That interface work remains outstanding.
 - **FR-03.** The Pi records temperatures and sensor errors in SQLite, but flags every timestamp as reliable.
   An unsynchronised clock can therefore produce a misleading observation time.
   See the [device logger](../../device/temperature_readings.py).
@@ -85,7 +87,7 @@ Universal Design.
 
 | ID    | Feature                                        | Status      | Why it is essential                                                                                                                                                       | UX / Universal Design justification                                                                                                                                                                                  |
 |-------|------------------------------------------------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| FR-01 | Sign in and sign out                           | In progress | Establish an authorised user session before accessing box data.                                                                                                           | P3: clear login, failure and logout states support a predictable journey.                                                                                                                                            |
+| FR-01 | Sign in and sign out                           | Done        | Establish an authorised user session before accessing box data.                                                                                                           | P3: clear login, failure and logout states support a predictable journey.                                                                                                                                            |
 | FR-02 | Restrict access to the assigned prototype box  | In progress | Multiple assigned users share the single prototype box; unassigned users are denied through both the interface and API.                                                   | P3/P5: a clear shared-box identity reduces confusion; permission enforcement prevents inappropriate access.                                                                                                          |
 | FR-03 | Measure and record internal temperature        | In progress | Temperature monitoring is the purpose of the prototype; readings need identity, time and quality information.                                                             | P5: a failed sensor read must not become a plausible temperature value.                                                                                                                                              |
 | FR-04 | Show the latest temperature and its freshness  | In progress | A value without its age can mislead the user about the current condition.                                                                                                 | P3/P4: show value, units, observation time and explicit unknown, stale or sensor-error states.                                                                                                                       |

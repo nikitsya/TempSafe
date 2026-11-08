@@ -8,7 +8,7 @@
 - `POST /api/logout` revokes the server-side session and clears the cookie. It returns 204.
 - Box and reading queries require a current session (401 otherwise). Lists contain only
   assigned boxes' samples. Requests for unassigned boxes or samples return 404.
-  Threshold configuration also requires the existing operator bearer token.
+  Threshold and heartbeat configuration also require the operator bearer token.
 - `POST /api/readings` requires the `X-Device-Key` header. Set `TEMSAFE_DEVICE_KEY` in
   the server environment to a separate randomly generated secret of at least 32 characters
   and set `TEMSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
@@ -18,10 +18,13 @@
 ### Provision a prototype account
 
 For an existing database, apply [migration 004](../../database/migrations/004_add_user_sessions.sql)
-once after backing up MySQL. Fresh installations include the session table in the baseline schema.
+once after backing up MySQL, only if `user_sessions` is missing. Fresh installations already include it.
+Apply any other outstanding migrations in the [database guide](../../database/README.md).
 Install the project dependencies. From the project root, run the following with the
 project virtual environment active. Enter a new username and a password when prompted.
 The example grants access to the existing prototype box. Both inserts commit together.
+Use a new identifier of at most 191 characters and a password of at most 1,024 characters,
+matching the login endpoint limits. This creates an account; it does not reset an existing password.
 
 ```sh
 python - <<'PYTHON'
@@ -197,8 +200,8 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
   fresh.
 - Handle HTTP status and `detail` together: `404` with `Box not found` is not the no-observations state. Invalid `limit`
   returns `422` with a validation-error array in `detail`. Network errors and `5xx` mean loading failed. The current
-  pages replace the content with an error message;
-  retaining previous values as explicitly historical data is a possible future enhancement.
+  history page shows an error. The dashboard retains its last response when available, continues
+  ageing it and shows a refresh-error banner; without a previous response it shows a loading error.
 
 ### Profile limits and remaining integration
 
@@ -208,7 +211,7 @@ The seeded demo limits are 0/24/25°C; the unused legacy frontend fixture's 15°
 
 The dashboard maps the API response and distinguishes the two `404` cases using the error body.
 It currently derives age from the browser clock rather than consuming `freshness`. See the
-[frontend guide](../../frontend/README.md#current-behaviour-and-limitations) for remaining UI work.
+[frontend guide](../../frontend/README.md#history-behaviour-and-limitations) for remaining UI work.
 
 Device-contact handling remains planned. A silence or review
 acknowledgement action is not part of these read endpoints.
@@ -221,7 +224,8 @@ acknowledgement action is not part of these read endpoints.
 | `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`. |
 | `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
 
-Run the server using the [backend guide](../../backend/temsafe/README.md); inspect live schemas at `/docs`.
+Run the server using the [backend guide](../../backend/temsafe/README.md); inspect schemas at `/docs`
+on the local development server. The hosted Nginx configuration blocks public documentation routes.
 
 ## Operator configuration
 

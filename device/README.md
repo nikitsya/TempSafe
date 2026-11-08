@@ -97,25 +97,18 @@ after the transaction commits.
 python mqtt_publisher.py
 ```
 
-The MQTT publisher runs separately from the temperature measurement script.
-
-It sends readings that have not yet been confirmed as stored by the backend.
+The MQTT publisher runs separately from the temperature measurement script. Set `MQTT_PASSWORD`
+in its terminal before starting it, as shown below. It sends readings that have not yet been
+confirmed as stored by the backend.
 
 The publisher:
 
-selects records where uploaded = 0;
-
-connects to the MQTT broker using TLS with certificate and server-name verification;
-
-publishes readings to tempsafe/boxes/TS-01/readings;
-
-listens for acknowledgements on tempsafe/boxes/TS-01/acks;
-
-sets uploaded = 1 only after receiving a stored acknowledgement for the corresponding reading;
-
-keeps an unconfirmed reading in the local queue and retries it using the same identifiers;
-
-continues running after the current queue is empty and waits for new readings.
+- Selects the oldest pending record where `uploaded = 0`.
+- Connects over TLS with certificate and server-name verification.
+- Publishes to `tempsafe/boxes/TS-01/readings` after subscribing to `tempsafe/boxes/TS-01/acks`.
+- Sets `uploaded = 1` only after a matching `stored` acknowledgement.
+- Retains unconfirmed records and retries with unchanged identifiers.
+- Waits for new readings when the queue is empty.
 
 The local SQLite database therefore acts as an offline queue between the sensor process and MQTT transmission.
 
@@ -155,7 +148,7 @@ means that the backend has confirmed that the reading was stored.
 
 Stop either process with Ctrl+C in its corresponding terminal.
 
-## Current limitations:
+## Current limitations
 
 - Sensor initialisation failures occur before the loop and are not recorded
   by its error handler.
@@ -163,7 +156,7 @@ Stop either process with Ctrl+C in its corresponding terminal.
   set to 1 without an independent clock synchronisation check.
 - `BOX_ID` and `PROFILE_ID` are configured in the script and must match the
   intended backend records before integration.
-- MQTT publishing is implemented, but automatic startup after Raspberry Pi reboot is not yet configured.;
+- MQTT publishing is implemented, but automatic startup after Raspberry Pi reboot is not yet configured.
 - Manual buzzer silencing is not implemented, so FR-15 is only partially
   implemented. Stopping the whole script is not a substitute for a silence control.
 

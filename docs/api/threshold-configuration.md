@@ -21,7 +21,10 @@ Keep it in the operator environment and out of browser JavaScript. See the
 For a fresh database, use the updated `database/schema.sql`. For an existing
 database, back up first and run
 [003_add_box_configuration.sql](../../database/migrations/003_add_box_configuration.sql)
-once. Do not run this migration after the updated baseline: the table already exists.
+once if `box_configuration` is missing. Do not run this migration after the updated baseline:
+the table already exists. Apply [migration 004](../../database/migrations/004_add_user_sessions.sql)
+if `user_sessions` is absent and [migration 005](../../database/migrations/005_add_box_heartbeat_interval.sql)
+if `boxes.heartbeat_interval_seconds` is absent.
 The migration selects the existing profile only for boxes with exactly one profile.
 Boxes with no profiles or several profiles remain unconfigured until an operator
 sets their limits. Existing profiles and measurements are preserved.
@@ -88,8 +91,11 @@ of individual operators in this feature.
 
 ## Verification
 
-Tests use isolated MySQL and cover disabled access, missing/incorrect credentials,
-invalid and unordered limits, missing boxes, unchanged retries, active-profile
-retrieval and preservation of an earlier sample's classification. The current
-backend suite passed 128 tests after this change. No production migration or
-Raspberry Pi change was performed.
+Tests cover disabled access, missing/incorrect credentials, invalid and unordered limits,
+missing boxes, unchanged retries, profile retrieval and historical classification. Heartbeat
+tests cover independent intervals, invalid values and preservation of other settings. See
+the [test guide](../../tests/backend/README.md).
+
+The configuration table and heartbeat migration were deployed on 7 November 2026; see the
+[deployment record](../operations/deployment.md). Access still requires a configured operator
+token. These API changes do not change the Raspberry Pi’s local constants.

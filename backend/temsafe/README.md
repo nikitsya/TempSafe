@@ -11,7 +11,10 @@ The commands below are for local development; the hosted service runs without `-
 
 ## Setup
 
-First, complete the [backend setup](../../README.md#backend-development).
+First, complete the [backend setup](../../README.md#backend-development) and
+[database setup](../../database/README.md), including outstanding migrations.
+Provision a user with access to `TS-01` using the
+[authentication guide](../../docs/api/api-contract.md#provision-a-prototype-account).
 
 ## In PyCharm
 

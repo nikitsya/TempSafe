@@ -3,9 +3,10 @@
 **Scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
 paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
 
-The device records temperature inside a portable medication box. MySQL is the proposed central database; SQLite provides
-the planned durable offline queue on the Raspberry Pi. Local SQLite recording is now implemented, but MQTT upload,
-acknowledgement and full offline recovery remain planned; see the [device guide](../../device/README.md).
+The device records temperature inside a portable medication box. MySQL is the deployed central database; SQLite provides
+the durable upload queue on the Raspberry Pi. Recording, MQTT upload and storage acknowledgements
+are implemented. The 24-hour outage/restart test and a fresh trace through the deployed FastMQTT
+subscriber remain outstanding; see the [device guide](../../device/README.md).
 
 The baseline uses one internal sensor. An external temperature sensor is a possible future research extension and
 is not included in this schema.
@@ -34,7 +35,8 @@ is not included in this schema.
 | User access            | User ID and permitted box IDs                                             | On provisioning/change                                             | Enforce authorisation                               |
 | Review acknowledgement | Sample ID, reviewer, reviewed-at                                          | Optional Should Have workflow                                      | Record review without altering measurements         |
 
-Heartbeats are sent every 60 seconds. Proposed contact timeout is 3 minutes. The
+The desired heartbeat interval defaults to 60 seconds, but device heartbeat delivery and
+reporting are not implemented. The proposed contact timeout is 3 minutes. The
 device needs at least 24 hours of local queue capacity (2,880 sample attempts).
 
 ## 3. Database categories
@@ -76,8 +78,8 @@ device needs at least 24 hours of local queue capacity (2,880 sample attempts).
 
 ## 6. Proposed decision
 
-**Recommendation: MySQL as the central database, SQLite as the device's durable upload queue, and a Python/FastAPI
-backend.**
+**Selected architecture: MySQL as the central database, SQLite as the device’s durable upload queue,
+and a Python/FastAPI backend.**
 
 MySQL fits structured relationships between boxes, users, access permissions and threshold profiles, as well as
 time-filtered reporting. The proposed rate of one sample every 30 seconds produces **2,880 samples per box per day**.
@@ -95,8 +97,9 @@ initialisation commands, integrity checks and application responsibilities. The 
 is the source of truth; the queries below illustrate the planned backend integration.
 
 `auth_subject` stores the case-sensitive local login identifier and `password_hash` its Argon2id hash.
-Session, device-certificate, notification subscription/outbox and maintenance tables remain
-implementation work.
+`user_sessions` stores hashed session tokens and expiry times. Notification subscription/outbox
+and maintenance tables remain future work. MQTT currently uses broker usernames and passwords
+over server-authenticated TLS, not device client certificates.
 
 ### Latest sample for an authorised user
 
@@ -180,6 +183,10 @@ normal restart. Report storage errors/full queues; no silent overwriting of pend
 retained locally so offline warnings still work.
 
 ## 8. Processing, security and privacy
+
+This section records design targets. Current gaps include heartbeat exchange, scheduled jobs,
+rate limiting, reduced runtime database grants and verified off-server backup recovery.
+See the [deployment record](../operations/deployment.md) for observed controls.
 
 ### Processing placement
 

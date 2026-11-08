@@ -140,6 +140,10 @@ and profile. Then follow the [backend guide](backend/temsafe/README.md) to start
 
 ## Project documentation
 
+See the [consistency review](docs/testing/project-consistency-review.md) for the
+8 November audit, verified checks and outstanding implementation gaps. Assessment
+documents retain dated content.
+
 | Topic                          | Documents                                                                                                                                                                                                                                                                                               |
 |--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Scope and requirements         | [Project scope](docs/project-scope.md) · [Requirements](docs/requirements/functional-requirements.md) · [Priorities](docs/requirements/moscow-prioritisation.md)                                                                                                                                        |

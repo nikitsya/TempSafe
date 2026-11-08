@@ -51,7 +51,17 @@ view. Although the history API returns each sample's recorded profile and classi
 frontend does not yet use those fields for historical thresholds. If profiles change, earlier
 samples can therefore be shown against the wrong limits. This remains an integration task.
 
-The interface is fixed to `TS-01`; there is no box selector or settings form.
+Other current limitations:
+
+- A missing sequence within 90 seconds can be joined into one excursion; missing
+  observations do not always break continuity.
+- At exactly the lower limit, the dashboard correctly shows Alert but its Details
+  explanation incorrectly says the reading is above the upper limit.
+- An unassigned user receives no data, but the dashboard shows a generic loading
+  error rather than a dedicated no-access explanation.
+- The interface is fixed to `TS-01`; there is no box selector or settings form.
+
+See the [consistency review](../docs/testing/project-consistency-review.md) for reproducible examples.
 
 ## How to run
 

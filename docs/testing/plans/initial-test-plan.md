@@ -85,7 +85,7 @@ results separately.
 | SEC-05 | Run cron jobs twice, overlap runs and force backup failure.                                    | No duplicate transition events; locks prevent overlaps; retention does not run without successful backup. |
 | SEC-06 | Restore an encrypted backup in an isolated test environment.                                   | Authorised restore succeeds and sample IDs/counts reconcile.                                              |
 
-## Conditional Should Have tests
+## Additional feature tests
 
 | ID / requirements | Preconditions                      | Actions                                                                      | Expected result                                                                                                |
 |-------------------|------------------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|

@@ -46,7 +46,8 @@ The Advanced Paramedic needs a system that:
 - works automatically in the background;
 - continuously monitors temperature over time;
 - does not require regular user interaction while conditions are normal;
-- records timestamped out-of-range observations; estimated duration and maximum-temperature summaries are Should Have;
+- records timestamped out-of-range observations; estimated duration and maximum-temperature summaries are Must Have
+  (FR-13);
 - provides clear visual feedback directly on the box;
 - can add an audible warning if the Should Have buzzer is implemented;
 - sends a phone notification when the temperature approaches or exceeds the configured limit;
@@ -145,8 +146,8 @@ safe.
 While conditions are normal, the system works in the background and requires no action from Shannon.
 
 If the temperature approaches the configured limit, TempSafe provides an early warning through the LED indicator and a
-phone notification. If the temperature exceeds the limit, it displays Alert and retains the observations; optional
-buzzer and estimated summaries can add feedback.
+phone notification. If the temperature exceeds the limit, it displays Alert and retains the observations; the Should
+Have buzzer can add feedback, and the Must Have estimated summaries support later review.
 
 The aim is to give the Advanced Paramedic useful information at the right time without adding unnecessary manual checks
 during patient care.
@@ -163,7 +164,7 @@ The TempSafe system includes:
 - **Buzzer** – Should Have audible feedback, subject to implementation;
 - **Database / Data Storage** – stores sample attempts and profiles; estimated excursion summaries are Must Have;
 - **Web Application** – displays current status, freshness, history and alerts; estimated excursion duration is
-  optional;
+  Must Have (FR-13);
 - **Notification System** – sends warnings and alerts to the user;
 - **Internet Connection** – allows data to be transferred from the Raspberry Pi to the application.
 

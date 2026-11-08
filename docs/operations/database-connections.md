@@ -22,8 +22,12 @@ Some subsequent SSH connections still timed out, so the verification is partial.
 | Database grants         | `ALL PRIVILEGES` on `temsafe.*`                                       |
 | Scheduled backups       | No MySQL backup timer or database-related cron job found              |
 
-The effective backend environment, current AWS rule sources and off-server backup
-configuration have not been independently verified. Secrets were not displayed.
+The 5 November [FastAPI account check](../database-access-evidence.md#checking-fastapi-separately)
+subsequently verified the effective database account and schema. On 8 November, the service,
+container, loopback mapping, session/configuration tables and heartbeat column were rechecked.
+The hosted database also contains a `temperature_history` table outside the current eight-table
+baseline; its purpose was not established and no table was removed. Current AWS rule sources
+and off-server backup configuration remain unverified. Secrets were not displayed.
 
 ## Figure 1. Application connection
 
@@ -101,11 +105,10 @@ stop the website or database.
 
 ## Network access and troubleshooting
 
-The recorded AWS rules allow website ports 80/443, MQTT TLS port 8883 and SSH port
-
-22. SSH should be restricted to the operator's current public IP (`/32`). MySQL
-    ports 3306/3307 and backend port 8000 should not be publicly exposed. The current
-    security group rules still need live verification; see [Network access](deployment.md#network-access).
+The recorded AWS rules allow website ports 80/443, MQTT TLS port 8883 and SSH port 22.
+SSH should be restricted to the operator’s current public IP (`/32`). MySQL ports
+3306/3307 and backend port 8000 should not be publicly exposed. The current
+security group rules still need live verification; see [Network access](deployment.md#network-access).
 
 | Symptom                            | What to check                                                               |
 |------------------------------------|-----------------------------------------------------------------------------|
@@ -141,8 +144,11 @@ Backup checks on 4 November 2026 found:
 - No backup candidates matching the inspected names and dump extensions under
   `/var/backups`, `/home/ubuntu/Smart-Box`, `/home/ubuntu/backups` or `/opt`.
 
-These checks found no evidence of an operational application database backup on
-the host. They do not rule out custom jobs elsewhere or external AWS Backup/EBS
+Those 4 November checks found no evidence of an operational application database backup on
+the host. Manual SQL backups were subsequently created before both deployments on 7 November
+under `/home/ubuntu/tempsafe-deploy-backups/`; see the
+[backup record](deployment.md#deployment-backups). They remain on the same server. They do not rule out custom jobs
+elsewhere or external AWS Backup/EBS
 snapshots, which were not inspected. Off-server copies, retention and successful
 restore tests remain **unverified**. A backup proposal in the design document is
 not evidence of a running backup job.

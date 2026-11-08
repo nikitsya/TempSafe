@@ -1,7 +1,11 @@
 # TempSafe UI prototype
 
-**Live prototype:** https://nikitsya.github.io/Smart-Box/prototype/ui/login.html
-(test account `paramedic` / `demo`; synthetic data only)
+**Local prototype:** open `login.html` from this directory.
+Test account: `paramedic` / `demo`; synthetic data only.
+
+The former GitHub Pages address returned 404 on 8 November 2026, as did the
+corresponding `/TempSafe/` address. A hosted prototype URL is not currently verified.
+The working application is separately hosted at [tempsafe.app](https://tempsafe.app).
 
 A clickable HTML/CSS/JavaScript prototype of the TempSafe web application. It uses synthetic data only and does not
 connect to the backend. It is used to check the UI design and to run automated browser tests independently of the
@@ -21,7 +25,7 @@ prototype test results are not evidence of backend authentication or live device
 
 ## How to open
 
-Use the live link above, or open `login.html` in a browser from a downloaded copy. No server or build step is needed.
+Open `login.html` in a browser from a downloaded copy. No server or build step is needed.
 
 ## Automated tests
 

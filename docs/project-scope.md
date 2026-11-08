@@ -7,22 +7,24 @@ temperature limit.
 The current prototype is tested on a bench without medicines; ambulance use is a future context.
 
 The project focuses on reducing unnecessary manual temperature checks by providing automatic monitoring, local LED
-feedback, phone notifications and a record of temperature observations. Audible buzzer feedback and estimated excursion
-summaries are Should Have enhancements.
+feedback, planned phone notifications and a record of temperature observations. Estimated excursion
+summaries (FR-13) are Must Have; audible buzzer feedback remains Should Have.
+This document defines the target scope; see the [implementation review](requirements/moscow-prioritisation.md)
+for completed and outstanding work.
 
 ## Application platform
 
 TempSafe will be a responsive web application with a Python/FastAPI backend and an HTML, CSS and JavaScript frontend.
 Planned Progressive Web App (PWA) support would let users add a home-screen icon and open the same web application
 in a standalone window on supported phones. PWA installation and Web Push require browser/platform testing.
-A separate native mobile application is likely to follow the web application, subject to a final team decision.
+A separate native mobile application is a Could Have follow-up, subject to a team decision.
 
 ## Included in the Project
 
 - Continuous temperature monitoring inside the Controlled Drug Box using an SCD-41 sensor.
 - Use of a Raspberry Pi to collect, process and store temperature readings.
 - Monitoring temperature over time through timestamped readings and accessible history. Estimated excursion timing and
-  maximum-temperature summaries are Should Have.
+  maximum-temperature summaries are Must Have (FR-13).
 - Classification against versioned lower/upper limits: demonstration Warning begins at 24°C; Alert is above 25°C or
   at or below the agreed 0.00°C lower threshold.
 - A single-colour LED lights for Warning or Alert and uses a distinct blink pattern for sensor failure. Normal leaves it

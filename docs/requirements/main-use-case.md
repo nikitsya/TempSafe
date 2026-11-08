@@ -18,7 +18,10 @@ application, the temperature has returned to Normal, but the completed excursion
 The values and times below are synthetic demonstration data for the Figma prototype and user testing. All displayed
 times refer to the same day and use local time.
 
-This scenario illustrates the Must Have excursion summary (FR-13).
+This scenario illustrates the Must Have excursion summary (FR-13). It is the target journey:
+phone notifications and the dashboard’s event shortcut are not implemented. The current website
+shows estimated periods on History; see
+the [frontend limitations](../../frontend/README.md#history-behaviour-and-limitations).
 
 ## Preconditions
 

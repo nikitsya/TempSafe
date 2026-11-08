@@ -3,7 +3,8 @@
 Author: Maryna Hordiienko (frontend and Web Push integration)
 
 [ui-design.md](ui-design.md) states that TempSafe plans Web Push with a service worker and explicit permission. This
-document shows the detailed flow. The browser asks for permission only after the user chooses to turn alerts on, never
+document shows the target flow. The service worker, push subscription endpoint and delivery
+worker are not implemented. The browser asks for permission only after the user chooses to turn alerts on, never
 on first page load.
 
 ## Flow

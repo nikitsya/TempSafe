@@ -72,21 +72,24 @@ colour alone.
 
 ## 5. Proposed system behaviour
 
-## 1. The SCD-41 measures the temperature inside the Controlled Drug Box at regular intervals.
+1. The SCD-41 measures the temperature inside the Controlled Drug Box at regular intervals.
 
-## 2. The Raspberry Pi receives the readings and stores them with a timestamp.
+2. The Raspberry Pi receives the readings and stores them with a timestamp.
 
-## 3. The system calculates the current status and tracks temperature over time.
+3. The system calculates the current status and tracks temperature over time.
 
-## 4. For a valid reading above the agreed 0°C lower threshold and below 24°C, the LED is off (Normal).
+4. For a valid reading above the agreed 0°C lower threshold and below 24°C, the LED is off (Normal).
 
-## 5. From 24°C through 25°C, the single-colour LED is steadily lit (Warning); the system sends an early phone warning when connected and permission is granted.
+5. From 24°C through 25°C, the single-colour LED is steadily lit (Warning); the system sends an early phone warning when
+   connected and permission is granted.
 
-## 6. Above 25°C or at or below the agreed 0°C lower threshold, the LED remains steadily lit (Alert); the optional buzzer sounds if implemented, and a phone alert is sent when connected and permitted.
+6. Above 25°C or at or below the agreed 0°C lower threshold, the LED remains steadily lit (Alert); the optional buzzer
+   sounds if implemented, and a phone alert is sent when connected and permitted.
 
-## 7. If FR-13 is implemented, the system estimates excursion start, duration and maximum temperature from recorded observations; gaps and errors break the summary.
+7. If FR-13 is implemented, the system estimates excursion start, duration and maximum temperature from recorded
+   observations; gaps and errors break the summary.
 
-## 8. The web application allows the user to review the current status and historical excursion data.
+8. The web application allows the user to review the current status and historical excursion data.
 
 On sensor failure, the LED uses a distinct blink pattern: two short flashes followed by a pause. A failed reading is not
 Normal. Green, amber and red status colours are used only in the application, alongside text and symbols.
@@ -99,8 +102,8 @@ single-colour LED is off for Normal, steadily lit for Warning or Alert, and blin
 unlit LED alone does not prove acceptable conditions or working power. When connected and notification permission is
 granted, the system sends an early warning as the temperature approaches the configured upper limit and an alert when it
 exceeds 25°C or falls to or below the agreed 0°C lower threshold. The optional buzzer sounds on Alert if implemented.
-The
-application distinguishes Normal, Warning and Alert using text, symbols and green, amber and red colours. The prototype
+The application distinguishes Normal, Warning and Alert using text, symbols and green, amber and red colours. The
+prototype
 records observations for review; it does not cool the box automatically.
 
 ## 7. Prototype limitations
@@ -115,9 +118,10 @@ The prototype is for demonstration and testing and is not intended for clinical 
 
 The LED and buzzer provide local feedback but do not replace official clinical or medication-storage procedures.
 
-## 7. Research sources
+## 8. Research sources
 
-- National Ambulance Service (NAS), *NASCG006 – Management and Requisition of Controlled Drugs*, Appendix 11:
+- [National Ambulance Service (NAS), NASCG006](https://www.nationalambulanceservice.ie/clinical%20care/clinical-directives-advisories/nascg006-management-requisition-of-controlled-drugs.pdf),
+  Appendix 11:
   Practitioner Stock Limits.
 - Health Products Regulatory Authority (HPRA), product information for Morphine Sulphate injection used in this
   research.

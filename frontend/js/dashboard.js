@@ -448,7 +448,7 @@ async function loadTemperature() {
 document.addEventListener('DOMContentLoaded', () => {
     loadTemperature();
 
-    // Ask the API for new data every 30 seconds.
+    // Ask the API for new data every five seconds.
     setInterval(loadTemperature, REFRESH_SECONDS * 1000);
 
     // Update the age every 5 seconds without a new request.
