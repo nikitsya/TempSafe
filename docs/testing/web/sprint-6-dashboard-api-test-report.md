@@ -82,7 +82,7 @@ The temperature profile contained the following thresholds:
 Started the backend using:
 
 ```powershell
-python -m uvicorn temsafe.main:app --reload
+python -m uvicorn tempsafe.main:app --reload
 ```
 
 The health endpoint was successfully accessed at:

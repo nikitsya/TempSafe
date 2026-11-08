@@ -231,3 +231,23 @@ private; they contain account data or credentials.
   That was the previous ingestion service. FastMQTT replaced it on 7 November.
   For a fresh end-to-end check, match a new Pi sample ID to FastMQTT's storage
   acknowledgement and the same ID in MySQL.
+
+## Package name update: tempsafe
+
+The Python package is now `tempsafe`, and its distribution is `tempsafe-backend`.
+After deploying this change, reinstall with `.venv/bin/python -m pip install -e .`
+and update every Uvicorn service command (including the MQTT override) to
+`tempsafe.main:app`. Run `sudo systemctl daemon-reload` before restarting the
+service. The recorded deployment above predates this package rename.
+
+New project settings use the `TEMPSAFE_` prefix. Existing `TEMSAFE_` settings
+remain accepted as a compatibility fallback; an explicitly set new setting takes
+precedence, including an empty value. Rename the keys in private environment files
+when updating an installation, preserving their values.
+
+New installations default to MySQL database and user `tempsafe`. Existing databases
+are not renamed by this code change. On the recorded EC2 installation, retain
+`MYSQL_DATABASE=temsafe`, `MYSQL_USER=temsafe` and the Compose project name
+`temsafe` to keep using the existing data and volume. Set these explicitly before
+running Compose or starting the renamed backend. Changing a default does not
+migrate a database, rename a MySQL account or copy a Docker volume.

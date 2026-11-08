@@ -124,14 +124,14 @@ On Windows, create the environment with `py -3.11 -m venv .venv` and activate it
 `.venv\Scripts\Activate.ps1` in PowerShell.
 
 Follow the [database setup guide](database/README.md) to configure `.env`, create the tables and add the prototype box
-and profile. Then follow the [backend guide](backend/temsafe/README.md) to start the server and try the API.
+and profile. Then follow the [backend guide](backend/tempsafe/README.md) to start the server and try the API.
 
 ## Code and development guides
 
 | Area                | Location / guide                                            |
 |---------------------|-------------------------------------------------------------|
 | Device scripts      | [device/](device/)                                          |
-| Backend and API     | [Backend guide](backend/temsafe/README.md)                  |
+| Backend and API     | [Backend guide](backend/tempsafe/README.md)                 |
 | Database            | [Database setup](database/README.md)                        |
 | Web interface       | [Frontend guide](frontend/README.md)                        |
 | Clickable prototype | [Prototype guide](prototype/ui/README.md)                   |

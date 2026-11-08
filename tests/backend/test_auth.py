@@ -8,10 +8,10 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from temsafe.api.auth import COOKIE, hasher, token_digest, utc_now
-from temsafe.db.models import AppUser, Box, BoxAccess, TemperatureSample, ThresholdProfile, UserSession
-from temsafe.db.session import engine, get_db
-from temsafe.main import app
+from tempsafe.api.auth import COOKIE, hasher, token_digest, utc_now
+from tempsafe.db.models import AppUser, Box, BoxAccess, TemperatureSample, ThresholdProfile, UserSession
+from tempsafe.db.session import engine, get_db
+from tempsafe.main import app
 
 
 @pytest.fixture
@@ -99,11 +99,11 @@ def test_expired_session(account):
 
 def test_device_key_is_separate_from_browser_access(monkeypatch):
     key = secrets.token_urlsafe(32)
-    monkeypatch.setenv("TEMSAFE_DEVICE_KEY", key)
-    monkeypatch.setenv("TEMSAFE_DEVICE_BOX_ID", "TS-01")
+    monkeypatch.setenv("TEMPSAFE_DEVICE_KEY", key)
+    monkeypatch.setenv("TEMPSAFE_DEVICE_BOX_ID", "TS-01")
     with TestClient(app) as client:
         for headers in [{}, {"X-Device-Key": "wrong"}]:
             assert client.post("/api/readings", headers=headers, json={}).status_code == 401
         assert client.get("/api/readings", headers={"X-Device-Key": key}).status_code == 401
-        monkeypatch.delenv("TEMSAFE_DEVICE_KEY")
+        monkeypatch.delenv("TEMPSAFE_DEVICE_KEY")
         assert client.post("/api/readings", headers={"X-Device-Key": key}, json={}).status_code == 401

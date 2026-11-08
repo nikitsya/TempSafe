@@ -31,9 +31,9 @@ docker compose up -d --wait mysql
 With the default project name, Docker Desktop shows the container as
 `tempsafe-mysql-1` and stores its data in `tempsafe_mysql_data`.
 
-On the first start, this creates the `temsafe` database, the `temsafe` database
+On the first start, this creates the `tempsafe` database, the `tempsafe` database
 user and all eight tables. Connect using host `127.0.0.1`, port `3307` (unless changed
-in `.env`), user `temsafe` and your `MYSQL_PASSWORD`.
+in `.env`), user `tempsafe` and your `MYSQL_PASSWORD`.
 
 To stop it, use `docker compose stop mysql`. Your data stays in the Docker volume.
 Changing `.env` later does not change an existing database password. Avoid
@@ -45,16 +45,16 @@ Changing `.env` later does not change an existing database password. Avoid
 2. Connect with an administrator account in your SQL client and run:
 
 ```sql
-CREATE DATABASE temsafe CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
-CREATE USER 'temsafe'@'localhost' IDENTIFIED BY 'replace-with-your-own-password';
-GRANT ALL PRIVILEGES ON temsafe.* TO 'temsafe'@'localhost';
+CREATE DATABASE tempsafe CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
+CREATE USER 'tempsafe'@'localhost' IDENTIFIED BY 'replace-with-your-own-password';
+GRANT ALL PRIVILEGES ON tempsafe.* TO 'tempsafe'@'localhost';
 ```
 
 This account is for local development. If the database or account already exists,
 use the existing setup. For a remote server, ask its administrator for an account
 that can connect from your computer.
 
-3. Select the empty `temsafe` database in your SQL client, open
+3. Select the empty `tempsafe` database in your SQL client, open
    [`schema.sql`](schema.sql) and execute the whole file once. Do not import it
    again over existing tables.
 4. Create or update `.env` in the project root with your connection details:
@@ -62,8 +62,8 @@ that can connect from your computer.
 ```dotenv
 MYSQL_HOST=127.0.0.1
 MYSQL_PORT=3306
-MYSQL_DATABASE=temsafe
-MYSQL_USER=temsafe
+MYSQL_DATABASE=tempsafe
+MYSQL_USER=tempsafe
 MYSQL_PASSWORD=replace-with-your-own-password
 ```
 
@@ -72,7 +72,7 @@ our Docker setup. Keep `.env` out of Git.
 
 ## Apply migrations
 
-For either setup, select `temsafe` in your SQL client after the tables exist.
+For either setup, select `tempsafe` in your SQL client after the tables exist.
 Run these files manually in order, then commit if auto-commit is off:
 
 | File                                                                                              | Result                                                                                                  |
@@ -113,7 +113,7 @@ once if `boxes.heartbeat_interval_seconds` is missing. Existing boxes receive th
 
 ## Verify the setup
 
-Select `temsafe` and run:
+Select `tempsafe` and run:
 
 ```sql
 SHOW TABLES;
@@ -125,3 +125,11 @@ Expected tables: `app_users`, `box_access`, `boxes`, `sample_reviews`,
 Follow the [backend test instructions](../tests/backend/README.md) to check database
 access and API behaviour. For the schema rationale, see the
 [database research](../docs/research/database-research.md).
+
+## Existing installations with the old name
+
+The defaults above apply to new installations. An existing database or account
+named `temsafe` remains valid: set `MYSQL_DATABASE=temsafe` and `MYSQL_USER=temsafe`
+explicitly in its private environment file. Keep its existing Compose project
+name and volume. See the [package update](../docs/operations/deployment.md#package-name-update-tempsafe)
+for the application rename; do not reinitialise a populated database.

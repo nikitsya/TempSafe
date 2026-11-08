@@ -7,12 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from temsafe.api.auth import require_box
-from temsafe.db import models
-from temsafe.db.session import get_db
-from temsafe.monitoring.freshness import classify_freshness
-from temsafe.monitoring.temperature import classify_temperature
-from temsafe.schemas import BoxResponse, HistoryReadingResponse, LatestReadingResponse, ReadingResponse
+from tempsafe.api.auth import require_box
+from tempsafe.db import models
+from tempsafe.db.session import get_db
+from tempsafe.monitoring.freshness import classify_freshness
+from tempsafe.monitoring.temperature import classify_temperature
+from tempsafe.schemas import BoxResponse, HistoryReadingResponse, LatestReadingResponse, ReadingResponse
 
 router = APIRouter(tags=["Boxes"], dependencies=[Depends(require_box)])
 

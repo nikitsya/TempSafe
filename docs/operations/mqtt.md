@@ -141,7 +141,7 @@ override. On a new host, create the `tempsafe.service.d` directory first:
 EnvironmentFile = /etc/tempsafe/mqtt.env
 Environment = MQTT_ENABLED=true
 ExecStart =
-ExecStart = /home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn temsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
+ExecStart = /home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn tempsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
 Restart = on-failure
 RestartSec = 5
 ```

@@ -1,4 +1,4 @@
-"""SQLAlchemy models for the TEMSAFE database tables."""
+"""SQLAlchemy models for the TEMPSAFE database tables."""
 
 from datetime import datetime
 from decimal import Decimal
@@ -7,7 +7,7 @@ from sqlalchemy import Boolean, ForeignKey, ForeignKeyConstraint, Numeric, Strin
 from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM, SMALLINT
 from sqlalchemy.orm import Mapped, mapped_column
 
-from temsafe.db.session import Base
+from tempsafe.db.session import Base
 
 
 class Box(Base):

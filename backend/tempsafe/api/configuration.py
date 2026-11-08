@@ -7,11 +7,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from temsafe.api.admin import require_configuration_admin
-from temsafe.api.auth import require_box
-from temsafe.db.models import Box, BoxConfiguration, ThresholdProfile
-from temsafe.db.session import get_db
-from temsafe.schemas import HeartbeatSettings, ThresholdSettingsCreate, ThresholdSettingsResponse
+from tempsafe.api.admin import require_configuration_admin
+from tempsafe.api.auth import require_box
+from tempsafe.db.models import Box, BoxConfiguration, ThresholdProfile
+from tempsafe.db.session import get_db
+from tempsafe.schemas import HeartbeatSettings, ThresholdSettingsCreate, ThresholdSettingsResponse
 
 router = APIRouter(tags=["Configuration"], dependencies=[Depends(require_box), Depends(require_configuration_admin)])
 

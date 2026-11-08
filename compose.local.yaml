@@ -27,11 +27,11 @@ services:
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_USER: temsafe
-      MYSQL_DATABASE: temsafe
+      MYSQL_USER: ${MYSQL_USER:-tempsafe}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-tempsafe}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
       MQTT_ENABLED: "true"
-      TEMSAFE_LOCAL_MQTT: "1"
+      TEMPSAFE_LOCAL_MQTT: "1"
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=2)" ]
       interval: 5s

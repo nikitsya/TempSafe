@@ -9,9 +9,9 @@
 - Box and reading queries require a current session (401 otherwise). Lists contain only
   assigned boxes' samples. Requests for unassigned boxes or samples return 404.
   Threshold and heartbeat configuration also require the operator bearer token.
-- `POST /api/readings` requires the `X-Device-Key` header. Set `TEMSAFE_DEVICE_KEY` in
+- `POST /api/readings` requires the `X-Device-Key` header. Set `TEMPSAFE_DEVICE_KEY` in
   the server environment to a separate randomly generated secret of at least 32 characters
-  and set `TEMSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
+  and set `TEMPSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
   return 401. A valid key used for another box returns 403. The Raspberry Pi MQTT publisher
   continues to use its broker credentials. `GET /api/health` remains public.
 
@@ -30,8 +30,8 @@ matching the login endpoint limits. This creates an account; it does not reset a
 python - <<'PYTHON'
 from getpass import getpass
 from argon2 import PasswordHasher
-from temsafe.db.session import SessionLocal
-from temsafe.db.models import AppUser, BoxAccess
+from tempsafe.db.session import SessionLocal
+from tempsafe.db.models import AppUser, BoxAccess
 
 username = getpass("New username (hidden): ").strip()
 password = getpass("New password: ")
@@ -47,7 +47,7 @@ PYTHON
 
 ## Temperature classification
 
-[`temperature.py`](../../backend/temsafe/monitoring/temperature.py) provides
+[`temperature.py`](../../backend/tempsafe/monitoring/temperature.py) provides
 `classify_temperature(temperature_c, quality, profile)`.
 Pass the profile associated with the measurement. The function uses its stored
 limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
@@ -60,8 +60,8 @@ A later change to the box’s limits preserves the interpretation of earlier rea
 
 ## Saving incoming readings
 
-`ReadingCreate` in [`schemas.py`](../../backend/temsafe/schemas.py) validates the incoming fields. Use
-`save_reading(db, reading)` from `temsafe.monitoring.readings` with a validated `ReadingCreate`
+`ReadingCreate` in [`schemas.py`](../../backend/tempsafe/schemas.py) validates the incoming fields. Use
+`save_reading(db, reading)` from `tempsafe.monitoring.readings` with a validated `ReadingCreate`
 and a dedicated `SessionLocal()` session. The function checks the box and profile,
 then uses `add()`, `commit()` and `refresh()` to save the sample.
 
@@ -224,7 +224,7 @@ acknowledgement action is not part of these read endpoints.
 | `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`. |
 | `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
 
-Run the server using the [backend guide](../../backend/temsafe/README.md); inspect schemas at `/docs`
+Run the server using the [backend guide](../../backend/tempsafe/README.md); inspect schemas at `/docs`
 on the local development server. The hosted Nginx configuration blocks public documentation routes.
 
 ## Operator configuration

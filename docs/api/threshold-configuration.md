@@ -9,7 +9,7 @@ not prove that the device has received or adopted it.
 All configuration routes require a signed-in session assigned to the requested box and
 `Authorization: Bearer <operator-token>`.
 Configure
-`TEMSAFE_CONFIG_ADMIN_TOKEN` with a cryptographically random value of at least
+`TEMPSAFE_CONFIG_ADMIN_TOKEN` with a cryptographically random value of at least
 32 characters in the backend environment. Restart the backend after changing it.
 An absent or short configured token disables these routes (`503`); missing or
 incorrect client credentials return `401`. Use HTTPS when accessing a remote server.

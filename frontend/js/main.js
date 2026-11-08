@@ -1,4 +1,4 @@
-// Page start-up code shared by all TEMSAFE pages.
+// Page start-up code shared by all TEMPSAFE pages.
 
 async function showApiStatus() {
     const status = document.getElementById('api-status');

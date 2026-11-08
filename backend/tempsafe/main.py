@@ -5,19 +5,19 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from temsafe.api.auth import router as auth_router
-from temsafe.api.boxes import router as boxes_router
-from temsafe.api.configuration import router as configuration_router
-from temsafe.api.health import router as health_router
-from temsafe.api.readings import router as readings_router
-from temsafe.mqtt import lifespan
-from temsafe.pages import router as pages_router
+from tempsafe.api.auth import router as auth_router
+from tempsafe.api.boxes import router as boxes_router
+from tempsafe.api.configuration import router as configuration_router
+from tempsafe.api.health import router as health_router
+from tempsafe.api.readings import router as readings_router
+from tempsafe.mqtt import lifespan
+from tempsafe.pages import router as pages_router
 
 # Create the application and set the information shown in the API documentation.
 app = FastAPI(
     lifespan=lifespan,
-    title="TEMSAFE API",
-    description="Backend API for the TEMSAFE temperature monitoring prototype.",
+    title="TEMPSAFE API",
+    description="Backend API for the TEMPSAFE temperature monitoring prototype.",
     version="0.1.0",
 )
 

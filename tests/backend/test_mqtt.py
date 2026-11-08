@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 
-from temsafe.mqtt import ReadingConsumer
+from tempsafe.mqtt import ReadingConsumer
 
 
 @pytest.fixture
@@ -98,7 +98,7 @@ def test_sensor_errors_and_unknown_times_are_preserved(consumer_data, unreliable
 def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
     import asyncio
     import ssl
-    from temsafe.mqtt import create_mqtt
+    from tempsafe.mqtt import create_mqtt
 
     monkeypatch.setenv("MQTT_ENABLED", "true")
     monkeypatch.setenv("MQTT_HOST", "mqtt.example.test")
@@ -140,7 +140,7 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
 def test_lifespan_stops_mqtt_even_on_startup_failure(monkeypatch, failure):
     import asyncio
     from unittest.mock import AsyncMock
-    from temsafe import mqtt as module
+    from tempsafe import mqtt as module
 
     mqtt = Mock(mqtt_startup=AsyncMock(), mqtt_shutdown=AsyncMock())
     if failure:
@@ -163,7 +163,7 @@ def test_lifespan_stops_mqtt_even_on_startup_failure(monkeypatch, failure):
 
 
 def test_mqtt_disabled_or_missing_configuration(monkeypatch):
-    from temsafe.mqtt import create_mqtt
+    from tempsafe.mqtt import create_mqtt
     monkeypatch.setenv("MQTT_ENABLED", "false")
     assert create_mqtt() is None
     monkeypatch.setenv("MQTT_ENABLED", "true")

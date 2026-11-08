@@ -5,7 +5,7 @@ The latest layout changes are recorded in
 the [accessibility review](../docs/testing/accessibility/core-scenario-accessibility-review.md).
 The [UI mock-ups](../docs/design/ui/ui-design.md) describe the wider target design.
 The clickable design prototype stays in [`prototype/ui`](../prototype/ui); this folder is the
-application frontend under development, served by the FastAPI backend in `backend/temsafe`.
+application frontend under development, served by the FastAPI backend in `backend/tempsafe`.
 Sign-in and sign-out use the backend session API. The dashboard and history request readings for
 prototype box `TS-01`; the signed-in user must have access to that box. The dashboard polls every
 five seconds and refreshes when the browser tab becomes visible. Reload history to fetch new readings.
@@ -71,7 +71,7 @@ including any required migrations. Provision an account with access to `TS-01` u
 repository root with the project virtual environment activated:
 
 ```bash
-python -m uvicorn temsafe.main:app --reload --app-dir backend
+python -m uvicorn tempsafe.main:app --reload --app-dir backend
 ```
 
 Open http://127.0.0.1:8000 in a browser and sign in. Serve the pages through FastAPI rather than

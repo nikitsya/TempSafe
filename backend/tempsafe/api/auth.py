@@ -1,7 +1,6 @@
 """Authenticate browser sessions and the prototype's HTTP device publisher."""
 
 import hashlib
-import os
 import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
@@ -13,8 +12,9 @@ from pydantic import BaseModel, SecretStr
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from temsafe.db.models import AppUser, BoxAccess, UserSession
-from temsafe.db.session import get_db
+from tempsafe.settings import project_setting
+from tempsafe.db.models import AppUser, BoxAccess, UserSession
+from tempsafe.db.session import get_db
 
 router = APIRouter(tags=["Authentication"])
 COOKIE = "__Host-tempsafe_session"
@@ -91,8 +91,8 @@ def require_box(box_id: str, allowed: AllowedBoxes):
 
 
 def require_device(key: Annotated[str | None, Header(alias="X-Device-Key")] = None) -> str:
-    expected = os.getenv("TEMSAFE_DEVICE_KEY", "")
-    box_id = os.getenv("TEMSAFE_DEVICE_BOX_ID", "")
+    expected = project_setting("TEMPSAFE_DEVICE_KEY", "")
+    box_id = project_setting("TEMPSAFE_DEVICE_BOX_ID", "")
     if len(expected) < 32 or not box_id or not key or not secrets.compare_digest(key.encode(), expected.encode()):
         raise HTTPException(401, "Invalid device credentials")
     return box_id

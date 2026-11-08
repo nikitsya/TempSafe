@@ -1,4 +1,4 @@
--- TEMSAFE initial core schema: MySQL 8.4 or later, in an empty database.
+-- TEMPSAFE initial core schema: MySQL 8.4 or later, in an empty database.
 -- Run with strict SQL mode enabled. Use UTC on every application connection.
 -- This is a baseline, not an upgrade script; existing tables deliberately cause errors.
 SET SESSION time_zone = '+00:00';

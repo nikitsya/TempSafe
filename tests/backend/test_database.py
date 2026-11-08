@@ -10,9 +10,9 @@ from uuid import uuid4
 from fastapi.testclient import TestClient
 from sqlalchemy import select, text
 
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.db.session import SessionLocal, get_db
-from temsafe.main import app
+from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.db.session import SessionLocal, get_db
+from tempsafe.main import app
 
 
 def test_database_connection():

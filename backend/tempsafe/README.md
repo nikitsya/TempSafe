@@ -1,20 +1,20 @@
 # TempSafe backend
 
-See the [API contract](../../docs/api/api-contract.md) for endpoints, fields, examples and integration status.
+See the [API contract](../../../docs/api/api-contract.md) for endpoints, fields, examples and integration status.
 
 ## Hosted backend
 
 The application at [tempsafe.app](https://tempsafe.app) runs this backend as the `tempsafe`
 systemd service on AWS EC2. Nginx forwards HTTPS requests to Uvicorn on `127.0.0.1:8000`.
-See the [deployment notes](../../docs/operations/deployment.md) for service checks.
+See the [deployment notes](../../../docs/operations/deployment.md) for service checks.
 The commands below are for local development; the hosted service runs without `--reload`.
 
 ## Setup
 
-First, complete the [backend setup](../../README.md#backend-development) and
-[database setup](../../database/README.md), including outstanding migrations.
+First, complete the [backend setup](../../../README.md#backend-development) and
+[database setup](../../../database/README.md), including outstanding migrations.
 Provision a user with access to `TS-01` using the
-[authentication guide](../../docs/api/api-contract.md#provision-a-prototype-account).
+[authentication guide](../../../docs/api/api-contract.md#provision-a-prototype-account).
 
 ## In PyCharm
 
@@ -26,7 +26,7 @@ Create a **Python** run configuration:
 | Interpreter       | Python from the project's `.venv` |
 | Run target type   | `Module`                          |
 | Module name       | `uvicorn`                         |
-| Parameters        | `temsafe.main:app --reload`       |
+| Parameters        | `tempsafe.main:app --reload`       |
 | Working directory | The TempSafe project root         |
 
 Click **Run** and wait for `Application startup complete`.
@@ -36,7 +36,7 @@ Click **Run** and wait for `Application startup complete`.
 From the project root, with `.venv` activated, run:
 
 ```sh
-python -m uvicorn temsafe.main:app --reload
+python -m uvicorn tempsafe.main:app --reload
 ```
 
 ## Open in your browser
@@ -50,5 +50,5 @@ Keep the server running while using the site. Stop it with **Ctrl+C**.
 ## MQTT lifecycle
 
 FastMQTT starts with FastAPI when `MQTT_ENABLED=true`. Leave it disabled for HTTP-only development.
-Configure broker credentials in the environment; see the [MQTT guide](../../docs/operations/mqtt.md).
+Configure broker credentials in the environment; see the [MQTT guide](../../../docs/operations/mqtt.md).
 Use one Uvicorn worker and no production reload. The separate MQTT worker service is no longer used.

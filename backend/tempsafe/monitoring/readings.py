@@ -6,8 +6,8 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.schemas import ReadingCreate
+from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.schemas import ReadingCreate
 
 
 class ReadingReferenceNotFound(ValueError):

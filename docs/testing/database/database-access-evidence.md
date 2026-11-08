@@ -13,7 +13,7 @@ The visible rows identify box `TS-01`, the sequence of each reading, its
 temperature profile and its observation time. **TempSafe Local** opens the
 development database instead.
 
-![PyCharm showing temperature_samples for TS-01 under the TempSafe AWS connection, with TempSafe Local also visible in the Database panel](assets/testing/database-access/pycharm-aws-readings.png)
+![PyCharm showing temperature_samples for TS-01 under the TempSafe AWS connection, with TempSafe Local also visible in the Database panel](../../assets/testing/database-access/pycharm-aws-readings.png)
 
 *Figure 1. Stored readings for TS-01 viewed through the TempSafe AWS connection.*
 
@@ -31,7 +31,7 @@ ssh -o ExitOnForwardFailure=yes -i ~/.ssh/tempsafe-key.pem -L 13307:127.0.0.1:33
 
 Figure 2 shows the command in my local PyCharm terminal.
 
-![Local PyCharm terminal showing the SSH command forwarding port 13307 on the Mac to port 3307 on EC2](assets/testing/database-access/pycharm-ssh-tunnel.png)
+![Local PyCharm terminal showing the SSH command forwarding port 13307 on the Mac to port 3307 on EC2](../../assets/testing/database-access/pycharm-ssh-tunnel.png)
 
 *Figure 2. The SSH command I use for the TempSafe AWS connection.*
 
@@ -39,7 +39,7 @@ I keep that terminal open while I use PyCharm. The `-N` option opens the tunnel
 without starting a remote shell, so the terminal can stay quiet. PyCharm connects
 to `127.0.0.1:13307` on my Mac. SSH carries that connection to EC2, where the
 destination `127.0.0.1:3307` refers to the EC2 instance itself.
-The [database connection record](operations/database-connections.md) includes the port
+The [database connection record](../../operations/database-connections.md) includes the port
 mapping observed on EC2.
 
 ## Viewing local services in Docker Desktop
@@ -58,7 +58,7 @@ $ docker port temsafe-mysql-1 3306/tcp
 This output shows that port `3307` on my Mac leads to MySQL in the local
 container. I use that port for **TempSafe Local** and port `13307` for **TempSafe AWS** through the SSH tunnel.
 
-![Docker Desktop on the Mac showing the running temsafe and tempsafe-classroom Compose projects](assets/testing/database-access/local-docker-projects.png)
+![Docker Desktop on the Mac showing the running temsafe and tempsafe-classroom Compose projects](../../assets/testing/database-access/local-docker-projects.png)
 
 *Figure 3. Local Compose projects in Docker Desktop.*
 
@@ -77,7 +77,7 @@ global privileges. The second entry grants `ALL PRIVILEGES` on `temsafe.*`,
 so this account can also create, alter and drop tables in the project database.
 Figure 4 records the privileges of the PyCharm session.
 
-![PyCharm TempSafe AWS console showing the global USAGE entry and ALL PRIVILEGES on the temsafe schema](assets/testing/database-access/pycharm-aws-grants.png)
+![PyCharm TempSafe AWS console showing the global USAGE entry and ALL PRIVILEGES on the temsafe schema](../../assets/testing/database-access/pycharm-aws-grants.png)
 
 *Figure 4. MySQL grants for the account used by the TempSafe AWS connection.*
 

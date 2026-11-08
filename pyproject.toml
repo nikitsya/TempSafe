@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "temsafe-backend"
+name = "tempsafe-backend"
 version = "0.1.0"
-description = "TEMSAFE prototype backend API"
+description = "TEMPSAFE prototype backend API"
 requires-python = ">=3.11"
 dependencies = [
     "argon2-cffi>=23,<26",
@@ -26,7 +26,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["backend"]
-include = ["temsafe*"]
+include = ["tempsafe*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests/backend"]

@@ -14,7 +14,7 @@ out uses `POST /api/logout`.
 2. Migrations `003` and `004` applied, so the database has the users and sessions tables.
 3. One local test user, `paramedic`, with access to box TS-01. The password is used only on the local database.
 4. The device key is set in `.env`. It is local only and is not in Git.
-5. Server: `python -m uvicorn temsafe.main:app --reload`, opened at http://127.0.0.1:8000/.
+5. Server: `python -m uvicorn tempsafe.main:app --reload`, opened at http://127.0.0.1:8000/.
 6. A test reading (21.5°C) was sent to `POST /api/readings` with the device key, so the dashboard had live data.
 
 ## Results

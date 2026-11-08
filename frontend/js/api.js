@@ -1,4 +1,4 @@
-// Small helper for calls to the TEMSAFE backend API.
+// Small helper for calls to the TEMPSAFE backend API.
 // When the page is served by FastAPI, relative URLs such as /api/health
 // go to the same server. When the file is opened directly, the local
 // development server address is used instead.

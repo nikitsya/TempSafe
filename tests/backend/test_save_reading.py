@@ -10,11 +10,11 @@ from pydantic import ValidationError
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.db.session import SessionLocal
-from temsafe.main import app
-from temsafe.monitoring.readings import save_reading
-from temsafe.schemas import ReadingCreate
+from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.db.session import SessionLocal
+from tempsafe.main import app
+from tempsafe.monitoring.readings import save_reading
+from tempsafe.schemas import ReadingCreate
 
 DEVICE_KEY = uuid4().hex
 
@@ -24,8 +24,8 @@ def payload(monkeypatch, grant_boxes):
     """Provide a valid device payload without inserting any records."""
     box_id = f"pytest-{uuid4()}"
     grant_boxes(box_id)
-    monkeypatch.setenv("TEMSAFE_DEVICE_KEY", DEVICE_KEY)
-    monkeypatch.setenv("TEMSAFE_DEVICE_BOX_ID", box_id)
+    monkeypatch.setenv("TEMPSAFE_DEVICE_KEY", DEVICE_KEY)
+    monkeypatch.setenv("TEMPSAFE_DEVICE_BOX_ID", box_id)
     return {
         "sample_id": str(uuid4()), "box_id": box_id,
         "sequence_no": 1, "profile_id": str(uuid4()),

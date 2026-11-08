@@ -8,9 +8,9 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from temsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from temsafe.db.session import SessionLocal, get_db
-from temsafe.main import app
+from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.db.session import SessionLocal, get_db
+from tempsafe.main import app
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def latest_reading_data(monkeypatch, grant_boxes):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
     clock = Mock()
     clock.now.return_value = datetime(2026, 1, 1, 12, 10, tzinfo=UTC)
-    monkeypatch.setattr("temsafe.api.boxes.datetime", clock)
+    monkeypatch.setattr("tempsafe.api.boxes.datetime", clock)
     with SessionLocal() as db:
         box_ids = [f"pytest-{uuid4()}", f"pytest-{uuid4()}"]
         grant_boxes(*box_ids)

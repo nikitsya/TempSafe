@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from temsafe.api.auth import AllowedBoxes, require_device
-from temsafe.db import models
-from temsafe.db.session import get_db
-from temsafe.monitoring.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
-from temsafe.schemas import ReadingCreate, ReadingResponse
+from tempsafe.api.auth import AllowedBoxes, require_device
+from tempsafe.db import models
+from tempsafe.db.session import get_db
+from tempsafe.monitoring.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
+from tempsafe.schemas import ReadingCreate, ReadingResponse
 
 router = APIRouter(tags=["Readings"])
 

@@ -7,9 +7,9 @@ from unittest.mock import Mock
 import pytest
 from fastapi.testclient import TestClient
 
-from temsafe.db.models import TemperatureSample
-from temsafe.db.session import get_db
-from temsafe.main import app
+from tempsafe.db.models import TemperatureSample
+from tempsafe.db.session import get_db
+from tempsafe.main import app
 
 
 @pytest.fixture

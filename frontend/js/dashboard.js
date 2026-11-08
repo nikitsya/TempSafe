@@ -1,4 +1,4 @@
-// Dashboard for TEMSAFE.
+// Dashboard for TEMPSAFE.
 // Get temperature data from the backend API.
 
 const STATUS_VIEW = {
