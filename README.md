@@ -41,7 +41,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Frontend:** signed-in users with access to `TS-01` can view its dashboard, temperature graph,
   excursion estimates and accessible history table. The dashboard polls every five seconds. History
   loads up to 100 readings when opened or reloaded.
-- **UI prototype:** a separate clickable interface with synthetic data and automated browser tests.
+- **UI prototype:** four editable Figma screens with synthetic readings for
+  TS-01. [Play the monitoring prototype](https://www.figma.com/proto/oPwORgZUE7djuQHnbzekz6/TempSafe?node-id=0-2&page-id=0%3A1&scaling=min-zoom).
 
 See the [functional requirements](docs/requirements/functional-requirements.md) and
 [MoSCoW priorities](docs/requirements/moscow-prioritisation.md) for the target system.
@@ -128,15 +129,16 @@ and profile. Then follow the [backend guide](backend/tempsafe/README.md) to star
 
 ## Code and development guides
 
-| Area                | Location / guide                                            |
-|---------------------|-------------------------------------------------------------|
-| Device scripts      | [device/](device/)                                          |
-| Backend and API     | [Backend guide](backend/tempsafe/README.md)                 |
-| Database            | [Database setup](database/README.md)                        |
-| Web interface       | [Frontend guide](frontend/README.md)                        |
-| Clickable prototype | [Prototype guide](prototype/ui/README.md)                   |
-| Backend tests       | [Test instructions](tests/backend/README.md)                |
-| Deployment          | [Hosting and service checks](docs/operations/deployment.md) |
+| Area                 | Location / guide                                                                                                                                                                                                                                |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Device scripts       | [device/](device/)                                                                                                                                                                                                                              |
+| Backend and API      | [Backend guide](backend/tempsafe/README.md)                                                                                                                                                                                                     |
+| Database             | [Database setup](database/README.md)                                                                                                                                                                                                            |
+| Web interface        | [Frontend guide](frontend/README.md)                                                                                                                                                                                                            |
+| Figma prototype      | [Play](https://www.figma.com/proto/oPwORgZUE7djuQHnbzekz6/TempSafe?node-id=0-2&page-id=0%3A1&scaling=min-zoom) · [Edit](https://www.figma.com/design/oPwORgZUE7djuQHnbzekz6/TempSafe) · [Prototype guide and local file](prototype-2/README.md) |
+| Earlier UI prototype | [HTML prototype and browser tests](prototype/ui/README.md)                                                                                                                                                                                      |
+| Backend tests        | [Test instructions](tests/backend/README.md)                                                                                                                                                                                                    |
+| Deployment           | [Hosting and service checks](docs/operations/deployment.md)                                                                                                                                                                                     |
 
 ## Project documentation
 
