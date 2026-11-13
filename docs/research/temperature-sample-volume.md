@@ -46,7 +46,7 @@ SQLite must have capacity for **at least 24 hours of offline sampling**. The pro
 period for MySQL readings. The database design leaves the retention period for the team to agree and proposes deleting
 expired records only after a successful backup. The hourly summary in the Figma prototype groups readings for display
 and does not change how the backend stores
-them. [Offline buffering requirement](../requirements/functional-requirements.md) · [MQTT publisher](../../device/mqtt_publisher.py) · [Server storage and retries](../../backend/tempsafe/monitoring/readings.py) · [Retention proposal](database-research.md) · [Dashboard prototype](../../prototype-2/README.md)
+them. [Offline buffering requirement](../requirements/functional-requirements.md) · [MQTT publisher](../../device/mqtt_publisher.py) · [Server storage and retries](../../backend/tempsafe/monitoring/readings.py) · [Retention proposal](database-research.md) · [Dashboard example](../../ui-example/README.md)
 
 ## Estimating disk space
 
