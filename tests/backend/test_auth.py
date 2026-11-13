@@ -66,6 +66,22 @@ def test_login_scope_and_logout(account):
     assert client.get("/api/readings", headers={"Cookie": f"{COOKIE}={token}"}).status_code == 401
 
 
+def test_session_can_change_only_assigned_box_limits(account):
+    client, credentials, box_id, db = account
+    limits = {"lower_c": "0", "warning_c": "24", "upper_c": "25", "source_note": "Test"}
+    url = f"/api/boxes/{box_id}/configuration"
+    assert client.put(url, json=limits).status_code == 401
+    client.post("/api/login", json=credentials)
+    other_id = str(uuid4())
+    db.add(Box(box_id=other_id, name="Unassigned box"))
+    db.commit()
+    other = f"/api/boxes/{other_id}/configuration"
+    assert client.get(other).status_code == 404
+    assert client.put(other, json=limits).status_code == 404
+    assert client.put(url, json=limits).status_code == 200
+    assert client.get(url).json()["warning_c"] == "24.00"
+
+
 def test_readings_are_limited_to_assigned_boxes(account):
     client, credentials, box_id, db = account
     other_id = str(uuid4())

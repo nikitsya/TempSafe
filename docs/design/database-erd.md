@@ -115,4 +115,4 @@ measurement, not whether its temperature is within the configured limits.
 a selection from crossing box boundaries. A profile can be selected by at most its
 own box. New selections do not change the profiles attached to earlier samples.
 This is desired backend configuration, not confirmation that the device has adopted it.
-See the [operator API guide](../api/threshold-configuration.md).
+See the [configuration API guide](../api/threshold-configuration.md).

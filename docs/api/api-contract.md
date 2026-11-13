@@ -11,7 +11,6 @@
 - `POST /api/logout` revokes the server-side session and clears the cookie. It returns 204.
 - Box and reading queries require a current session (401 otherwise). Lists contain only
   assigned boxes' samples. Requests for unassigned boxes or samples return 404.
-  Threshold configuration also require the operator bearer token.
 - `POST /api/readings` requires the `X-Device-Key` header. Set `TEMPSAFE_DEVICE_KEY` in
   the server environment to a separate randomly generated secret of at least 32 characters
   and set `TEMPSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
@@ -236,8 +235,7 @@ acknowledgement action is not part of these read endpoints.
 Run the server using the [backend guide](../../backend/tempsafe/README.md); inspect schemas at `/docs`
 on the local development server. The hosted Nginx configuration blocks public documentation routes.
 
-## Operator configuration
+## Temperature limits
 
-The protected [threshold configuration API](threshold-configuration.md) creates and
-selects versioned demo profiles. Its
-operator token does not secure the other endpoints.
+A signed-in user can read and change the desired limits for an assigned box
+through the [threshold configuration API](threshold-configuration.md).

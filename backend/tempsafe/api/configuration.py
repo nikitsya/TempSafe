@@ -1,4 +1,4 @@
-"""Operator-only routes for a box's desired configuration."""
+"""Manage the desired configuration of an assigned box."""
 
 from typing import Annotated
 from uuid import uuid4
@@ -7,13 +7,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from tempsafe.api.admin import require_configuration_admin
 from tempsafe.api.auth import require_box
 from tempsafe.db.models import Box, BoxConfiguration, ThresholdProfile
 from tempsafe.db.session import get_db
 from tempsafe.schemas import ThresholdSettingsCreate, ThresholdSettingsResponse
 
-router = APIRouter(tags=["Configuration"], dependencies=[Depends(require_box), Depends(require_configuration_admin)])
+router = APIRouter(tags=["Configuration"], dependencies=[Depends(require_box)])
 
 
 @router.get("/boxes/{box_id}/configuration", response_model=ThresholdSettingsResponse)

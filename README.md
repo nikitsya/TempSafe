@@ -26,10 +26,9 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   to boxes assigned to the user; accounts are provisioned by an operator.
 - **Reading freshness:** the dashboard uses the time of the latest sample. See
   the [monitoring decision](docs/design/monitoring-decision.md).
-- **Threshold settings:** the API creates and selects versioned demo profiles. Both configuration APIs
-  require a signed-in user assigned to the box and a configured operator bearer token. Frontend settings,
-  application roles and device delivery remain pending. See the
-  [configuration API guide](docs/api/threshold-configuration.md).
+- **Threshold settings:** signed-in users can review and change the desired limits for an
+  assigned box through the API. Saving creates or selects a versioned demo profile. Device
+  delivery remains pending. See the [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
