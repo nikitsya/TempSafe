@@ -54,6 +54,15 @@ class BoxResponse(BaseModel):
     name: str
 
 
+class BoxStatusResponse(BaseModel):
+    """Report contact and the age of the latest successful measurement."""
+
+    last_received_at: UTCTimestamp | None
+    contact_status: Literal["reporting", "not_reporting", "never_reported"]
+    observed_at: UTCTimestamp | None
+    freshness: Literal["fresh", "stale", "unknown"]
+
+
 class ReadingResponse(BaseModel):
     """Return a stored sample, including missing values after a sensor error."""
 

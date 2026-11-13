@@ -35,7 +35,7 @@ def account(monkeypatch):
 
 @pytest.mark.parametrize("path", [
     "/api/me", "/api/boxes/TS-01", "/api/boxes/TS-01/configuration", "/api/boxes/TS-01/readings",
-    "/api/boxes/TS-01/readings/latest", "/api/readings", "/api/readings/example",
+    "/api/boxes/TS-01/status", "/api/boxes/TS-01/readings/latest", "/api/readings", "/api/readings/example",
 ])
 def test_anonymous_read_is_rejected(path):
     with TestClient(app) as client:
@@ -58,6 +58,7 @@ def test_login_scope_and_logout(account):
     db.commit()
     assert client.get("/api/me").json() == {"username": credentials["username"], "box_ids": [box_id]}
     assert client.get(f"/api/boxes/{other_box}/readings?start_date=2026-11-01&end_date=2026-11-01").status_code == 404
+    assert client.get(f"/api/boxes/{other_box}/status").status_code == 404
     assert client.get(f"/api/boxes/{other_box}").status_code == 404
     assert client.get("/api/readings").json() == []
     assert client.post("/api/readings", json={}).status_code == 401

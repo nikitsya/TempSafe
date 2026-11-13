@@ -333,3 +333,53 @@ def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
         assert [row["sequence_no"] for row in response.json()] == expected
     assert client.get(url, params={"start_date": "2026-10-25"}).status_code == 422
     assert client.get(url, params=params | {"end_date": "2026-10-24"}).status_code == 422
+
+
+def test_box_contact_is_independent_of_measurement_time(latest_reading_data):
+    client, db, boxes, profiles = latest_reading_data
+    url = f"/api/boxes/{boxes[0]}/status"
+    now = datetime(2026, 1, 1, 12, 10)
+    earlier = now - timedelta(hours=2)
+
+    def store(sequence, observed, received, quality="valid", box=0):
+        db.add(TemperatureSample(
+            sample_id=str(uuid4()), box_id=boxes[box], profile_id=profiles[box],
+            sequence_no=sequence, observed_at=observed, clock_reliable=observed is not None,
+            received_at=received, quality=quality,
+            temperature_c=Decimal("5.25") if quality == "valid" else None,
+        ))
+        db.flush()
+
+    store(1, now, now, box=1)
+    assert client.get(url).json() == {
+        "contact_status": "never_reported", "last_received_at": None,
+        "observed_at": None, "freshness": "unknown",
+    }
+    store(3, earlier, now - timedelta(seconds=91))
+    assert client.get(url).json()["contact_status"] == "not_reporting"
+    store(2, earlier - timedelta(seconds=30), now - timedelta(seconds=90))
+    assert client.get(url).json()["contact_status"] == "reporting"
+    store(1, earlier - timedelta(minutes=1), now)
+    assert client.get(url).json() == {
+        "contact_status": "reporting", "last_received_at": "2026-01-01T12:10:00Z",
+        "observed_at": "2026-01-01T10:10:00Z", "freshness": "stale",
+    }
+    store(4, now, now)
+    assert client.get(url).json()["freshness"] == "fresh"
+    store(5, None, now)
+    assert client.get(url).json()["freshness"] == "unknown"
+
+
+def test_sensor_error_counts_as_contact(latest_reading_data):
+    client, db, boxes, profiles = latest_reading_data
+    now = datetime(2026, 1, 1, 12, 10)
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+        sequence_no=1, observed_at=now, clock_reliable=True, received_at=now,
+        quality="sensor_error",
+    ))
+    db.flush()
+    assert client.get(f"/api/boxes/{boxes[0]}/status").json() == {
+        "contact_status": "reporting", "last_received_at": "2026-01-01T12:10:00Z",
+        "observed_at": None, "freshness": "unknown",
+    }

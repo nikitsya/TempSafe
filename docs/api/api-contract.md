@@ -112,6 +112,18 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 | `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                                 |
 | `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; each includes its recorded `profile` and `temperature_state`. Default limit 20, allowed 1–100. Empty history: `[]`. |
 
+`GET /api/boxes/{box_id}/status` returns contact and temperature freshness for
+an assigned box. `last_received_at` is the latest server receipt time across
+stored samples, including sensor errors and delayed uploads. `contact_status`
+is `reporting` through 90 seconds and `not_reporting` after 90 seconds.
+Before the first sample it is `never_reported` and both timestamps are null.
+
+`observed_at` is the original time of the valid temperature sample with the
+highest sequence number. `freshness` is `fresh` through 90 seconds, `stale`
+afterwards and `unknown` for a missing or future measurement time. Use
+`/readings/latest` for the outcome of the latest sampling attempt, including
+sensor errors.
+
 For a calendar period, pass both inclusive dates, for example
 `/api/boxes/TS-01/readings?start_date=2026-11-05&end_date=2026-11-11&limit=100`.
 Use the same date twice for a single day. Dates follow Europe/Dublin and filter

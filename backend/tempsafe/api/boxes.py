@@ -5,7 +5,7 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from tempsafe.api.auth import require_box
@@ -13,7 +13,8 @@ from tempsafe.db import models
 from tempsafe.db.session import get_db
 from tempsafe.monitoring.freshness import classify_freshness
 from tempsafe.monitoring.temperature import classify_temperature
-from tempsafe.schemas import BoxResponse, HistoryReadingResponse, LatestReadingResponse, ReadingResponse
+from tempsafe.schemas import BoxStatusResponse, as_utc, BoxResponse, HistoryReadingResponse, LatestReadingResponse, \
+    ReadingResponse
 
 router = APIRouter(tags=["Boxes"], dependencies=[Depends(require_box)])
 
@@ -89,6 +90,39 @@ def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
     return LatestReadingResponse(
         **sample.model_dump(),
         freshness=classify_freshness(sample.observed_at, sample.clock_reliable, datetime.now(UTC)),
+    )
+
+
+@router.get("/boxes/{box_id}/status", response_model=BoxStatusResponse)
+def get_box_status(box_id: str, db: Annotated[Session, Depends(get_db)]):
+    """Use every stored receipt for contact and the latest valid sample for temperature."""
+    sample = models.TemperatureSample
+    receipt = select(func.max(sample.received_at)).where(sample.box_id == box_id)
+    observation = (
+        select(sample.observed_at)
+        .where(sample.box_id == box_id, sample.quality == "valid")
+        .order_by(sample.sequence_no.desc())
+        .limit(1)
+    )
+    row = db.execute(
+        select(receipt.scalar_subquery(), observation.scalar_subquery())
+        .select_from(models.Box).where(models.Box.box_id == box_id)
+    ).one_or_none()
+    if row is None:
+        raise HTTPException(404, "Box not found")
+
+    received, observed = row
+    now = datetime.now(UTC)
+    last_received_at = as_utc(received) if received is not None else None
+    observed_at = as_utc(observed) if observed is not None else None
+    contact_status = "never_reported"
+    if last_received_at is not None:
+        contact_status = "not_reporting" if now - last_received_at > timedelta(seconds=90) else "reporting"
+    return BoxStatusResponse(
+        last_received_at=last_received_at,
+        contact_status=contact_status,
+        observed_at=observed_at,
+        freshness=classify_freshness(observed_at, observed_at is not None, now),
     )
 
 

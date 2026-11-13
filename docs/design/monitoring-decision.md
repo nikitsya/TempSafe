@@ -8,4 +8,8 @@ The dashboard uses the original observation time. A reliable timestamp up to 90 
 
 When uploads resume, buffered observations fill the history at their original times. Silence alone cannot tell the user whether the Pi lost power, the network failed or sampling stopped.
 
-FR-08 retains the requirement to flag a possible loss of device contact. The design uses the latest server receipt time (`received_at`) for the box. After the first record, more than 90 seconds without a new record triggers the warning. Receiving a new record, including a sensor error or a buffered sample, clears it. A buffered sample can therefore restore contact while the temperature is still stale. This contact warning is a design target. The current dashboard already checks observation freshness.
+FR-08 retains the requirement to flag a possible loss of device contact. The design uses the latest server receipt time
+(`received_at`) for the box. After the first record, more than 90 seconds without a new record triggers the warning.
+Receiving a new record, including a sensor error or a buffered sample, clears it. A buffered sample can therefore
+restore contact while the temperature is still stale. The backend exposes both states through the assigned box status
+endpoint. The current dashboard already checks observation freshness.
