@@ -300,9 +300,10 @@ def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
     times = [start - timedelta(seconds=1)]
     times.extend(start + timedelta(seconds=i * 30) for i in range(100))
     times.extend([stop - timedelta(seconds=1), stop, None])
+    sample_ids = [str(uuid4()) for _ in times]
     for sequence, observed in enumerate(times):
         db.add(TemperatureSample(
-            sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+            sample_id=sample_ids[sequence], box_id=boxes[0], profile_id=profiles[0],
             sequence_no=sequence, observed_at=observed, clock_reliable=observed is not None,
             received_at=stop + timedelta(days=1), quality="sensor_error",
         ))
@@ -312,5 +313,23 @@ def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
     first = client.get(url, params=params).json()
     second = client.get(url, params=params | {"before_sequence": first[-1]["sequence_no"]}).json()
     assert [row["sequence_no"] for row in first + second] == list(range(101, 0, -1))
+    assert [row["sample_id"] for row in first + second] == sample_ids[101:0:-1]
+    for row in first + second:
+        assert row["quality"] == "sensor_error"
+        assert row["profile"]["profile_id"] == profiles[0]
+        assert row["temperature_state"] == "Unknown"
+
+    for start_date, end_date, expected in [
+        ("2026-10-26", "2026-10-26", [102]),
+        ("2026-10-25", "2026-10-26", [1]),
+        ("2026-10-20", "2026-10-26", [1, 0]),
+        ("2026-10-27", "2026-10-27", []),
+    ]:
+        query = {"start_date": start_date, "end_date": end_date}
+        if start_date != end_date:
+            query["before_sequence"] = 2
+        response = client.get(url, params=query)
+        assert response.status_code == 200
+        assert [row["sequence_no"] for row in response.json()] == expected
     assert client.get(url, params={"start_date": "2026-10-25"}).status_code == 422
     assert client.get(url, params=params | {"end_date": "2026-10-24"}).status_code == 422
