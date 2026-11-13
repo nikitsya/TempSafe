@@ -192,9 +192,6 @@ Unit tests cover storage before acknowledgement, failure without acknowledgement
 invalid JSON and quality, retained and oversized payloads, repeated unchanged delivery, and wildcard configuration.
 They use a mock storage boundary and do not replace the MQTT-to-MySQL integration test.
 
-Heartbeat interval settings are stored by the API, but the current MQTT implementation only
-handles readings and storage acknowledgements. Delivery of that setting and authenticated
-heartbeat reporting are not implemented in this deployed revision.
 
 HTTP publishers use a separate device key restricted to their assigned box.
 See the [API authentication guide](../api/api-contract.md#authentication).

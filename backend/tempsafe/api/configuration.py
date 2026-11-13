@@ -11,7 +11,7 @@ from tempsafe.api.admin import require_configuration_admin
 from tempsafe.api.auth import require_box
 from tempsafe.db.models import Box, BoxConfiguration, ThresholdProfile
 from tempsafe.db.session import get_db
-from tempsafe.schemas import HeartbeatSettings, ThresholdSettingsCreate, ThresholdSettingsResponse
+from tempsafe.schemas import ThresholdSettingsCreate, ThresholdSettingsResponse
 
 router = APIRouter(tags=["Configuration"], dependencies=[Depends(require_box), Depends(require_configuration_admin)])
 
@@ -61,23 +61,3 @@ def set_configuration(
     except Exception:
         db.rollback()
         raise
-
-
-@router.get("/boxes/{box_id}/configuration/heartbeat", response_model=HeartbeatSettings)
-def get_heartbeat_settings(box_id: str, db: Annotated[Session, Depends(get_db)]):
-    """Read the desired interval even when the box has no threshold profile."""
-    box = db.get(Box, box_id)
-    if box is None:
-        raise HTTPException(404, "Box not found")
-    return HeartbeatSettings(heartbeat_interval_seconds=box.heartbeat_interval_seconds)
-
-
-@router.put("/boxes/{box_id}/configuration/heartbeat", response_model=HeartbeatSettings)
-def set_heartbeat_settings(box_id: str, settings: HeartbeatSettings, db: Annotated[Session, Depends(get_db)]):
-    """Update the desired interval independently of device contact."""
-    box = db.get(Box, box_id, with_for_update=True)
-    if box is None:
-        raise HTTPException(404, "Box not found")
-    box.heartbeat_interval_seconds = settings.heartbeat_interval_seconds
-    db.commit()
-    return settings

@@ -36,8 +36,6 @@ erDiagram
     boxes {
         VARCHAR box_id PK "64 characters"
         VARCHAR name "100 characters"
-        DATETIME last_seen_at "Nullable"
-        SMALLINT heartbeat_interval_seconds "Unsigned; default 60"
     }
     box_access {
         BIGINT user_id PK, FK "Unsigned; composite primary key"

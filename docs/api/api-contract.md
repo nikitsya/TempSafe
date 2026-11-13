@@ -8,7 +8,7 @@
 - `POST /api/logout` revokes the server-side session and clears the cookie. It returns 204.
 - Box and reading queries require a current session (401 otherwise). Lists contain only
   assigned boxes' samples. Requests for unassigned boxes or samples return 404.
-  Threshold and heartbeat configuration also require the operator bearer token.
+  Threshold configuration also require the operator bearer token.
 - `POST /api/readings` requires the `X-Device-Key` header. Set `TEMPSAFE_DEVICE_KEY` in
   the server environment to a separate randomly generated secret of at least 32 characters
   and set `TEMPSAFE_DEVICE_BOX_ID` to the authorised box. Missing or invalid credentials
@@ -106,7 +106,7 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 
 | GET endpoint                            | Successful response                                                                                                                                             |
 |-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings), `last_seen_at` (UTC timestamp or `null`).                                                                            |
+| `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings).                                                                                                                      |
 | `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                                 |
 | `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; each includes its recorded `profile` and `temperature_state`. Default limit 20, allowed 1–100. Empty history: `[]`. |
 
@@ -188,15 +188,13 @@ Known box with no observations — latest endpoint returns `404 Not Found`:
 
 ### Time, freshness and errors
 
-- Responses use ISO 8601 UTC timestamps ending in `Z`, including `last_seen_at`. Fractional seconds may be present.
+- Responses use ISO 8601 UTC timestamps ending in `Z`. Fractional seconds may be present.
   Parse the timezone directly and format local time for display; missing timestamps remain `null`.
 - `freshness` uses server UTC time minus `observed_at`: 0–90 seconds inclusive is `fresh`; older is `stale`.
   Missing or unreliable observation time, or time in the future, produces `unknown`. Receipt time is not used.
   This describes sample age, not sensor health: a recent sensor error can be `fresh` with `temperature_state: Unknown`.
   It is evaluated on each request; the frontend must refresh or age the display rather than keep a cached result live.
-- Intended contact rule: more than 180 seconds without authenticated contact means not reporting. Heartbeat updates
-  are not implemented; `last_seen_at: null` means contact is unknown, not proof that the device is offline.
-- Sensor errors remain explicit even when stale or not reporting. Receipt of an old buffered sample does not make it
+- Sensor errors remain explicit even when stale. Receipt of an old buffered sample does not make it
   fresh.
 - Handle HTTP status and `detail` together: `404` with `Box not found` is not the no-observations state. Invalid `limit`
   returns `422` with a validation-error array in `detail`. Network errors and `5xx` mean loading failed. The current
@@ -213,7 +211,7 @@ The dashboard maps the API response and distinguishes the two `404` cases using 
 It currently derives age from the browser clock rather than consuming `freshness`. See the
 [frontend guide](../../frontend/README.md#history-behaviour-and-limitations) for remaining UI work.
 
-Device-contact handling remains planned. A silence or review
+A silence or review
 acknowledgement action is not part of these read endpoints.
 
 ## Other available endpoints
@@ -230,5 +228,5 @@ on the local development server. The hosted Nginx configuration blocks public do
 ## Operator configuration
 
 The protected [threshold configuration API](threshold-configuration.md) creates and
-selects versioned demo profiles. Its heartbeat routes independently read and update the desired interval for a box. Its
+selects versioned demo profiles. Its
 operator token does not secure the other endpoints.

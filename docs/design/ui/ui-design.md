@@ -58,7 +58,8 @@ found"; an invalid range (From after To) shows an error message.
 
 **Figure 4.** Error and empty states. F: Data stale. No new reading for longer than 90 s; the last value is labelled
 historical and "current conditions unknown". G: Sensor error. The failed sample is never shown as 0°C or Normal. H: Not
-reporting. No device contact for more than 180 s; last contact and last reading are shown separately. I: Network/API
+reporting. No new record received for more than 90 s after the first record; show when the server last received data and
+when the box last took a reading. I: Network/API
 failure. Data is visibly dated and a Retry button is offered. J: No observations yet. K: Denied access. An account
 without an assigned box sees no data from any other box.
 

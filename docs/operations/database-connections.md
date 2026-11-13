@@ -24,7 +24,7 @@ Some subsequent SSH connections still timed out, so the verification is partial.
 
 The 5 November [FastAPI account check](../testing/database/database-access-evidence.md#checking-fastapi-separately)
 subsequently verified the effective database account and schema. On 8 November, the service,
-container, loopback mapping, session/configuration tables and heartbeat column were rechecked.
+container, loopback mapping, session and configuration tables were rechecked.
 The hosted database also contains a `temperature_history` table outside the current eight-table
 baseline; its purpose was not established and no table was removed. Current AWS rule sources
 and off-server backup configuration remain unverified. Secrets were not displayed.

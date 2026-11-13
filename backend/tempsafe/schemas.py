@@ -46,14 +46,12 @@ class ReadingCreate(BaseModel):
 
 
 class BoxResponse(BaseModel):
-    """Return a box's identity and last recorded contact time."""
+    """Return a box's identity."""
 
     model_config = ConfigDict(from_attributes=True)
 
     box_id: str
     name: str
-    # A box may not have contacted the server yet.
-    last_seen_at: UTCTimestamp | None
 
 
 class ReadingResponse(BaseModel):
@@ -95,13 +93,6 @@ class LatestReadingResponse(HistoryReadingResponse):
     """Include the freshness of the latest observation."""
 
     freshness: Literal["fresh", "stale", "unknown"]
-
-
-class HeartbeatSettings(BaseModel):
-    """Represent the desired interval between device heartbeats."""
-
-    model_config = ConfigDict(extra="forbid")
-    heartbeat_interval_seconds: int = Field(strict=True, ge=1, le=65535)
 
 
 class ThresholdSettingsCreate(BaseModel):

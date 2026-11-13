@@ -43,14 +43,14 @@ a failed request leaves the user on the page with an error and a retry opportuni
 
 These messages are design targets for remaining interface features:
 
-| Situation             | Proposed wording                                                      |
-|-----------------------|-----------------------------------------------------------------------|
-| Device contact lost   | NO CONNECTION — The box is not sending data.                          |
-| No access             | No assigned box available. Ask your administrator for access.         |
-| Invalid history range | The start time must be before the end time.                           |
-| Empty history range   | No observations found for this period.                                |
-| Phone warning         | TempSafe: Box TS-01 WARNING — 24.6°C at 14:17. Open the app to check. |
-| Phone alert           | TempSafe: Box TS-01 ALERT — above upper limit, 25.9°C at 14:31.       |
+| Situation                       | Proposed wording                                                      |
+|---------------------------------|-----------------------------------------------------------------------|
+| Possible loss of device contact | No recent contact with the box. Last data received at {time}.         |
+| No access                       | No assigned box available. Ask your administrator for access.         |
+| Invalid history range           | The start time must be before the end time.                           |
+| Empty history range             | No observations found for this period.                                |
+| Phone warning                   | TempSafe: Box TS-01 WARNING — 24.6°C at 14:17. Open the app to check. |
+| Phone alert                     | TempSafe: Box TS-01 ALERT — above upper limit, 25.9°C at 14:31.       |
 
 Phone notifications contain no account details and should open the authorised dashboard.
 See the [planned Web Push flow](web-push-permission-flow.md).

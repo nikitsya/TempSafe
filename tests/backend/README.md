@@ -32,7 +32,7 @@ python -m pytest tests/backend/test_save_reading.py -v
 | File                     | Coverage                                                                           |
 |--------------------------|------------------------------------------------------------------------------------|
 | `test_auth.py`           | Login, session expiry/revocation, box assignments and device credentials.          |
-| `test_configuration.py`  | Operator access, versioned thresholds and per-box heartbeat settings.              |
+| `test_configuration.py`  | Operator access and versioned thresholds.                                          |
 | `test_database.py`       | Database connection, stored reading retrieval and missing readings.                |
 | `test_boxes.py`          | Box responses and unknown boxes.                                                   |
 | `test_readings.py`       | Reading lists and limit validation.                                                |

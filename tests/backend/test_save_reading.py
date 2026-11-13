@@ -101,7 +101,6 @@ def test_save_and_identical_retry(stored_box):
             TemperatureSample.box_id == stored_box["box_id"]
         ))
         assert count == 1
-        assert db.get(Box, stored_box["box_id"]).last_seen_at is None
 
 
 @pytest.mark.parametrize("changes", [

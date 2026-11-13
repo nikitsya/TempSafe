@@ -24,8 +24,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   classification.
 - **Authentication:** browser sign-in and sign-out use server-side sessions. Reading access is restricted
   to boxes assigned to the user; accounts are provisioned by an operator.
-- **Heartbeat settings:** the API can read and update the desired heartbeat interval for each box,
-  defaulting to 60 seconds. Device delivery and authenticated heartbeat reporting are pending.
+- **Reading freshness:** the dashboard uses the time of the latest sample. See
+  the [monitoring decision](docs/design/monitoring-decision.md).
 - **Threshold settings:** the API creates and selects versioned demo profiles. Both configuration APIs
   require a signed-in user assigned to the box and a configured operator bearer token. Frontend settings,
   application roles and device delivery remain pending. See the

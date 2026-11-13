@@ -1,4 +1,4 @@
-"""Classify observation age independently of temperature and device contact."""
+"""Classify observation age independently of temperature."""
 
 from datetime import datetime, timedelta
 from typing import Literal
