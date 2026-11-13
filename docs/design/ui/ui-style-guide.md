@@ -3,7 +3,26 @@
 These values apply to the original UI mock-ups and HTML prototype. The later
 [core scenario mock-ups](core-scenario-mockups.md) document their own visual style.
 
-## Colours
+## Web application (from Sprint 9)
+
+The web application uses a teal medical palette. Status colours below are unchanged. White text is only placed on
+`--teal` or darker (4.9:1). `--teal-bright` is decoration only (top stripes and frames), never text.
+
+| Token           | Hex       | Use                                                  |
+|-----------------|-----------|------------------------------------------------------|
+| `--teal`        | `#0E7F77` | Brand, navigation bar, buttons, button borders       |
+| `--teal-dark`   | `#0A625C` | Active tab, headings and labels on light backgrounds |
+| `--teal-bright` | `#13B0A5` | Decorative stripes only                              |
+| `--mint`        | `#E8F6F4` | Table headers, light panels                          |
+| `--bg`          | `#F3F4F4` | Page background                                      |
+| `--focus`       | `#1D2433` | 3 px focus outline (white inside the navigation bar) |
+
+- Status word 32 px and temperature 64 px, weight 800. Buttons and section titles in upper case, weight 800.
+- Content is grouped in framed panels: Period and Show on History; Graph, Last 100 and Alerts on the dashboard.
+- Touch targets are at least 44 px high; main buttons and tabs are 52 px.
+- Status symbols: OK ✓, Warning !, Too hot / Too cold ✕, Sensor fault ⚠, No data ⏱, Offline and Not connected ⦸.
+
+## Original prototype colours
 
 | Token                    | Hex                   | Use                                |
 |--------------------------|-----------------------|------------------------------------|

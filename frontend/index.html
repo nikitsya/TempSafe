@@ -4,15 +4,18 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Sign in – TEMPSAFE</title>
-    <link href="css/main.css" rel="stylesheet">
+    <link href="css/main.css?v=3" rel="stylesheet">
 </head>
 <body>
-<main>
-    <div class="top">
-        <h1 class="brand">TEMPSAFE</h1>
-        <span class="muted">Secure sign-in</span>
+<header class="site-header">
+    <div class="header-top">
+        <span class="brand">TEMPSAFE</span>
     </div>
-    <p class="muted">Sign in to view the temperature of the box assigned to you.</p>
+    <div aria-hidden="true" class="nav-bar nav-bar-thin"></div>
+</header>
+<main class="signin">
+    <h1 class="signin-title">Sign in</h1>
+    <p class="muted">See the temperature of your box.</p>
 
     <div class="banner" hidden id="signin-message" role="alert"></div>
     <form class="card" id="signin" method="post" novalidate>

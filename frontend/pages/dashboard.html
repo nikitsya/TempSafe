@@ -3,27 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Current status – TEMPSAFE</title>
-    <link href="../css/main.css" rel="stylesheet">
+    <title>Status – TEMPSAFE</title>
+    <link href="../css/main.css?v=3" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
-    <nav aria-label="Main" class="nav">
+    <div class="header-top">
         <span class="brand">TEMPSAFE</span>
-        <a aria-current="page" href="dashboard.html">Current status</a>
-        <a href="history.html">History</a>
-        <a data-signout href="../index.html">Sign out</a>
-    </nav>
+        <span class="box-id">Box TS-01</span>
+    </div>
+    <div class="nav-bar">
+        <nav aria-label="Main" class="nav">
+            <a aria-current="page" href="dashboard.html">Status</a>
+            <a href="history.html">History</a>
+            <a data-signout href="../index.html">Sign out</a>
+        </nav>
+    </div>
 </header>
 <main>
+    <h1 class="visually-hidden">Status of box TS-01</h1>
     <p class="banner error" hidden id="signout-error" role="alert"></p>
-
-    <div class="top">
-        <h1 class="page-title">Current status</h1>
-        <span class="muted">Box TS-01</span>
-    </div>
-
     <p class="banner error" hidden id="refresh-error" role="status"></p>
+
+    <div id="unread-alert"></div>
 
     <div id="dashboard"></div>
 
@@ -31,7 +33,11 @@
     <p aria-live="polite" class="visually-hidden" id="status-announcer" role="status"></p>
     <p aria-live="assertive" class="visually-hidden" id="alert-announcer" role="alert"></p>
 
-    <a class="btn" href="history.html">History</a>
+    <nav aria-label="History" class="shortcuts">
+        <a class="shortcut" href="history.html#graph"><span aria-hidden="true" class="shortcut-icon">↗</span>Graph</a>
+        <a class="shortcut" href="history.html#readings"><span aria-hidden="true" class="shortcut-icon">☰</span>Last 100</a>
+        <a class="shortcut" href="history.html#alerts"><span aria-hidden="true" class="shortcut-icon">⚠</span>Alerts</a>
+    </nav>
 
     <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
 </main>
