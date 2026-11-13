@@ -1,7 +1,8 @@
 """Routes for retrieving box information."""
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from typing import Annotated
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -40,6 +41,9 @@ def get_box_readings(
         box_id: str,
         db: Annotated[Session, Depends(get_db)],
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    start_date: date | None = None,
+    end_date: date | None = None,
+    before_sequence: Annotated[int | None, Query(ge=0, le=18446744073709551615)] = None,
 ):
     """Return this box's history in descending measurement order."""
     result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
@@ -47,7 +51,23 @@ def get_box_readings(
     if result.scalars().first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Box not found")
 
-    rows = db.execute(recorded_readings(box_id).limit(limit))
+    query = recorded_readings(box_id)
+    sample = models.TemperatureSample
+    if (start_date is None) != (end_date is None):
+        raise HTTPException(422, "Supply both start_date and end_date")
+    if start_date is not None:
+        if start_date > end_date or start_date.year < 1001 or end_date == date.max:
+            raise HTTPException(422, "Invalid history date range")
+        dublin = ZoneInfo("Europe/Dublin")
+        start = datetime.combine(start_date, time.min, dublin)
+        stop = datetime.combine(end_date + timedelta(days=1), time.min, dublin)
+        query = query.where(
+            sample.observed_at >= start.astimezone(UTC).replace(tzinfo=None),
+            sample.observed_at < stop.astimezone(UTC).replace(tzinfo=None),
+        )
+    if before_sequence is not None:
+        query = query.where(sample.sequence_no < before_sequence)
+    rows = db.execute(query.limit(limit))
     return [history_reading(sample, profile) for sample, profile in rows]
 
 

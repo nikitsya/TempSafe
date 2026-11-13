@@ -2,6 +2,9 @@
 
 ## Authentication
 
+- `GET /api/me` returns the signed-in username and assigned box IDs, for example
+  `{"username":"alex","box_ids":["TS-01"]}`. An account without assignments gets
+  an empty list. An absent or expired session returns 401.
 - `POST /api/login` accepts JSON fields `username` and `password`. Success returns 204
   and an eight-hour, host-only session cookie with Secure, HttpOnly and SameSite=Strict.
   Use HTTPS. Incorrect credentials return 401.
@@ -109,6 +112,14 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 | `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings).                                                                                                                      |
 | `/api/boxes/{box_id}/readings/latest`   | Latest sample by highest `sequence_no`, including a sensor error; fields below.                                                                                 |
 | `/api/boxes/{box_id}/readings?limit=20` | Array of samples, descending `sequence_no`; each includes its recorded `profile` and `temperature_state`. Default limit 20, allowed 1–100. Empty history: `[]`. |
+
+For a calendar period, pass both inclusive dates, for example
+`/api/boxes/TS-01/readings?start_date=2026-11-05&end_date=2026-11-11&limit=100`.
+Use the same date twice for a single day. Dates follow Europe/Dublin and filter
+by observation time. Samples without an observation time appear only in unfiltered
+history. To continue, repeat the query with `before_sequence` set to the last
+sequence number on the previous page. Stop when a page contains fewer than
+the requested number of samples. Refresh the range to include late uploads.
 
 Use the box-specific endpoints for the dashboard, not `/api/readings`, which mixes boxes and sorts by receipt time.
 

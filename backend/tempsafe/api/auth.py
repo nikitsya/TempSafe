@@ -74,15 +74,34 @@ def logout(response: Response, db: Database, token: SessionCookie = None):
     response.headers["Cache-Control"] = "no-store"
 
 
-def accessible_boxes(db: Database, response: Response, token: SessionCookie = None) -> list[str]:
+def current_session(db: Database, response: Response, token: SessionCookie = None) -> UserSession:
     session = db.get(UserSession, token_digest(token)) if token else None
     if session is None or session.expires_at <= utc_now():
         raise HTTPException(401, "Sign in to access readings")
     response.headers["Cache-Control"] = "no-store"
-    return list(db.scalars(select(BoxAccess.box_id).where(BoxAccess.user_id == session.user_id)))
+    return session
+
+
+CurrentSession = Annotated[UserSession, Depends(current_session)]
+
+
+def accessible_boxes(db: Database, session: CurrentSession) -> list[str]:
+    query = select(BoxAccess.box_id).where(BoxAccess.user_id == session.user_id).order_by(BoxAccess.box_id)
+    return list(db.scalars(query))
 
 
 AllowedBoxes = Annotated[list[str], Depends(accessible_boxes)]
+
+
+class AccountResponse(BaseModel):
+    username: str
+    box_ids: list[str]
+
+
+@router.get("/me")
+def get_account(db: Database, session: CurrentSession, allowed: AllowedBoxes) -> AccountResponse:
+    user = db.get(AppUser, session.user_id)
+    return AccountResponse(username=user.auth_subject, box_ids=allowed)
 
 
 def require_box(box_id: str, allowed: AllowedBoxes):

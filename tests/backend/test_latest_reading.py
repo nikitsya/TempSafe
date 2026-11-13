@@ -16,7 +16,7 @@ from tempsafe.main import app
 @pytest.fixture
 def latest_reading_data(monkeypatch, grant_boxes):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
-    clock = Mock()
+    clock = Mock(wraps=datetime)
     clock.now.return_value = datetime(2026, 1, 1, 12, 10, tzinfo=UTC)
     monkeypatch.setattr("tempsafe.api.boxes.datetime", clock)
     with SessionLocal() as db:
@@ -290,3 +290,27 @@ def test_latest_freshness_uses_observation_time(latest_reading_data, quality, ag
     assert reading["quality"] == quality
     assert reading["temperature_state"] == ("Normal" if quality == "valid" else "Unknown")
     assert reading["received_at"] == "2026-01-01T12:10:00Z"
+
+
+def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
+    client, db, boxes, profiles = latest_reading_data
+    # The clocks go back on 25 October. Local midnight starts at 23:00 UTC.
+    start = datetime(2026, 10, 24, 23)
+    stop = datetime(2026, 10, 26)
+    times = [start - timedelta(seconds=1)]
+    times.extend(start + timedelta(seconds=i * 30) for i in range(100))
+    times.extend([stop - timedelta(seconds=1), stop, None])
+    for sequence, observed in enumerate(times):
+        db.add(TemperatureSample(
+            sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+            sequence_no=sequence, observed_at=observed, clock_reliable=observed is not None,
+            received_at=stop + timedelta(days=1), quality="sensor_error",
+        ))
+    db.flush()
+    url = f"/api/boxes/{boxes[0]}/readings"
+    params = {"start_date": "2026-10-25", "end_date": "2026-10-25", "limit": 100}
+    first = client.get(url, params=params).json()
+    second = client.get(url, params=params | {"before_sequence": first[-1]["sequence_no"]}).json()
+    assert [row["sequence_no"] for row in first + second] == list(range(101, 0, -1))
+    assert client.get(url, params={"start_date": "2026-10-25"}).status_code == 422
+    assert client.get(url, params=params | {"end_date": "2026-10-24"}).status_code == 422
