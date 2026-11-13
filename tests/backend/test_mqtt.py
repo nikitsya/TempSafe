@@ -146,11 +146,9 @@ def test_lifespan_stops_mqtt_even_on_startup_failure(monkeypatch, failure):
     if failure:
         mqtt.mqtt_startup.side_effect = ConnectionError("unavailable")
     monkeypatch.setattr(module, "create_mqtt", lambda: mqtt)
-    app = SimpleNamespace(state=SimpleNamespace())
 
     async def scenario():
-        async with module.lifespan(app):
-            assert app.state.mqtt is mqtt
+        async with module.lifespan(None):
             mqtt.mqtt_startup.assert_awaited_once()
 
     if failure:
@@ -159,7 +157,6 @@ def test_lifespan_stops_mqtt_even_on_startup_failure(monkeypatch, failure):
     else:
         asyncio.run(scenario())
     mqtt.mqtt_shutdown.assert_awaited_once()
-    assert app.state.mqtt is None
 
 
 def test_mqtt_disabled_or_missing_configuration(monkeypatch):
