@@ -16,6 +16,7 @@ dependencies = [
     "mysql-connector-python>=9.0,<10.0",
     "python-dotenv>=1.0,<2.0",
     "fastapi-mqtt>=2.2,<3.0",
+    "tzdata",
 ]
 
 [project.optional-dependencies]
