@@ -3,25 +3,28 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>History – TEMPSAFE</title>
-    <link href="../css/main.css?v=3" rel="stylesheet">
+    <title>History – TempSafe</title>
+    <link href="../css/main.css?v=35" rel="stylesheet">
 </head>
-<body>
+<body data-page="history">
 <header class="site-header">
     <div class="header-top">
-        <span class="brand">TEMPSAFE</span>
-        <span class="box-id">Box TS-01</span>
+        <span class="brand">TempSafe</span>
+        <div class="header-right">
+            <a class="signout-link" data-signout href="../index.html">Sign out</a>
+        </div>
     </div>
     <div class="nav-bar">
         <nav aria-label="Main" class="nav">
-            <a href="dashboard.html">Status</a>
+            <a href="dashboard.html">Dashboard</a>
             <a aria-current="page" href="history.html">History</a>
-            <a data-signout href="../index.html">Sign out</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="settings.html">Settings</a>
         </nav>
     </div>
 </header>
 <main class="wide">
-    <h1 class="visually-hidden">History of box TS-01</h1>
+    <h1 class="visually-hidden">History</h1>
     <p class="banner error" hidden id="signout-error" role="alert"></p>
 
     <div class="history-controls">
@@ -36,11 +39,10 @@
     </div>
 
     <section aria-busy="true" aria-live="polite" class="card view" id="history" tabindex="-1"></section>
-
-    <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
 </main>
-<script src="../js/api.js"></script>
-<script src="../js/main.js"></script>
-<script src="../js/history.js"></script>
+<script src="../js/api.js?v=35"></script>
+<script src="../js/main.js?v=35"></script>
+<script src="../js/notifications.js?v=35"></script>
+<script src="../js/history.js?v=35"></script>
 </body>
 </html>

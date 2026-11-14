@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Settings – TempSafe</title>
+    <link href="../css/main.css?v=35" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-top">
+        <span class="brand">TempSafe</span>
+        <div class="header-right">
+            <a class="signout-link" data-signout href="../index.html">Sign out</a>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <nav aria-label="Main" class="nav">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="history.html">History</a>
+            <a href="alerts.html">Alerts</a>
+            <a aria-current="page" href="settings.html">Settings</a>
+        </nav>
+    </div>
+</header>
+<main>
+    <h1 class="visually-hidden">Settings</h1>
+    <p class="banner error" hidden id="signout-error" role="alert"></p>
+
+    <div aria-live="polite" id="settings-message" role="status"></div>
+
+    <section aria-labelledby="notify-title" class="panel" id="notify-panel">
+        <h2 class="visually-hidden" id="notify-title">Notifications</h2>
+        <div id="notify-box"></div>
+    </section>
+
+    <section aria-busy="true" aria-labelledby="limits-title" class="panel settings" id="settings">
+        <h2 class="panel-title" id="limits-title">Temperature limits</h2>
+        <p class="muted">Loading…</p>
+    </section>
+</main>
+<script src="../js/api.js?v=35"></script>
+<script src="../js/main.js?v=35"></script>
+<script src="../js/notifications.js?v=35"></script>
+<script src="../js/settings.js?v=35"></script>
+</body>
+</html>

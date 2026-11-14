@@ -5,22 +5,28 @@ These values apply to the original UI mock-ups and HTML prototype. The later
 
 ## Web application (from Sprint 9)
 
-The web application uses a teal medical palette. Status colours below are unchanged. White text is only placed on
-`--teal` or darker (4.9:1). `--teal-bright` is decoration only (top stripes and frames), never text.
+Clinical and calm, easy to read at a glance in an ambulance. A navy frame, white cards on a cool grey page, one
+accent blue for actions; green, amber and red are used only for status. All text pairs meet WCAG AA.
 
-| Token           | Hex       | Use                                                  |
-|-----------------|-----------|------------------------------------------------------|
-| `--teal`        | `#0E7F77` | Brand, navigation bar, buttons, button borders       |
-| `--teal-dark`   | `#0A625C` | Active tab, headings and labels on light backgrounds |
-| `--teal-bright` | `#13B0A5` | Decorative stripes only                              |
-| `--mint`        | `#E8F6F4` | Table headers, light panels                          |
-| `--bg`          | `#F3F4F4` | Page background                                      |
-| `--focus`       | `#1D2433` | 3 px focus outline (white inside the navigation bar) |
+| Token        | Hex       | Use                                              |
+|--------------|-----------|--------------------------------------------------|
+| `--navy`     | `#14233F` | Header and menu, main text                       |
+| `--accent`   | `#1E5AA8` | Buttons, links, selected tab and focus outline   |
+| `--page`     | `#F4F6F9` | Page background                                  |
+| `--line`     | `#DDE3EB` | Card borders and table lines                     |
+| `--muted`    | `#56647B` | Labels and secondary text                        |
+| `--normal`   | `#1B7A43` | Normal                                           |
+| `--warning`  | `#8A5800` | Warning (lines `#C48A12`)                        |
+| `--alert`    | `#B42318` | Alert                                            |
+| `--grey`     | `#536074` | No data, offline, last reading                   |
+| `--fault`    | `#7C2D12` | Sensor fault                                     |
 
-- Status word 32 px and temperature 64 px, weight 800. Buttons and section titles in upper case, weight 800.
-- Content is grouped in framed panels: Period and Show on History; Graph, Last 100 and Alerts on the dashboard.
-- Touch targets are at least 44 px high; main buttons and tabs are 52 px.
-- Status symbols: OK ✓, Warning !, Too hot / Too cold ✕, Sensor fault ⚠, No data ⏱, Offline and Not connected ⦸.
+- Typeface: IBM Plex Sans 400–700, self-hosted in `frontend/css/fonts` (SIL Open Font Licence), tabular numbers.
+- Sentence case for all labels, buttons, tabs and status words.
+- Radius 14 px for cards, 8 px for controls, round pills for status tags. No shadows except pop-ups.
+- The status tile is the strongest element: a coloured band on the left, the status word and a large temperature.
+- Period and view choosers are segmented controls; the selected option is white with blue text.
+- Touch targets are at least 44 px high.
 
 ## Original prototype colours
 

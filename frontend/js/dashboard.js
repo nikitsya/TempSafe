@@ -5,61 +5,57 @@ const STATUS_VIEW = {
     normal: {
         cls: 'normal',
         icon: '✓',
-        title: 'OK',
+        title: 'Normal',
         role: 'status'
     },
     warning: {
         cls: 'warning',
         icon: '!',
-        title: 'WARNING',
+        title: 'Warning',
         role: 'status'
     },
     alert: {
         cls: 'alert',
         icon: '✕',
-        title: 'TOO HOT',
+        title: 'Alert',
         role: 'alert'
     },
     stale: {
         cls: 'unknown',
         icon: '⏱',
-        title: 'NO DATA',
+        title: 'Last reading',
         role: 'status'
     },
     sensor_error: {
         cls: 'alert',
         icon: '⚠',
-        title: 'SENSOR FAULT',
+        title: 'Sensor fault',
         role: 'alert'
     },
     not_reporting: {
         cls: 'unknown',
         icon: '⦸',
-        title: 'OFFLINE',
+        title: 'Offline',
         role: 'alert'
     },
     never_connected: {
         cls: 'unknown',
         icon: '⦸',
-        title: 'NOT CONNECTED',
+        title: 'Not connected',
         role: 'status'
     },
     unknown: {
         cls: 'unknown',
         icon: '?',
-        title: 'UNKNOWN',
+        title: 'Unknown',
         role: 'status'
     }
 };
 
-// Status words are short on purpose (usability: read at a glance).
-// An alert says which way: TOO HOT or TOO COLD.
+// Status words follow FR-05: Normal, Warning and Alert. Details say which limit
+// an alert crossed ("Above 25°C" or "0°C or below").
 function viewFor(reading) {
-    const view = STATUS_VIEW[reading.status] || STATUS_VIEW.unknown;
-    if (reading.status === 'alert' && reading.tooCold) {
-        return {...view, title: 'TOO COLD'};
-    }
-    return view;
+    return STATUS_VIEW[reading.status] || STATUS_VIEW.unknown;
 }
 
 // Convert API date to local date and time (used in Details).
@@ -96,113 +92,87 @@ function formatClock(date) {
     return time.toLocaleTimeString('en-IE', {hour: '2-digit', minute: '2-digit'});
 }
 
-// Short explanation of the status. Shown in Details, not on the main card.
-function describe(reading, profile) {
-    switch (reading.status) {
-        case 'normal':
-            return 'In range';
 
-        case 'warning':
-            return `Near the limit (${profile.upperC}°C)`;
 
-        case 'alert':
-            // The lower limit is inclusive: exactly 0°C is already an alert.
-            return reading.temperatureC <= profile.lowerC
-                ? `${profile.lowerC}°C or below`
-                : `Above ${profile.upperC}°C`;
 
-        case 'stale':
-            return 'No reading for 90 s';
-
-        case 'sensor_error':
-            return 'Sensor cannot measure';
-
-        case 'not_reporting':
-            return 'Box not sending data';
-
-        case 'never_connected':
-            return 'Box never connected';
-
-        default:
-            return 'Clock not reliable';
-    }
+// Age of the last reading for Details (FR-04): "5 s ago", "3 min ago", "2 h ago".
+function ageText(seconds) {
+    if (seconds < 60) return `${seconds} s ago`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} h ago`;
+    return `${Math.floor(seconds / 86400)} days ago`;
 }
 
-// Main card: only the status, the temperature and the time.
-function statusCard(reading) {
-    const view = viewFor(reading);
+// ---- How long the current status has lasted, and the alert banner ----
+// Uses the latest 100 readings: counts back while the status stays the same.
+let stateSince = null;     // time the current Warning or Alert started (ms)
+let recentReadings = [];   // latest 100 readings, newest first (for the Last hour chart)
+let todayStats = null;     // {min, max, alerts, lastAlert} for today
+let alertBanner = null;    // {low: true/false} while an alert is on
 
-    let body = '';
-
-    // Show a live temperature only when the time is reliable.
-    if (
-        reading.temperatureC !== null &&
-        ['normal', 'warning', 'alert'].includes(reading.status) &&
-        reading.ageSeconds !== null
-    ) {
-        body = `
-            <div class="value">
-                ${reading.temperatureC.toFixed(1)}<small>°C</small>
-            </div>
-            <div class="meta">
-                ${reading.observedClock} · ${reading.ageSeconds} s ago
-            </div>
-        `;
+// "4 min", "1 h", "1 h 20 min", "2 days" – as short as possible.
+function shortDuration(ms) {
+    const minutes = Math.max(1, Math.round(ms / 60000));
+    if (minutes < 60) return `${minutes} min`;
+    if (minutes < 1440) {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return m ? `${h} h ${m} min` : `${h} h`;
     }
+    const days = Math.round(minutes / 1440);
+    return `${days} day${days === 1 ? '' : 's'}`;
+}
 
-    // No current temperature: never show an old number here.
-    else {
-        body = `<p class="status-text">No temperature</p>`;
-
-        if (reading.status === 'not_reporting' && reading.lastContact) {
-            body += `<div class="meta">Last contact ${reading.lastContact}</div>`;
+async function loadRecentState() {
+    try {
+        const response = await fetch(`${API_BASE}/boxes/TS-01/readings?limit=100`);
+        if (!response.ok) return;
+        const readings = await response.json();
+        if (!Array.isArray(readings) || readings.length === 0) return;
+        recentReadings = readings;
+        const stateOf = (r) => r.quality === 'valid' ? String(r.temperature_state || '').toLowerCase() : null;
+        const current = stateOf(readings[0]);
+        stateSince = null;
+        alertBanner = null;
+        if (current === 'warning' || current === 'alert') {
+            let first = readings[0];
+            for (let i = 1; i < readings.length; i++) {
+                const gap = Number(readings[i - 1].sequence_no) - Number(readings[i].sequence_no) > 1;
+                if (gap || stateOf(readings[i]) !== current) break;
+                first = readings[i];
+            }
+            stateSince = new Date(first.observed_at).getTime();
         }
+        if (current === 'alert') {
+            const lower = Number(readings[0].profile && readings[0].profile.lower_c);
+            alertBanner = {low: Number.isFinite(lower) && Number(readings[0].temperature_c) <= lower};
+        }
+    } catch (error) {
+        console.error('Recent state error:', error);
     }
-
-    return `
-        <section class="status ${view.cls}">
-            <div class="status-row">
-                <span class="status-icon" aria-hidden="true">
-                    ${view.icon}
-                </span>
-                <h2 class="status-title">${view.title}</h2>
-            </div>
-
-            ${body}
-        </section>
-    `;
 }
 
-// Everything else is behind the "Details" button.
-function detailsCard(reading, profile) {
-    const live = ['normal', 'warning', 'alert'].includes(reading.status) &&
-        reading.ageSeconds !== null;
-
-    const lastReading = !live && reading.temperatureC !== null
-        ? `<dt>Last value</dt><dd>${reading.temperatureC.toFixed(1)}°C (old)</dd>`
-        : '';
-
-    return `
-        <details class="details">
-            <summary>Details</summary>
-            <dl class="kv">
-                <dt>Status</dt>
-                <dd>${describe(reading, profile)}</dd>
-
-                ${lastReading}
-
-                <dt>Last measured</dt>
-                <dd>${reading.observedAt}</dd>
-
-                ${reading.lastContactFull
-                    ? `<dt>Last contact</dt><dd>${reading.lastContactFull}</dd>`
-                    : ''}
-
-                <dt>Limits</dt>
-                <dd>${profile.lowerC}–${profile.upperC}°C · warning ${profile.warningC}°C</dd>
-            </dl>
-        </details>
-    `;
+// "Alert: High temperature detected" with a View button (usability test finding 1).
+function renderAlertBanner() {
+    const box = document.getElementById('alert-banner');
+    if (!box) return;
+    if (!alertBanner) {
+        box.innerHTML = '';
+        return;
+    }
+    const text = alertBanner.low ? 'Alert: Low temperature detected' : 'Alert: High temperature detected';
+    if (box.dataset.text === text && box.innerHTML) return;   // already shown
+    box.dataset.text = text;
+    box.innerHTML = `
+        <section aria-labelledby="alert-banner-title" class="unread-alert alert-banner-stacked">
+            <span aria-hidden="true" class="unread-alert-icon">⚠</span>
+            <div class="unread-alert-text">
+                <h2 id="alert-banner-title">${text}</h2>
+            </div>
+            <a class="unread-alert-btn" href="alerts.html">
+                View<span class="visually-hidden"> alerts</span> <span aria-hidden="true">→</span>
+            </a>
+        </section>`;
 }
 
 // Show a message when no readings exist.
@@ -226,53 +196,208 @@ function noAccessState() {
 
             <h2>No access</h2>
 
-            <p class="muted">Ask your admin for box TS-01.</p>
+            <p class="muted">Ask your admin for access.</p>
         </section>
     `;
 }
 
-// Show the dashboard and keep the Details panel open if the user opened it.
+// Show the status card and the details.
+// ---- Dashboard panel ----
+// Row of four tiles (status and temperature, today's range, alerts today, last measured),
+// then a "Last hour" chart. The red alert banner stays on top.
+function tile(label, value, sub, extraClass = '') {
+    return `
+        <section class="tile ${extraClass}">
+            <h2 class="tile-label">${label}</h2>
+            <div class="tile-value">${value}</div>
+            ${sub ? `<p class="tile-sub">${sub}</p>` : ''}
+        </section>`;
+}
+
+function mainTile(reading) {
+    const view = viewFor(reading);
+    const live = ['normal', 'warning', 'alert'].includes(reading.status) && reading.ageSeconds !== null;
+    const value = reading.temperatureC === null
+        ? '<span class="tile-none">No temperature</span>'
+        : `${reading.temperatureC.toFixed(1)}<small>°C</small>`;
+    const forChip = live && ['warning', 'alert'].includes(reading.status) && stateSince
+        ? `<span class="status-for">for ${shortDuration(Date.now() - stateSince)}</span>` : '';
+    return `
+        <section class="tile tile-main status ${view.cls}">
+            <div class="status-row">
+                <span aria-hidden="true" class="status-icon">${view.icon}</span>
+                <h2 class="status-title">${view.title}</h2>
+            </div>
+            <div class="value ${live ? '' : 'value-old'}">${value}</div>
+            ${forChip}
+        </section>`;
+}
+
+function todayTiles(reading) {
+    const range = todayStats && todayStats.min !== null
+        ? `${todayStats.min.toFixed(1)} – ${todayStats.max.toFixed(1)}<small>°C</small>` : '—';
+    const alerts = todayStats ? String(todayStats.alerts) : '—';
+    const alertSub = todayStats && todayStats.lastAlert ? `last at ${formatClock(todayStats.lastAlert)}` : 'none today';
+    const measured = reading.observedClock || '—';
+    const ago = reading.ageSeconds !== null ? ageText(reading.ageSeconds) : '';
+    return tile("Today's range", range, '') +
+        tile('Alerts today', alerts, alertSub, todayStats && todayStats.alerts ? 'tile-alert' : '') +
+        tile('Last measured', measured, ago);
+}
+
+// Small "Last hour" chart: line coloured by status, dashed limit lines, a few time marks.
+function lastHourChart(profile) {
+    const now = Date.now();
+    const from = now - 3600 * 1000;
+    const points = recentReadings.slice().reverse().filter((r) => {
+        const t = new Date(r.observed_at).getTime();
+        return r.clock_reliable && t >= from && t <= now + 30000;
+    });
+    const valid = points.filter((r) => r.quality === 'valid' && Number.isFinite(Number(r.temperature_c)));
+    let body;
+    if (valid.length < 2) {
+        body = '<p class="muted chart-empty">No readings in the last hour.</p>';
+    } else {
+        const W = 900, H = 260, L = 44, R = 10, T = 12, B = 34;
+        const values = valid.map((r) => Number(r.temperature_c));
+        let min = Math.min(...values, profile.warningC) - 1;
+        let max = Math.max(...values, profile.upperC) + 1;
+        min = Math.floor(min);
+        max = Math.ceil(max);
+        const x = (t) => L + (t - from) / (now - from) * (W - L - R);
+        const y = (v) => T + (max - v) / (max - min) * (H - T - B);
+        const color = (r) => {
+            const st = String(r.temperature_state || '').toLowerCase();
+            return st === 'alert' ? 'line-alert' : st === 'warning' ? 'line-warning' : 'line-normal';
+        };
+        let svg = '';
+        const step = max - min > 8 ? 4 : 2;
+        for (let v = Math.ceil(min / step) * step; v <= max; v += step) {
+            svg += `<line class="graph-grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>` +
+                `<text class="graph-axis" x="${L - 8}" y="${y(v) + 5}" text-anchor="end">${v}</text>`;
+        }
+        [profile.upperC, profile.warningC].forEach((v, i) => {
+            svg += `<line class="${i === 0 ? 'graph-upper' : 'graph-warning'}" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`;
+        });
+        for (let k = 0; k <= 4; k++) {
+            const t = from + k * 15 * 60000;
+            svg += `<text class="graph-axis" x="${x(t)}" y="${H - 8}" text-anchor="${k === 0 ? 'start' : k === 4 ? 'end' : 'middle'}">${formatClock(new Date(t))}</text>`;
+        }
+        // Grey band: no data (more than 90 s without a reading). Red band: sensor fault.
+        const band = (t1, t2, cls) => {
+            const x1 = Math.max(L, x(t1));
+            const x2 = Math.min(W - R, x(t2));
+            if (x2 - x1 > 1) svg += `<rect class="${cls}" x="${x1.toFixed(1)}" y="${T}" width="${(x2 - x1).toFixed(1)}" height="${H - T - B}"/>`;
+        };
+        const times = points.map((r) => new Date(r.observed_at).getTime());
+        if (times.length && times[0] - from > 90000) band(from, times[0], 'band-nodata');
+        for (let i = 1; i < points.length; i++) {
+            const seqGap = Number(points[i].sequence_no) - Number(points[i - 1].sequence_no) > 1;
+            if (seqGap || times[i] - times[i - 1] > 90000) band(times[i - 1], times[i], 'band-nodata');
+            if (points[i - 1].quality === 'sensor_error') band(times[i - 1], times[i], 'band-fault');
+        }
+        if (times.length && now - times[times.length - 1] > 90000) band(times[times.length - 1], now, 'band-nodata');
+        if (!times.length) band(from, now, 'band-nodata');
+
+        for (let i = 1; i < points.length; i++) {
+            const a = points[i - 1];
+            const b = points[i];
+            const gap = Number(b.sequence_no) - Number(a.sequence_no) > 1 ||
+                new Date(b.observed_at) - new Date(a.observed_at) > 90000;
+            if (gap || a.quality !== 'valid' || b.quality !== 'valid') continue;
+            svg += `<line class="graph-seg ${color(b)}" x1="${x(new Date(a.observed_at).getTime()).toFixed(1)}" ` +
+                `y1="${y(Number(a.temperature_c)).toFixed(1)}" x2="${x(new Date(b.observed_at).getTime()).toFixed(1)}" ` +
+                `y2="${y(Number(b.temperature_c)).toFixed(1)}"/>`;
+        }
+        const last = valid[valid.length - 1];
+        body = `<svg class="mini-chart" role="img" viewBox="0 0 ${W} ${H}"
+                    aria-label="Temperature in the last hour: lowest ${Math.min(...values).toFixed(1)}°C, highest ${Math.max(...values).toFixed(1)}°C, now ${Number(last.temperature_c).toFixed(1)}°C.">${svg}</svg>`;
+        body += `<ul class="graph-legend mini-legend">
+            <li><span aria-hidden="true" class="legend-line line-normal"></span>Normal</li>
+            <li><span aria-hidden="true" class="legend-line line-warning"></span>Warning</li>
+            <li><span aria-hidden="true" class="legend-line line-alert"></span>Alert</li>
+            <li><span aria-hidden="true" class="legend-upper"></span>Limit</li>
+            <li><span aria-hidden="true" class="legend-band legend-fault"></span>Sensor fault</li>
+            <li><span aria-hidden="true" class="legend-band legend-nodata"></span>No data</li>
+        </ul>`;
+    }
+    return `
+        <section aria-labelledby="chart-title" class="tile tile-chart">
+            <h2 class="tile-label" id="chart-title">Last hour</h2>
+            ${body}
+        </section>`;
+}
+
 function renderDashboard(reading, profile) {
     const dashboard = document.getElementById('dashboard');
-    const details = dashboard.querySelector('details');
-    const detailsOpen = details ? details.open : false;
+    dashboard.innerHTML = `
+        <div class="tiles">
+            ${mainTile(reading)}
+            ${todayTiles(reading)}
+        </div>
+        ${lastHourChart(profile)}`;
+    renderAlertBanner();
+}
 
-    dashboard.innerHTML =
-        statusCard(reading) +
-        detailsCard(reading, profile);
-
-    if (detailsOpen) {
-        dashboard.querySelector('details').open = true;
+// Today's lowest and highest temperature and number of alerts (refreshed every minute).
+async function loadToday() {
+    try {
+        const today = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Europe/Dublin', year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(new Date());
+        const all = [];
+        let before = null;
+        for (let page = 0; page < 10; page++) {
+            let url = `${API_BASE}/boxes/TS-01/readings?limit=100&start_date=${today}&end_date=${today}`;
+            if (before !== null) url += `&before_sequence=${before}`;
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const rows = await response.json();
+            all.push(...rows);
+            if (rows.length < 100) break;
+            before = rows[rows.length - 1].sequence_no;
+        }
+        const values = all.filter((r) => r.quality === 'valid').map((r) => Number(r.temperature_c)).filter(Number.isFinite);
+        let alerts = 0;
+        let lastAlert = null;
+        const oldestFirst = all.slice().reverse();
+        oldestFirst.forEach((r, i) => {
+            const isAlert = String(r.temperature_state || '').toLowerCase() === 'alert';
+            const prev = oldestFirst[i - 1];
+            const prevAlert = prev && String(prev.temperature_state || '').toLowerCase() === 'alert' &&
+                Number(r.sequence_no) - Number(prev.sequence_no) === 1;
+            if (isAlert && !prevAlert) {
+                alerts++;
+                lastAlert = r.observed_at;
+            }
+        });
+        todayStats = {
+            min: values.length ? Math.min(...values) : null,
+            max: values.length ? Math.max(...values) : null,
+            alerts,
+            lastAlert,
+        };
+    } catch (error) {
+        console.error('Today error:', error);
     }
 }
 
-// Device contact (FR-08). Uses GET /api/boxes/{box_id}.
-// If the API sends contact_state, use it. Otherwise use last_seen_at:
-// more than 3 minutes without contact means NOT REPORTING.
-// No contact time means "unknown", not "offline", so nothing is shown.
-const CONTACT_TIMEOUT_SECONDS = 180;
+// Device contact (FR-08). Uses GET /api/boxes/{box_id}/status.
+// The server says "reporting" while it received anything (even a sensor error)
+// in the last 90 seconds, "not_reporting" after that and "never_reported"
+// before the first sample. If the request fails, contact is unknown and
+// nothing extra is shown.
+const CONTACT_STATES = {
+    reporting: 'reporting',
+    not_reporting: 'not_reporting',
+    never_reported: 'never_connected'
+};
 
-function contactState(box) {
-    if (!box) {
+function contactState(boxStatus) {
+    if (!boxStatus) {
         return null;
     }
-
-    if (box.contact_state) {
-        return String(box.contact_state).toLowerCase();
-    }
-
-    if (!box.last_seen_at) {
-        return null;
-    }
-
-    const seen = new Date(box.last_seen_at);
-
-    if (isNaN(seen.getTime())) {
-        return null;
-    }
-
-    const seconds = (Date.now() - seen.getTime()) / 1000;
-    return seconds > CONTACT_TIMEOUT_SECONDS ? 'not_reporting' : 'reporting';
+    return CONTACT_STATES[boxStatus.contact_status] || null;
 }
 
 // Convert API data into frontend data.
@@ -385,8 +510,8 @@ function convertReading(data, box = null) {
         observedClock: formatClock(data.observed_at),
         receivedAt: formatTime(data.received_at),
         ageSeconds: ageSeconds,
-        lastContact: box ? formatClock(box.last_seen_at) : null,
-        lastContactFull: box && box.last_seen_at ? formatTime(box.last_seen_at) : null
+        lastContact: box ? formatClock(box.last_received_at) : null,
+        lastContactFull: box && box.last_received_at ? formatTime(box.last_received_at) : null
     };
 
     return {reading, profile};
@@ -397,7 +522,9 @@ const REFRESH_SECONDS = 5;   // ask the API for new data
 const TICK_SECONDS = 5;       // update "… s ago" and the stale check
 
 let lastData = null;          // last successful API response
-let lastBox = null;           // last box contact information
+let lastBox = null;           // last box status (contact) from the API
+let lastStateCheck = 0;       // when loadRecentState last ran
+let lastTodayCheck = 0;       // when loadToday last ran
 let lastStatus = null;        // last announced status
 let loading = false;          // avoid overlapping requests
 
@@ -406,9 +533,12 @@ function announceStatus(reading) {
     const view = viewFor(reading);
     const live = ['normal', 'warning', 'alert'].includes(reading.status) &&
         reading.ageSeconds !== null;
-    const text = live
-        ? `Status ${view.title}, ${reading.temperatureC.toFixed(1)} degrees Celsius`
-        : `Status ${view.title}, temperature unknown`;
+    let text = `Status ${view.title}, temperature unknown`;
+    if (live) {
+        text = `Status ${view.title}, ${reading.temperatureC.toFixed(1)} degrees Celsius`;
+    } else if (reading.temperatureC !== null && ['stale', 'not_reporting'].includes(reading.status)) {
+        text = `Status ${view.title}, last measured ${reading.temperatureC.toFixed(1)} degrees Celsius, not live`;
+    }
 
     if (reading.status === lastStatus) {
         return;
@@ -455,7 +585,7 @@ function showRefreshError(show) {
 // Get the box contact information. Returns null if it is not available.
 async function loadBox() {
     try {
-        const response = await fetch(`${API_BASE}/boxes/TS-01`);
+        const response = await fetch(`${API_BASE}/boxes/TS-01/status`);
         if (!response.ok) {
             return null;
         }
@@ -464,103 +594,6 @@ async function loadBox() {
         return null;
     }
 }
-
-// ---- Unread temperature alert (usability test finding 1) ----
-// The status card shows only the current reading. If the box was too hot or too cold
-// earlier and is now back within the limits, the user would miss it. So the dashboard
-// shows a banner for the newest alert the user has not viewed yet, with a View button.
-// "Viewed" is saved in this browser only (localStorage), per user and per box.
-const SEEN_ALERT_KEY = 'tempsafe.seenAlert.TS-01';
-const ALERT_CHECK_SECONDS = 30;
-let shownAlertSeq = null;
-
-function getSeenAlertSeq() {
-    try {
-        const value = Number(localStorage.getItem(SEEN_ALERT_KEY));
-        return Number.isFinite(value) ? value : 0;
-    } catch (error) {
-        return 0;
-    }
-}
-
-function setSeenAlertSeq(seq) {
-    try {
-        if (seq > getSeenAlertSeq()) localStorage.setItem(SEEN_ALERT_KEY, String(seq));
-    } catch (error) {
-        // Storage can be blocked (private mode). The banner then shows again next time.
-    }
-}
-
-// Newest reading that the API classified as Alert, or null.
-function newestAlert(readings) {
-    for (const r of readings) {   // the API returns the newest first
-        if (String(r.temperature_state || '').toLowerCase() !== 'alert') continue;
-        const t = Number(r.temperature_c);
-        const lower = Number(r.profile && r.profile.lower_c);
-        if (!Number.isFinite(t) || !Number.isFinite(Number(r.sequence_no))) continue;
-        return {
-            seq: Number(r.sequence_no),
-            kind: Number.isFinite(lower) && t <= lower ? 'low' : 'high',
-            temperatureC: t,
-            observedAt: r.observed_at ? new Date(r.observed_at) : null,
-        };
-    }
-    return null;
-}
-
-function alertBannerHtml(alert) {
-    const what = alert.kind === 'low' ? 'Low temperature detected' : 'High temperature detected';
-    let when = '';
-    if (alert.observedAt && !Number.isNaN(alert.observedAt.getTime())) {
-        const day = alert.observedAt.toLocaleDateString('en-IE', {day: 'numeric', month: 'short'});
-        const time = alert.observedAt.toLocaleTimeString('en-IE', {hour: '2-digit', minute: '2-digit'});
-        when = `${day}, ${time} · `;
-    }
-    return `
-        <section aria-labelledby="unread-alert-title" class="unread-alert">
-            <span aria-hidden="true" class="unread-alert-icon">⚠</span>
-            <div class="unread-alert-text">
-                <h2 id="unread-alert-title">Alert: ${what}</h2>
-                <p>${when}${alert.temperatureC.toFixed(1)}°C</p>
-            </div>
-            <a class="unread-alert-btn" data-alert-seq="${alert.seq}" href="history.html#alerts">
-                View<span class="visually-hidden"> alert in history</span> <span aria-hidden="true">→</span>
-            </a>
-        </section>`;
-}
-
-async function checkUnreadAlert() {
-    const box = document.getElementById('unread-alert');
-    if (!box) return;
-    try {
-        const response = await fetch(`${API_BASE}/boxes/TS-01/readings?limit=100`);
-        if (!response.ok) return;   // keep what is on screen
-        const readings = await response.json();
-        const alert = Array.isArray(readings) ? newestAlert(readings) : null;
-
-        if (!alert || alert.seq <= getSeenAlertSeq()) {
-            box.innerHTML = '';
-            shownAlertSeq = null;
-            return;
-        }
-        if (alert.seq === shownAlertSeq) return;   // already shown, do not announce again
-        shownAlertSeq = alert.seq;
-        box.innerHTML = alertBannerHtml(alert);
-        const announcer = document.getElementById('alert-announcer');
-        if (announcer) {
-            announcer.textContent = alert.kind === 'low'
-                ? 'Unread alert: low temperature detected.'
-                : 'Unread alert: high temperature detected.';
-        }
-    } catch (error) {
-        console.error('Unread alert error:', error);
-    }
-}
-
-document.addEventListener('click', (event) => {
-    const link = event.target.closest && event.target.closest('[data-alert-seq]');
-    if (link) setSeenAlertSeq(Number(link.dataset.alertSeq));
-});
 
 // Get the latest reading from the API.
 async function loadTemperature() {
@@ -625,6 +658,14 @@ async function loadTemperature() {
 
         // Device contact is optional: if it fails, the reading is still shown.
         lastBox = await loadBox();
+        if (Date.now() - lastStateCheck > 15000) {
+            lastStateCheck = Date.now();
+            await loadRecentState();
+        }
+        if (Date.now() - lastTodayCheck > 60000) {
+            lastTodayCheck = Date.now();
+            await loadToday();
+        }
 
         lastData = data;
         showRefreshError(false);
@@ -654,8 +695,6 @@ async function loadTemperature() {
 // Start loading and refreshing when the page opens.
 document.addEventListener('DOMContentLoaded', () => {
     loadTemperature();
-    checkUnreadAlert();
-    setInterval(checkUnreadAlert, ALERT_CHECK_SECONDS * 1000);
 
     // Ask the API for new data every five seconds.
     setInterval(loadTemperature, REFRESH_SECONDS * 1000);
