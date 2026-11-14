@@ -18,7 +18,7 @@ flowchart TD
     S -->|Fresh and valid| C1[Normal / Warning / Alert]
     S -->|Older than 90 s| F[Data stale]
     S -->|Failed reading| G[Sensor error]
-    S -->|No contact for 180 s| H[Not reporting]
+    S -->|Last receipt more than 90 s ago| H[Not reporting]
     S -->|API unreachable| I[Unable to refresh + Retry]
     S -->|No readings ever| J[No observations yet]
     C --> D[View temperature history]

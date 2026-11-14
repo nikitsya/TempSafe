@@ -26,18 +26,16 @@ is not included in this schema.
 
 ## 2. Data requirements
 
-| Data                   | Example fields                                                            | Proposed policy                                                    | Purpose                                             |
-|------------------------|---------------------------------------------------------------------------|--------------------------------------------------------------------|-----------------------------------------------------|
-| Box metadata           | Box ID, name, last contact                                                | Provisioned once; contact updated on authenticated device requests | Identify the monitored box and connection freshness |
-| Temperature samples    | Sample ID, sequence number, temperature Celsius, quality                  | Every 30 seconds, including explicit failed sample attempts        | Current state and history                           |
-| Timing                 | Observed-at UTC, received-at UTC, clock reliability                       | Every sample; preserve original values on retry                    | Distinguish historical uploads and uncertain timing |
-| Threshold profiles     | Profile ID, lower/upper limits, warning threshold, source note, demo flag | Immutable version for each configuration change                    | Reproduce the interpretation applied when recorded  |
-| User access            | User ID and permitted box IDs                                             | On provisioning/change                                             | Enforce authorisation                               |
-| Review acknowledgement | Sample ID, reviewer, reviewed-at                                          | Optional Should Have workflow                                      | Record review without altering measurements         |
+| Data                   | Example fields                                                            | Proposed policy                                             | Purpose                                             |
+|------------------------|---------------------------------------------------------------------------|-------------------------------------------------------------|-----------------------------------------------------|
+| Box metadata           | Box ID and name                                                           | Provisioned once                                            | Identify the monitored box                          |
+| Temperature samples    | Sample ID, sequence number, temperature Celsius, quality                  | Every 30 seconds, including explicit failed sample attempts | Current state and history                           |
+| Timing                 | Observed-at UTC, received-at UTC, clock reliability                       | Every sample; preserve original values on retry             | Distinguish historical uploads and uncertain timing |
+| Threshold profiles     | Profile ID, lower/upper limits, warning threshold, source note, demo flag | Immutable version for each configuration change             | Reproduce the interpretation applied when recorded  |
+| User access            | User ID and permitted box IDs                                             | On provisioning/change                                      | Enforce authorisation                               |
+| Review acknowledgement | Sample ID, reviewer, reviewed-at                                          | Optional Should Have workflow                               | Record review without altering measurements         |
 
-The desired heartbeat interval defaults to 60 seconds, but device heartbeat delivery and
-reporting are not implemented. The proposed contact timeout is 3 minutes. The
-device needs at least 24 hours of local queue capacity (2,880 sample attempts).
+The device needs at least 24 hours of local queue capacity (2,880 sample attempts).
 
 ## 3. Database categories
 
@@ -114,7 +112,6 @@ SELECT s.sample_id,
        p.lower_c,
        p.upper_c,
        p.is_demo,
-       b.last_seen_at,
        CASE
            WHEN s.quality <> 'valid' THEN 'unknown'
            WHEN s.temperature_c <= p.lower_c OR s.temperature_c > p.upper_c THEN 'Alert'
@@ -184,22 +181,20 @@ retained locally so offline warnings still work.
 
 ## 8. Processing, security and privacy
 
-This section records design targets. Current gaps include heartbeat exchange, scheduled jobs,
+This section records design targets. Current gaps include scheduled jobs,
 rate limiting, reduced runtime database grants and verified off-server backup recovery.
 See the [deployment record](../operations/deployment.md) for observed controls.
 
 ### Processing placement
 
-- Device loop: sample every 30 seconds, validate, classify and control local LED without internet; heartbeat every 60
-  seconds when connected.
+- Device loop: sample every 30 seconds, validate, classify and control local LED without internet.
 - MQTT FastMQTT subscriber: enforce authenticated topic/box identity, validate and deduplicate, preserve historical
   times
   and profiles; acknowledge only after database commit. HTTPS serves user-facing API requests.
-  Reject replayed heartbeats using a fresh, single-use challenge; historical uploads must not refresh device contact.
 - Dashboard: show current freshness, raw history, threshold bands and flagged observations; do not rely on cron for the
   local warning.
 
-Planned cron jobs check device contact, rebuild optional summaries and create encrypted off-host backups.
+Planned cron jobs rebuild optional summaries and create encrypted off-host backups.
 Prevent overlapping runs; delete expired records only after a successful backup. Agree schedules and retention periods
 before implementation and test restoration.
 

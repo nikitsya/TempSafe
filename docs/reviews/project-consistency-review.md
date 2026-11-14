@@ -43,8 +43,6 @@ These behaviours have not been changed by this documentation review. See the
 ## Outstanding scope and evidence
 
 - Device clock reliability is always set true by the logger; clock verification is missing.
-- Heartbeat settings exist, but device delivery, authenticated reporting and contact-loss
-  presentation are not implemented in the deployed revision.
 - Phone notifications, sample-review actions, time-range filtering, device profile delivery
   and manual buzzer silencing remain unfinished.
 - The new FastMQTT deployment needs a fresh Pi storage/acknowledgement trace. The 24-hour

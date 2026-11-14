@@ -24,12 +24,11 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   classification.
 - **Authentication:** browser sign-in and sign-out use server-side sessions. Reading access is restricted
   to boxes assigned to the user; accounts are provisioned by an operator.
-- **Heartbeat settings:** the API can read and update the desired heartbeat interval for each box,
-  defaulting to 60 seconds. Device delivery and authenticated heartbeat reporting are pending.
-- **Threshold settings:** the API creates and selects versioned demo profiles. Both configuration APIs
-  require a signed-in user assigned to the box and a configured operator bearer token. Frontend settings,
-  application roles and device delivery remain pending. See the
-  [configuration API guide](docs/api/threshold-configuration.md).
+- **Reading freshness:** the dashboard uses the time of the latest sample. See
+  the [monitoring decision](docs/design/monitoring-decision.md).
+- **Threshold settings:** signed-in users can review and change the desired limits for an
+  assigned box through the API. Saving creates or selects a versioned demo profile. Device
+  delivery remains pending. See the [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
@@ -41,8 +40,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Frontend:** signed-in users with access to `TS-01` can view its dashboard, temperature graph,
   excursion estimates and accessible history table. The dashboard polls every five seconds. History
   loads up to 100 readings when opened or reloaded.
-- **UI prototype:** four editable Figma screens with synthetic readings for
-  TS-01. [Mobile prototype](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-2&scaling=scale-down) · [Desktop prototype](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-50&scaling=scale-down).
+- **UI example:** four editable Figma screens with synthetic readings for
+  TS-01. [Mobile example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-2&scaling=scale-down) · [Desktop example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-50&scaling=scale-down).
 
 See the [functional requirements](docs/requirements/functional-requirements.md) and
 [MoSCoW priorities](docs/requirements/moscow-prioritisation.md) for the target system.
@@ -129,15 +128,15 @@ and profile. Then follow the [backend guide](backend/tempsafe/README.md) to star
 
 ## Code and development guides
 
-| Area            | Location / guide                                                                                                                                                                                                                                                                                                                                                                                               |
-|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Device scripts  | [device/](device/)                                                                                                                                                                                                                                                                                                                                                                                             |
-| Backend and API | [Backend guide](backend/tempsafe/README.md)                                                                                                                                                                                                                                                                                                                                                                    |
-| Database        | [Database setup](database/README.md)                                                                                                                                                                                                                                                                                                                                                                           |
-| Web interface   | [Frontend guide](frontend/README.md)                                                                                                                                                                                                                                                                                                                                                                           |
-| Figma prototype | [Mobile prototype](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-2&scaling=scale-down) · [Desktop prototype](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-50&scaling=scale-down) · [Edit](https://www.figma.com/design/oPwORgZUE7djuQHnbzekz6/TempSafe) · [Prototype guide and local file](prototype-2/README.md) |
-| Backend tests   | [Test instructions](tests/backend/README.md)                                                                                                                                                                                                                                                                                                                                                                   |
-| Deployment      | [Hosting and service checks](docs/operations/deployment.md)                                                                                                                                                                                                                                                                                                                                                    |
+| Area            | Location / guide                                                                                                                                                                                                                                                                                                                                                                            |
+|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Device scripts  | [device/](device/)                                                                                                                                                                                                                                                                                                                                                                          |
+| Backend and API | [Backend guide](backend/tempsafe/README.md)                                                                                                                                                                                                                                                                                                                                                 |
+| Database        | [Database setup](database/README.md)                                                                                                                                                                                                                                                                                                                                                        |
+| Web interface   | [Frontend guide](frontend/README.md)                                                                                                                                                                                                                                                                                                                                                        |
+| Figma example   | [Mobile example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-2&scaling=scale-down) · [Desktop example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-50&scaling=scale-down) · [Edit](https://www.figma.com/design/oPwORgZUE7djuQHnbzekz6/TempSafe) · [UI example files](ui-example/README.md) |
+| Backend tests   | [Test instructions](tests/backend/README.md)                                                                                                                                                                                                                                                                                                                                                |
+| Deployment      | [Hosting and service checks](docs/operations/deployment.md)                                                                                                                                                                                                                                                                                                                                 |
 
 ## Project documentation
 

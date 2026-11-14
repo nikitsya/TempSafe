@@ -34,8 +34,8 @@ def account(monkeypatch):
 
 
 @pytest.mark.parametrize("path", [
-    "/api/boxes/TS-01", "/api/boxes/TS-01/configuration", "/api/boxes/TS-01/readings",
-    "/api/boxes/TS-01/readings/latest", "/api/readings", "/api/readings/example",
+    "/api/me", "/api/boxes/TS-01", "/api/boxes/TS-01/configuration", "/api/boxes/TS-01/readings",
+    "/api/boxes/TS-01/status", "/api/boxes/TS-01/readings/latest", "/api/readings", "/api/readings/example",
 ])
 def test_anonymous_read_is_rejected(path):
     with TestClient(app) as client:
@@ -56,12 +56,31 @@ def test_login_scope_and_logout(account):
     other_box = str(uuid4())
     db.add(Box(box_id=other_box, name="Another user's box"))
     db.commit()
+    assert client.get("/api/me").json() == {"username": credentials["username"], "box_ids": [box_id]}
+    assert client.get(f"/api/boxes/{other_box}/readings?start_date=2026-11-01&end_date=2026-11-01").status_code == 404
+    assert client.get(f"/api/boxes/{other_box}/status").status_code == 404
     assert client.get(f"/api/boxes/{other_box}").status_code == 404
     assert client.get("/api/readings").json() == []
     assert client.post("/api/readings", json={}).status_code == 401
     assert client.post("/api/logout").status_code == 204
     assert COOKIE not in client.cookies
     assert client.get("/api/readings", headers={"Cookie": f"{COOKIE}={token}"}).status_code == 401
+
+
+def test_session_can_change_only_assigned_box_limits(account):
+    client, credentials, box_id, db = account
+    limits = {"lower_c": "0", "warning_c": "24", "upper_c": "25", "source_note": "Test"}
+    url = f"/api/boxes/{box_id}/configuration"
+    assert client.put(url, json=limits).status_code == 401
+    client.post("/api/login", json=credentials)
+    other_id = str(uuid4())
+    db.add(Box(box_id=other_id, name="Unassigned box"))
+    db.commit()
+    other = f"/api/boxes/{other_id}/configuration"
+    assert client.get(other).status_code == 404
+    assert client.put(other, json=limits).status_code == 404
+    assert client.put(url, json=limits).status_code == 200
+    assert client.get(url).json()["warning_c"] == "24.00"
 
 
 def test_readings_are_limited_to_assigned_boxes(account):

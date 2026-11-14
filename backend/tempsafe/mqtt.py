@@ -118,10 +118,9 @@ def create_mqtt():
 
 
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(_app):
     """Start and stop MQTT alongside FastAPI."""
     mqtt = create_mqtt()
-    app.state.mqtt = mqtt
     try:
         if mqtt is not None:
             await asyncio.wait_for(mqtt.mqtt_startup(), timeout=15)
@@ -129,4 +128,3 @@ async def lifespan(app):
     finally:
         if mqtt is not None:
             await mqtt.mqtt_shutdown()
-        app.state.mqtt = None

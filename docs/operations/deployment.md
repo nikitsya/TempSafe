@@ -78,17 +78,16 @@ hook passed its configuration test and reloaded Nginx.
 ## Current deployment — verified 8 November 2026
 
 The server runs commit `3578cfe77c6738fe2e08366337ec8de4776a58ad`, deployed on
-7 November. This includes the sign-in integration from PR #25 and heartbeat settings
-from PR #21. The checkout is detached at that commit; it does not track new commits
+7 November. This includes the sign-in integration from PR #25. The checkout is detached at that commit; it does not
+track new commits
 automatically. The server directory remains `/home/ubuntu/Smart-Box`.
 
 - `tempsafe`, `nginx` and `mosquitto` are active; the MySQL container is healthy.
 - FastMQTT runs inside FastAPI with one Uvicorn worker. The previous
   `tempsafe-mqtt.service` was stopped and disabled during the update.
-- `box_configuration` and `user_sessions` exist. Migration 005 added
-  `boxes.heartbeat_interval_seconds`, with a default of 60 seconds.
+- `box_configuration` and `user_sessions` exist.
 - External HTTPS checks returned 200 for the home page and `/api/health`, 401
-  for anonymous latest-reading, history and heartbeat-configuration requests,
+  for anonymous latest-reading and history requests,
   and 404 for `/docs`.
 
 Sign-in and sign-out are deployed. Application accounts are provisioned separately
@@ -97,8 +96,7 @@ hashes. The checks above confirm anonymous access is rejected; they do not repla
 an authenticated browser check with an assigned account.
 
 The deployment logs confirmed an MQTT broker connection. A fresh Pi-to-MySQL
-reading and matching storage acknowledgement still need verification. Configuring
-a heartbeat interval does not yet deliver it to the Pi or prove device contact.
+reading and matching storage acknowledgement still need verification.
 
 ## Network access
 
@@ -185,7 +183,7 @@ For each deployment:
 2. Back up the database and any configuration files that will change. Keep the
    previous commit available for rollback.
 3. Review the target's dependencies and migrations. The current schema includes
-   migrations 003, 004 and 005; apply each only if its table or column is missing.
+   migrations 003 and 004 where needed. See the database guide for existing installations.
    See the [database guide](../../database/README.md#apply-migrations). Do not run
    the baseline schema over an existing database.
 4. Deploy the selected code and install changed dependencies with

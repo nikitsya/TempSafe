@@ -77,7 +77,7 @@ Run these files manually in order, then commit if auto-commit is off:
 
 | File                                                                                              | Result                                                                                                  |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| [001_add_prototype_box.sql](migrations/001_add_prototype_box.sql)                                 | Adds `TS-01`, named `Prototype box TS-01`, with no recorded device contact.                             |
+| [001_add_prototype_box.sql](migrations/001_add_prototype_box.sql)                                 | Adds `TS-01`, named `Prototype box TS-01`.                                                              |
 | [002_add_prototype_temperature_profile.sql](migrations/002_add_prototype_temperature_profile.sql) | Adds its demo profile: lower threshold `0.00°C`, warning threshold `24.00°C` and upper limit `25.00°C`. |
 
 The profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548`. These migrations preserve
@@ -104,12 +104,11 @@ is missing, back up the database and run
 The sign-in endpoint uses this table to create and expire sessions. Fresh databases
 created with the current schema already include it.
 
-## Heartbeat interval migration
+## Upgrade existing box records
 
-Before starting the updated backend against an existing database, back it up and
-apply [005_add_box_heartbeat_interval.sql](migrations/005_add_box_heartbeat_interval.sql)
-once if `boxes.heartbeat_interval_seconds` is missing. Existing boxes receive the
-60-second default. The current baseline already defines this column for fresh installs.
+After deploying the updated backend, back up the database and
+run [migration 006](migrations/006_remove_box_contact_settings.sql) with the project database selected. It removes
+obsolete box contact columns where present. Fresh installations use the current baseline.
 
 ## Verify the setup
 

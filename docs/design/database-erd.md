@@ -36,8 +36,6 @@ erDiagram
     boxes {
         VARCHAR box_id PK "64 characters"
         VARCHAR name "100 characters"
-        DATETIME last_seen_at "Nullable"
-        SMALLINT heartbeat_interval_seconds "Unsigned; default 60"
     }
     box_access {
         BIGINT user_id PK, FK "Unsigned; composite primary key"
@@ -117,4 +115,4 @@ measurement, not whether its temperature is within the configured limits.
 a selection from crossing box boundaries. A profile can be selected by at most its
 own box. New selections do not change the profiles attached to earlier samples.
 This is desired backend configuration, not confirmation that the device has adopted it.
-See the [operator API guide](../api/threshold-configuration.md).
+See the [configuration API guide](../api/threshold-configuration.md).
