@@ -30,20 +30,28 @@ matching the login endpoint limits. This creates an account; it does not reset a
 
 ```sh
 python - <<'PYTHON'
+import asyncio
 from getpass import getpass
-from argon2 import PasswordHasher
-from tempsafe.db.session import SessionLocal
-from tempsafe.db.models import AppUser, BoxAccess
 
-username = getpass("New username (hidden): ").strip()
-password = getpass("New password: ")
-if not username or not password:
-    raise SystemExit("A username and password are required.")
-with SessionLocal.begin() as db:
-    user = AppUser(auth_subject=username, password_hash=PasswordHasher().hash(password))
-    db.add(user)
-    db.flush()
-    db.add(BoxAccess(user_id=user.user_id, box_id="TS-01"))
+from argon2 import PasswordHasher
+from tempsafe.db.models import AppUser, BoxAccess
+from tempsafe.db.session import AsyncSessionLocal, engine
+
+async def provision_account():
+    username = getpass("New username (hidden): ").strip()
+    password = getpass("New password: ")
+    if not username or not password:
+        raise SystemExit("A username and password are required.")
+    try:
+        async with AsyncSessionLocal.begin() as db:
+            user = AppUser(auth_subject=username, password_hash=PasswordHasher().hash(password))
+            db.add(user)
+            await db.flush()
+            db.add(BoxAccess(user_id=user.user_id, box_id="TS-01"))
+    finally:
+        await engine.dispose()
+
+asyncio.run(provision_account())
 PYTHON
 ```
 
@@ -63,9 +71,9 @@ A later change to the box’s limits preserves the interpretation of earlier rea
 ## Saving incoming readings
 
 `ReadingCreate` in [`schemas.py`](../../backend/tempsafe/schemas.py) validates the incoming fields. Use
-`save_reading(db, reading)` from `tempsafe.monitoring.readings` with a validated `ReadingCreate`
-and a dedicated `SessionLocal()` session. The function checks the box and profile,
-then uses `add()`, `commit()` and `refresh()` to save the sample.
+`await save_reading(db, reading)` from `tempsafe.monitoring.readings` with a validated
+`ReadingCreate` and a dedicated session opened with `async with AsyncSessionLocal() as db`.
+The function checks the box and profile, commits the sample and reads back the stored row.
 
 Observation times must include a timezone and are stored as UTC. Receipt time is
 set by the backend. Valid temperatures must be between -40 and 80°C with at most
