@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
 from tempsafe.schemas import ReadingCreate
@@ -18,9 +18,9 @@ class ReadingConflict(ValueError):
     """An existing sample uses the supplied identifiers with different data."""
 
 
-def _find_existing(db: Session, values: dict):
+async def _find_existing(db: AsyncSession, values: dict):
     """Look for either of the two unique identifiers used by the SQL schema."""
-    result = db.execute(select(TemperatureSample).where(or_(
+    result = await db.execute(select(TemperatureSample).where(or_(
         TemperatureSample.sample_id == values["sample_id"],
         and_(
             TemperatureSample.box_id == values["box_id"],
@@ -41,7 +41,7 @@ def _matching_retry(existing: list[TemperatureSample], values: dict):
     raise ReadingConflict("Sample ID or box sequence number conflicts with an existing reading")
 
 
-def save_reading(db: Session, reading: ReadingCreate) -> TemperatureSample:
+async def save_reading(db: AsyncSession, reading: ReadingCreate) -> TemperatureSample:
     """Save one validated sample using a dedicated session, or return an identical retry.
 
     The caller must authenticate the device and authorise its box before calling.
@@ -58,18 +58,18 @@ def save_reading(db: Session, reading: ReadingCreate) -> TemperatureSample:
             raise ValueError("Observation time is outside the MySQL DATETIME range")
         values["observed_at"] = observed_at
 
-    result = db.execute(select(Box).where(Box.box_id == reading.box_id))
+    result = await db.execute(select(Box).where(Box.box_id == reading.box_id))
     if result.scalars().first() is None:
         raise ReadingReferenceNotFound("Box not found")
 
-    result = db.execute(select(ThresholdProfile).where(
+    result = await db.execute(select(ThresholdProfile).where(
         ThresholdProfile.profile_id == values["profile_id"],
         ThresholdProfile.box_id == reading.box_id,
     ))
     if result.scalars().first() is None:
         raise ReadingReferenceNotFound("Temperature profile not found for this box")
 
-    existing = _find_existing(db, values)
+    existing = await _find_existing(db, values)
     if existing:
         return _matching_retry(existing, values)
 
@@ -78,19 +78,19 @@ def save_reading(db: Session, reading: ReadingCreate) -> TemperatureSample:
 
     try:
         db.add(sample)
-        db.commit()
+        await db.commit()
     except IntegrityError as error:
-        db.rollback()
+        await db.rollback()
         # Another worker may have inserted the same identifiers after our lookup.
-        if getattr(error.orig, "errno", None) == 1062:
-            existing = _find_existing(db, values)
+        if error.orig.args[:1] == (1062,):
+            existing = await _find_existing(db, values)
             if existing:
                 return _matching_retry(existing, values)
         raise
     except SQLAlchemyError:
-        db.rollback()
+        await db.rollback()
         raise
 
-    db.refresh(sample)
+    await db.refresh(sample)
 
     return sample
