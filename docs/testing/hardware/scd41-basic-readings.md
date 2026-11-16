@@ -167,3 +167,34 @@ the script, not automatically during continuous operation.
 
 This test verified local SQLite storage only. MQTT transmission
 and server-side storage were not tested.
+
+## Additional Test — Physical Sensor Communication Failure
+
+**Date:** 16 November 2026
+
+**Tested by:** Hanna
+
+**Result:** PASS — the logger recorded the error, the LED flashed, and the website displayed the error.
+
+### Objective and procedure
+
+Check how the updated asynchronous logger handles a physical loss of communication with the SCD41.
+While the logger was running, sensor wiring was disconnected and the terminal output was observed.
+
+### Observed output
+
+```text
+Saved: 2026-11-16T19:15:16+00:00 | 22.76 C | Quality: valid
+Sensor error: Could not communicate via I2C, some commands/settings are not available in periodic measurement mode
+Saved: 2026-11-16T19:15:46+00:00 | None C | Quality: sensor_error
+```
+
+The logger reported an I²C communication error and a saved record with no temperature and
+`sensor_error` quality. This was a physical interruption, separate from the simulated test above.
+The LED flashed during the sensor error. The Raspberry Pi transmitted the error, which was displayed
+on both the website's current reading and History pages. A screenshot of the transmission is available.
+
+![Current Status showing the sensor error](../../assets/testing/scd41/physical-error-current-status.png)
+
+![History showing sensor-error readings](../../assets/testing/scd41/physical-error-history.png)
+

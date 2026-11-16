@@ -6,7 +6,7 @@ import adafruit_scd4x
 import board
 from gpiozero import LED, PWMOutputDevice
 
-from database import Base, engine, SessionLocal
+from database import Base, engine, AsyncSessionLocal
 from models import Reading
 
 
@@ -62,8 +62,8 @@ def read_temperature(sensor):
     return round(sensor.temperature, 2)
 
 
-def save_reading(temperature, quality, observed_at):
-    with SessionLocal.begin() as session:
+async def save_reading(temperature, quality, observed_at):
+    async with AsyncSessionLocal.begin() as session:
         session.add(Reading(
             sample_id=str(uuid4()),
             observed_at=observed_at,
@@ -120,12 +120,7 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
             print(f"State: {state}")
 
         try:
-            await asyncio.to_thread(
-                save_reading,
-                temperature,
-                quality,
-                observed_at,
-            )
+            await save_reading(temperature, quality, observed_at)
         except Exception as error:
             print("Database error: reading was not saved:", error)
 
@@ -140,7 +135,8 @@ async def main():
         sensor = adafruit_scd4x.SCD4X(i2c)
         sensor.start_periodic_measurement()
 
-        Base.metadata.create_all(engine)
+        async with engine.begin() as connection:
+            await connection.run_sync(Base.metadata.create_all)
 
         buzzer_alert = asyncio.Event()
 
@@ -157,6 +153,7 @@ async def main():
         finally:
             buzzer.off()
             led.off()
+            await engine.dispose()
 
 
 if __name__ == "__main__":

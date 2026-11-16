@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import paho.mqtt.client as mqtt
@@ -5,10 +6,10 @@ import ssl
 from queue import SimpleQueue, Empty
 from sqlalchemy import select, update
 from threading import Event
-from time import monotonic, sleep
+from time import monotonic
 from uuid import UUID
 
-from database import SessionLocal
+from database import AsyncSessionLocal, engine
 from models import Reading
 
 BOX_ID = "TS-01"
@@ -125,9 +126,9 @@ def create_client():
     return client
 
 
-def get_pending_reading():
-    with SessionLocal() as session:
-        reading = session.scalar(
+async def get_pending_reading():
+    async with AsyncSessionLocal() as session:
+        reading = await session.scalar(
             select(Reading)
             .where(
                 Reading.uploaded == 0,
@@ -143,9 +144,9 @@ def get_pending_reading():
         return reading.sample_id, make_payload(reading)
 
 
-def mark_uploaded(sample_id):
-    with SessionLocal.begin() as session:
-        session.execute(
+async def mark_uploaded(sample_id):
+    async with AsyncSessionLocal.begin() as session:
+        await session.execute(
             update(Reading)
             .where(
                 Reading.sample_id == sample_id,
@@ -158,7 +159,7 @@ def mark_uploaded(sample_id):
     print("Server confirmed storage:", sample_id)
 
 
-def send_and_wait(client, sample_id, payload):
+async def send_and_wait(client, sample_id, payload):
     result = client.publish(
         READINGS_TOPIC,
         payload,
@@ -178,21 +179,20 @@ def send_and_wait(client, sample_id, payload):
             break
 
         try:
-            acknowledged_id = acknowledgements.get(
-                timeout=min(remaining, 1)
-            )
+            acknowledged_id = acknowledgements.get_nowait()
         except Empty:
+            await asyncio.sleep(min(remaining, 0.1))
             continue
 
         if acknowledged_id == sample_id:
-            mark_uploaded(sample_id)
+            await mark_uploaded(sample_id)
             return True
 
     print("No storage confirmation; record remains pending")
     return False
 
 
-def main():
+async def main():
     client = create_client()
     retry_delay = 2
 
@@ -201,29 +201,32 @@ def main():
 
     try:
         while True:
-            if not subscription_ready.wait(timeout=1):
+            if not subscription_ready.is_set():
+                await asyncio.sleep(1)
                 continue
 
-            pending = get_pending_reading()
+            pending = await get_pending_reading()
 
             if pending is None:
-                sleep(1)
+                await asyncio.sleep(1)
                 continue
 
             sample_id, payload = pending
 
-            if send_and_wait(client, sample_id, payload):
+            if await send_and_wait(client, sample_id, payload):
                 retry_delay = 2
             else:
-                sleep(retry_delay)
+                await asyncio.sleep(retry_delay)
                 retry_delay = min(retry_delay * 2, 30)
 
-    except KeyboardInterrupt:
-        print("Publisher stopped.")
     finally:
         client.disconnect()
         client.loop_stop()
+        await engine.dispose()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Publisher stopped.")
