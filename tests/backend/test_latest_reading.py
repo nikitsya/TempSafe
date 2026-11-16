@@ -6,50 +6,38 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
-from fastapi.testclient import TestClient
 
 from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from tempsafe.db.session import SessionLocal, get_db
-from tempsafe.main import app
+
+pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture
-def latest_reading_data(monkeypatch, grant_boxes):
+async def latest_reading_data(monkeypatch, grant_boxes, client, db):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
     clock = Mock(wraps=datetime)
     clock.now.return_value = datetime(2026, 1, 1, 12, 10, tzinfo=UTC)
     monkeypatch.setattr("tempsafe.api.boxes.datetime", clock)
-    with SessionLocal() as db:
-        box_ids = [f"pytest-{uuid4()}", f"pytest-{uuid4()}"]
-        grant_boxes(*box_ids)
-        profile_ids = [str(uuid4()), str(uuid4())]
+    box_ids = [f"pytest-{uuid4()}", f"pytest-{uuid4()}"]
+    grant_boxes(*box_ids)
+    profile_ids = [str(uuid4()), str(uuid4())]
 
-        try:
-            for box_id, profile_id in zip(box_ids, profile_ids):
-                db.add(Box(box_id=box_id, name="Latest reading test box"))
-                db.flush()
-                db.add(ThresholdProfile(
-                    profile_id=profile_id, box_id=box_id,
-                    lower_c=Decimal("2.00"), warning_c=Decimal("7.00"),
-                    upper_c=Decimal("8.00"), is_demo=True,
-                    source_note="Synthetic limits for tests only.",
-                    created_at=datetime(2026, 1, 1),
-                ))
-                db.flush()
-
-            def override_get_db():
-                yield db
-
-            app.dependency_overrides[get_db] = override_get_db
-            with TestClient(app) as client:
-                yield client, db, box_ids, profile_ids
-        finally:
-            app.dependency_overrides.pop(get_db, None)
-            db.rollback()
+    for box_id, profile_id in zip(box_ids, profile_ids):
+        db.add(Box(box_id=box_id, name="Latest reading test box"))
+        await db.flush()
+        db.add(ThresholdProfile(
+            profile_id=profile_id, box_id=box_id,
+            lower_c=Decimal("2.00"), warning_c=Decimal("7.00"),
+            upper_c=Decimal("8.00"), is_demo=True,
+            source_note="Synthetic limits for tests only.",
+            created_at=datetime(2026, 1, 1),
+        ))
+        await db.flush()
+    return client, db, box_ids, profile_ids
 
 
 @pytest.mark.parametrize("quality", ["valid", "sensor_error"])
-def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
+async def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
     """Ignore a delayed older upload and another box's higher sequence number."""
     client, db, box_ids, profile_ids = latest_reading_data
     latest_id = str(uuid4())
@@ -61,7 +49,7 @@ def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
         received_at=datetime(2026, 1, 1, 12, 1), clock_reliable=True,
         quality=quality, temperature_c=Decimal("5.25") if quality == "valid" else None,
     ))
-    db.flush()
+    await db.flush()
     db.add(TemperatureSample(
         sample_id=str(uuid4()), box_id=box_ids[0], profile_id=profile_ids[0],
         sequence_no=100, observed_at=datetime(2026, 1, 1, 12),
@@ -74,9 +62,9 @@ def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
         received_at=datetime(2026, 1, 1, 12, 20), clock_reliable=True,
         quality="valid", temperature_c=Decimal("6.00"),
     ))
-    db.flush()
+    await db.flush()
 
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
 
     assert response.status_code == 200
     reading = response.json()
@@ -102,7 +90,7 @@ def test_latest_reading_uses_box_sequence(latest_reading_data, quality):
     ("8.00", "Warning"),
     ("8.01", "Alert"),
 ])
-def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, expected):
+async def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, expected):
     """Keep using the sample's 2/7/8 test profile after a different profile is added."""
     client, db, box_ids, profile_ids = latest_reading_data
     sample_id = str(uuid4())
@@ -112,7 +100,7 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         received_at=datetime(2026, 1, 1, 12, 1), clock_reliable=True,
         quality="valid", temperature_c=Decimal(temperature),
     ))
-    db.flush()
+    await db.flush()
     # Adding another profile must not reinterpret an existing measurement.
     db.add(ThresholdProfile(
         profile_id=str(uuid4()), box_id=box_ids[0],
@@ -121,9 +109,9 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
         source_note="Alternative profile for the API test only.",
         created_at=datetime(2026, 1, 2),
     ))
-    db.flush()
+    await db.flush()
 
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
     assert response.status_code == 200
     assert response.json() == {
         "sample_id": sample_id,
@@ -146,19 +134,19 @@ def test_latest_state_uses_recorded_profile(latest_reading_data, temperature, ex
     }
 
 
-def test_latest_reading_without_samples(latest_reading_data):
+async def test_latest_reading_without_samples(latest_reading_data):
     """Explain that a known box has no recorded measurements yet."""
     client, _, box_ids, _ = latest_reading_data
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
 
     assert response.status_code == 404
     assert response.json() == {"detail": "No readings available for this box"}
 
 
-def test_latest_reading_for_missing_box(latest_reading_data):
+async def test_latest_reading_for_missing_box(latest_reading_data):
     """Distinguish an unknown box from a known box without measurements."""
     client, _, _, _ = latest_reading_data
-    response = client.get(f"/api/boxes/pytest-{uuid4()}/readings/latest")
+    response = await client.get(f"/api/boxes/pytest-{uuid4()}/readings/latest")
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Box not found"}
@@ -168,7 +156,7 @@ def test_latest_reading_for_missing_box(latest_reading_data):
     ("", [102, 101, 100]),
     ("?limit=2", [102, 101]),
 ])
-def test_box_history_order_and_limit(latest_reading_data, query, expected_sequences):
+async def test_box_history_order_and_limit(latest_reading_data, query, expected_sequences):
     """Return only this box's readings in measurement order, including errors."""
     client, db, box_ids, profile_ids = latest_reading_data
 
@@ -191,9 +179,9 @@ def test_box_history_order_and_limit(latest_reading_data, query, expected_sequen
         received_at=datetime(2026, 1, 1, 12, 20), clock_reliable=True,
         quality="valid", temperature_c=Decimal("6.00"),
     ))
-    db.flush()
+    await db.flush()
 
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings{query}")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings{query}")
     assert response.status_code == 200
 
     readings = response.json()
@@ -207,7 +195,7 @@ def test_box_history_order_and_limit(latest_reading_data, query, expected_sequen
     assert readings[1]["observed_at"] == "2026-01-01T12:01:00Z"
 
 
-def test_box_history_uses_each_recorded_profile(latest_reading_data):
+async def test_box_history_uses_each_recorded_profile(latest_reading_data):
     client, db, box_ids, profile_ids = latest_reading_data
     new_id = str(uuid4())
     db.add(ThresholdProfile(
@@ -215,16 +203,16 @@ def test_box_history_uses_each_recorded_profile(latest_reading_data):
         warning_c=Decimal("24.00"), upper_c=Decimal("25.00"),
         source_note="Second test profile.",
     ))
-    db.flush()
+    await db.flush()
     for sequence, profile_id in enumerate([profile_ids[0], new_id], start=1):
         db.add(TemperatureSample(
             sample_id=str(uuid4()), box_id=box_ids[0], sequence_no=sequence,
             profile_id=profile_id, clock_reliable=False, temperature_c=Decimal("7.50"),
             quality="valid",
         ))
-    db.flush()
+    await db.flush()
 
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings")
     assert response.status_code == 200
     assert [
                (row["profile"]["profile_id"], row["profile"]["warning_c"], row["temperature_state"])
@@ -232,29 +220,29 @@ def test_box_history_uses_each_recorded_profile(latest_reading_data):
            ] == [(new_id, "24.00", "Normal"), (profile_ids[0], "7.00", "Warning")]
 
 
-def test_box_history_without_samples(latest_reading_data):
+async def test_box_history_without_samples(latest_reading_data):
     """A known box without measurements has an empty history, not a 404."""
     client, _, box_ids, _ = latest_reading_data
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings")
 
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_box_history_for_missing_box(latest_reading_data):
+async def test_box_history_for_missing_box(latest_reading_data):
     """An unknown box returns the same error as the box details route."""
     client, _, _, _ = latest_reading_data
-    response = client.get(f"/api/boxes/pytest-{uuid4()}/readings")
+    response = await client.get(f"/api/boxes/pytest-{uuid4()}/readings")
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Box not found"}
 
 
 @pytest.mark.parametrize("limit", ["0", "101", "invalid"])
-def test_box_history_rejects_invalid_limit(latest_reading_data, limit):
+async def test_box_history_rejects_invalid_limit(latest_reading_data, limit):
     """Accept only integer limits between 1 and 100."""
     client, _, box_ids, _ = latest_reading_data
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings?limit={limit}")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings?limit={limit}")
 
     assert response.status_code == 422
 
@@ -269,7 +257,7 @@ def test_box_history_rejects_invalid_limit(latest_reading_data, limit):
     (-1, "unknown"),
     (None, "unknown"),
 ])
-def test_latest_freshness_uses_observation_time(latest_reading_data, quality, age_seconds, expected):
+async def test_latest_freshness_uses_observation_time(latest_reading_data, quality, age_seconds, expected):
     """Fresh uploads cannot refresh old observations or hide sensor errors."""
     client, db, box_ids, profile_ids = latest_reading_data
     now = datetime(2026, 1, 1, 12, 10)
@@ -280,9 +268,9 @@ def test_latest_freshness_uses_observation_time(latest_reading_data, quality, ag
         received_at=now, quality=quality,
         temperature_c=Decimal("5.25") if quality == "valid" else None,
     ))
-    db.flush()
+    await db.flush()
 
-    response = client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
+    response = await client.get(f"/api/boxes/{box_ids[0]}/readings/latest")
 
     assert response.status_code == 200
     reading = response.json()
@@ -292,7 +280,7 @@ def test_latest_freshness_uses_observation_time(latest_reading_data, quality, ag
     assert reading["received_at"] == "2026-01-01T12:10:00Z"
 
 
-def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
+async def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
     client, db, boxes, profiles = latest_reading_data
     # The clocks go back on 25 October. Local midnight starts at 23:00 UTC.
     start = datetime(2026, 10, 24, 23)
@@ -307,11 +295,11 @@ def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
             sequence_no=sequence, observed_at=observed, clock_reliable=observed is not None,
             received_at=stop + timedelta(days=1), quality="sensor_error",
         ))
-    db.flush()
+    await db.flush()
     url = f"/api/boxes/{boxes[0]}/readings"
     params = {"start_date": "2026-10-25", "end_date": "2026-10-25", "limit": 100}
-    first = client.get(url, params=params).json()
-    second = client.get(url, params=params | {"before_sequence": first[-1]["sequence_no"]}).json()
+    first = (await client.get(url, params=params)).json()
+    second = (await client.get(url, params=params | {"before_sequence": first[-1]["sequence_no"]})).json()
     assert [row["sequence_no"] for row in first + second] == list(range(101, 0, -1))
     assert [row["sample_id"] for row in first + second] == sample_ids[101:0:-1]
     for row in first + second:
@@ -328,49 +316,49 @@ def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
         query = {"start_date": start_date, "end_date": end_date}
         if start_date != end_date:
             query["before_sequence"] = 2
-        response = client.get(url, params=query)
+        response = await client.get(url, params=query)
         assert response.status_code == 200
         assert [row["sequence_no"] for row in response.json()] == expected
-    assert client.get(url, params={"start_date": "2026-10-25"}).status_code == 422
-    assert client.get(url, params=params | {"end_date": "2026-10-24"}).status_code == 422
+    assert (await client.get(url, params={"start_date": "2026-10-25"})).status_code == 422
+    assert (await client.get(url, params=params | {"end_date": "2026-10-24"})).status_code == 422
 
 
-def test_box_contact_is_independent_of_measurement_time(latest_reading_data):
+async def test_box_contact_is_independent_of_measurement_time(latest_reading_data):
     client, db, boxes, profiles = latest_reading_data
     url = f"/api/boxes/{boxes[0]}/status"
     now = datetime(2026, 1, 1, 12, 10)
     earlier = now - timedelta(hours=2)
 
-    def store(sequence, observed, received, quality="valid", box=0):
+    async def store(sequence, observed, received, quality="valid", box=0):
         db.add(TemperatureSample(
             sample_id=str(uuid4()), box_id=boxes[box], profile_id=profiles[box],
             sequence_no=sequence, observed_at=observed, clock_reliable=observed is not None,
             received_at=received, quality=quality,
             temperature_c=Decimal("5.25") if quality == "valid" else None,
         ))
-        db.flush()
+        await db.flush()
 
-    store(1, now, now, box=1)
-    assert client.get(url).json() == {
+    await store(1, now, now, box=1)
+    assert (await client.get(url)).json() == {
         "contact_status": "never_reported", "last_received_at": None,
         "observed_at": None, "freshness": "unknown",
     }
-    store(3, earlier, now - timedelta(seconds=91))
-    assert client.get(url).json()["contact_status"] == "not_reporting"
-    store(2, earlier - timedelta(seconds=30), now - timedelta(seconds=90))
-    assert client.get(url).json()["contact_status"] == "reporting"
-    store(1, earlier - timedelta(minutes=1), now)
-    assert client.get(url).json() == {
+    await store(3, earlier, now - timedelta(seconds=91))
+    assert (await client.get(url)).json()["contact_status"] == "not_reporting"
+    await store(2, earlier - timedelta(seconds=30), now - timedelta(seconds=90))
+    assert (await client.get(url)).json()["contact_status"] == "reporting"
+    await store(1, earlier - timedelta(minutes=1), now)
+    assert (await client.get(url)).json() == {
         "contact_status": "reporting", "last_received_at": "2026-01-01T12:10:00Z",
         "observed_at": "2026-01-01T10:10:00Z", "freshness": "stale",
     }
-    store(4, now, now)
-    assert client.get(url).json()["freshness"] == "fresh"
-    store(5, None, now)
-    assert client.get(url).json()["freshness"] == "unknown"
+    await store(4, now, now)
+    assert (await client.get(url)).json()["freshness"] == "fresh"
+    await store(5, None, now)
+    assert (await client.get(url)).json()["freshness"] == "unknown"
 
 
-def test_sensor_error_counts_as_contact(latest_reading_data):
+async def test_sensor_error_counts_as_contact(latest_reading_data):
     client, db, boxes, profiles = latest_reading_data
     now = datetime(2026, 1, 1, 12, 10)
     db.add(TemperatureSample(
@@ -378,8 +366,8 @@ def test_sensor_error_counts_as_contact(latest_reading_data):
         sequence_no=1, observed_at=now, clock_reliable=True, received_at=now,
         quality="sensor_error",
     ))
-    db.flush()
-    assert client.get(f"/api/boxes/{boxes[0]}/status").json() == {
+    await db.flush()
+    assert (await client.get(f"/api/boxes/{boxes[0]}/status")).json() == {
         "contact_status": "reporting", "last_received_at": "2026-01-01T12:10:00Z",
         "observed_at": None, "freshness": "unknown",
     }
