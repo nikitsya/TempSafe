@@ -42,9 +42,9 @@ async def get_box_readings(
         box_id: str,
         db: Annotated[AsyncSession, Depends(get_db)],
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
-    start_date: date | None = None,
-    end_date: date | None = None,
-    before_sequence: Annotated[int | None, Query(ge=0, le=18446744073709551615)] = None,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        before_sequence: Annotated[int | None, Query(ge=0, le=18446744073709551615)] = None,
 ):
     """Return this box's history in descending measurement order."""
     result = await db.execute(select(models.Box).where(models.Box.box_id == box_id))
