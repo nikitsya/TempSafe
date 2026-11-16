@@ -5,8 +5,8 @@ SET SESSION time_zone = '+00:00';
 
 CREATE TABLE boxes
 (
-    box_id                     VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    box_id VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+    name   VARCHAR(100) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_as_cs;

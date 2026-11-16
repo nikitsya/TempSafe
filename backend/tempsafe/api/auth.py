@@ -10,7 +10,8 @@ from argon2.exceptions import InvalidHashError, VerificationError
 from fastapi import APIRouter, Cookie, Depends, Header, HTTPException, Response
 from pydantic import BaseModel, SecretStr
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.concurrency import run_in_threadpool
 
 from tempsafe.db.models import AppUser, BoxAccess, UserSession
 from tempsafe.db.session import get_db
@@ -21,7 +22,7 @@ COOKIE = "__Host-tempsafe_session"
 SESSION_SECONDS = 8 * 60 * 60
 hasher = PasswordHasher()
 dummy_hash = hasher.hash(secrets.token_urlsafe())
-Database = Annotated[Session, Depends(get_db)]
+Database = Annotated[AsyncSession, Depends(get_db)]
 SessionCookie = Annotated[str | None, Cookie(alias=COOKIE)]
 
 
@@ -40,42 +41,42 @@ def utc_now() -> datetime:
 
 
 @router.post("/login", status_code=204)
-def login(credentials: Login, response: Response, db: Database, token: SessionCookie = None):
+async def login(credentials: Login, response: Response, db: Database, token: SessionCookie = None):
     password = credentials.password.get_secret_value()
     if len(credentials.username) > 191 or len(password) > 1024:
         raise HTTPException(401, "Invalid username or password")
-    user = db.scalar(select(AppUser).where(AppUser.auth_subject == credentials.username))
+    user = await db.scalar(select(AppUser).where(AppUser.auth_subject == credentials.username))
     try:
-        hasher.verify(user.password_hash if user else dummy_hash, password)
+        await run_in_threadpool(hasher.verify, user.password_hash if user else dummy_hash, password)
     except (InvalidHashError, VerificationError):
         raise HTTPException(401, "Invalid username or password") from None
     if user is None:
         raise HTTPException(401, "Invalid username or password")
 
     now = utc_now()
-    db.execute(delete(UserSession).where(UserSession.expires_at <= now))
+    await db.execute(delete(UserSession).where(UserSession.expires_at <= now))
     if token:
-        db.execute(delete(UserSession).where(UserSession.token_hash == token_digest(token)))
+        await db.execute(delete(UserSession).where(UserSession.token_hash == token_digest(token)))
     new_token = secrets.token_urlsafe(32)
     db.add(UserSession(token_hash=token_digest(new_token), user_id=user.user_id,
                        expires_at=now + timedelta(seconds=SESSION_SECONDS)))
-    db.commit()
+    await db.commit()
     response.set_cookie(COOKIE, new_token, max_age=SESSION_SECONDS,
                         httponly=True, secure=True, samesite="strict")
     response.headers["Cache-Control"] = "no-store"
 
 
 @router.post("/logout", status_code=204)
-def logout(response: Response, db: Database, token: SessionCookie = None):
+async def logout(response: Response, db: Database, token: SessionCookie = None):
     if token:
-        db.execute(delete(UserSession).where(UserSession.token_hash == token_digest(token)))
-        db.commit()
+        await db.execute(delete(UserSession).where(UserSession.token_hash == token_digest(token)))
+        await db.commit()
     response.delete_cookie(COOKIE, secure=True, httponly=True, samesite="strict")
     response.headers["Cache-Control"] = "no-store"
 
 
-def current_session(db: Database, response: Response, token: SessionCookie = None) -> UserSession:
-    session = db.get(UserSession, token_digest(token)) if token else None
+async def current_session(db: Database, response: Response, token: SessionCookie = None) -> UserSession:
+    session = await db.get(UserSession, token_digest(token)) if token else None
     if session is None or session.expires_at <= utc_now():
         raise HTTPException(401, "Sign in to access readings")
     response.headers["Cache-Control"] = "no-store"
@@ -85,9 +86,9 @@ def current_session(db: Database, response: Response, token: SessionCookie = Non
 CurrentSession = Annotated[UserSession, Depends(current_session)]
 
 
-def accessible_boxes(db: Database, session: CurrentSession) -> list[str]:
+async def accessible_boxes(db: Database, session: CurrentSession) -> list[str]:
     query = select(BoxAccess.box_id).where(BoxAccess.user_id == session.user_id).order_by(BoxAccess.box_id)
-    return list(db.scalars(query))
+    return list(await db.scalars(query))
 
 
 AllowedBoxes = Annotated[list[str], Depends(accessible_boxes)]
@@ -99,8 +100,8 @@ class AccountResponse(BaseModel):
 
 
 @router.get("/me")
-def get_account(db: Database, session: CurrentSession, allowed: AllowedBoxes) -> AccountResponse:
-    user = db.get(AppUser, session.user_id)
+async def get_account(db: Database, session: CurrentSession, allowed: AllowedBoxes) -> AccountResponse:
+    user = await db.get(AppUser, session.user_id)
     return AccountResponse(username=user.auth_subject, box_ids=allowed)
 
 

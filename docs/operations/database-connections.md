@@ -44,7 +44,7 @@ MySQL runs in Docker on the same EC2 instance as the backend; it is not an RDS
 service. The deployment guide records the project at `/home/ubuntu/Smart-Box`
 and the backend as the host service `tempsafe.service`.
 
-The backend uses SQLAlchemy with MySQL Connector/Python. It reads the project
+The backend uses SQLAlchemy's asynchronous sessions with `aiomysql`. It reads the project
 `.env` without overwriting existing process environment variables. Therefore,
 systemd environment overrides must also be checked when verifying production.
 

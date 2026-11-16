@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from tempsafe.api.auth import require_box
 from tempsafe.db import models
@@ -38,16 +38,16 @@ def history_reading(sample: models.TemperatureSample, profile: models.ThresholdP
 
 
 @router.get("/boxes/{box_id}/readings", response_model=list[HistoryReadingResponse])
-def get_box_readings(
+async def get_box_readings(
         box_id: str,
-        db: Annotated[Session, Depends(get_db)],
+        db: Annotated[AsyncSession, Depends(get_db)],
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
-    start_date: date | None = None,
-    end_date: date | None = None,
-    before_sequence: Annotated[int | None, Query(ge=0, le=18446744073709551615)] = None,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        before_sequence: Annotated[int | None, Query(ge=0, le=18446744073709551615)] = None,
 ):
     """Return this box's history in descending measurement order."""
-    result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
+    result = await db.execute(select(models.Box).where(models.Box.box_id == box_id))
 
     if result.scalars().first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Box not found")
@@ -68,18 +68,19 @@ def get_box_readings(
         )
     if before_sequence is not None:
         query = query.where(sample.sequence_no < before_sequence)
-    rows = db.execute(query.limit(limit))
+    rows = await db.execute(query.limit(limit))
     return [history_reading(sample, profile) for sample, profile in rows]
 
 
 @router.get("/boxes/{box_id}/readings/latest", response_model=LatestReadingResponse)
-def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
+async def get_latest_reading(box_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     """Return the last sample taken by this box, including sensor errors."""
-    result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
+    result = await db.execute(select(models.Box).where(models.Box.box_id == box_id))
     if result.scalars().first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Box not found")
 
-    row = db.execute(recorded_readings(box_id).limit(1)).first()
+    result = await db.execute(recorded_readings(box_id).limit(1))
+    row = result.first()
     if row is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -94,7 +95,7 @@ def get_latest_reading(box_id: str, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/boxes/{box_id}/status", response_model=BoxStatusResponse)
-def get_box_status(box_id: str, db: Annotated[Session, Depends(get_db)]):
+async def get_box_status(box_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     """Use every stored receipt for contact and the latest valid sample for temperature."""
     sample = models.TemperatureSample
     receipt = select(func.max(sample.received_at)).where(sample.box_id == box_id)
@@ -104,10 +105,11 @@ def get_box_status(box_id: str, db: Annotated[Session, Depends(get_db)]):
         .order_by(sample.sequence_no.desc())
         .limit(1)
     )
-    row = db.execute(
+    result = await db.execute(
         select(receipt.scalar_subquery(), observation.scalar_subquery())
         .select_from(models.Box).where(models.Box.box_id == box_id)
-    ).one_or_none()
+    )
+    row = result.one_or_none()
     if row is None:
         raise HTTPException(404, "Box not found")
 
@@ -127,9 +129,9 @@ def get_box_status(box_id: str, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/boxes/{box_id}", response_model=BoxResponse)
-def get_box(box_id: str, db: Annotated[Session, Depends(get_db)]):
+async def get_box(box_id: str, db: Annotated[AsyncSession, Depends(get_db)]):
     """Return one box by ID, or 404 when it does not exist."""
-    result = db.execute(select(models.Box).where(models.Box.box_id == box_id))
+    result = await db.execute(select(models.Box).where(models.Box.box_id == box_id))
     box = result.scalars().first()
 
     if box:

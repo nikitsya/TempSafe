@@ -13,16 +13,16 @@ is not included in this schema.
 
 ## 1. System technologies and languages
 
-| Component              | Proposed technology                    | Language or format       | Role in TempSafe                                                    |
-|------------------------|----------------------------------------|--------------------------|---------------------------------------------------------------------|
-| Device application     | Raspberry Pi application               | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
-| Device's local storage | SQLite                                 | SQL through Python       | Keep an offline upload queue on the device                          |
-| Network messages       | MQTT over TLS                          | JSON payloads            | Publish observations through the broker to the FastMQTT subscriber  |
-| Backend                | FastAPI                                | Python                   | Authenticate devices and users, validate messages and retrieve data |
-| Database connector     | SQLAlchemy with MySQL Connector/Python | Python                   | Let the backend execute parameterised MySQL queries                 |
-| Central database       | MySQL with InnoDB                      | SQL                      | Store boxes, access permissions and historical observations         |
-| User interface         | Web application                        | HTML, CSS and JavaScript | Display temperature, freshness, history and warnings                |
-| Scheduled processing   | cron running application scripts       | cron syntax and Python   | Produce summaries, check stale devices and perform maintenance      |
+| Component              | Proposed technology              | Language or format       | Role in TempSafe                                                    |
+|------------------------|----------------------------------|--------------------------|---------------------------------------------------------------------|
+| Device application     | Raspberry Pi application         | Python                   | Read one internal temperature sensor; timestamp and queue samples   |
+| Device's local storage | SQLite                           | SQL through Python       | Keep an offline upload queue on the device                          |
+| Network messages       | MQTT over TLS                    | JSON payloads            | Publish observations through the broker to the FastMQTT subscriber  |
+| Backend                | FastAPI                          | Python                   | Authenticate devices and users, validate messages and retrieve data |
+| Database connector     | SQLAlchemy with aiomysql         | Python                   | Execute parameterised MySQL queries asynchronously                  |
+| Central database       | MySQL with InnoDB                | SQL                      | Store boxes, access permissions and historical observations         |
+| User interface         | Web application                  | HTML, CSS and JavaScript | Display temperature, freshness, history and warnings                |
+| Scheduled processing   | cron running application scripts | cron syntax and Python   | Produce summaries, check stale devices and perform maintenance      |
 
 ## 2. Data requirements
 
@@ -217,7 +217,7 @@ before implementation and test restoration.
 | Ref | Resource                                                                                                                            | What to use it for                                                |
 |-----|-------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | R1  | [FastAPI: SQL databases](https://fastapi.tiangolo.com/tutorial/sql-databases/)                                                      | Understand backend/database integration                           |
-| R2  | [MySQL Connector/Python Developer Guide](https://dev.mysql.com/doc/connector-python/en/)                                            | Python connections, parameter binding and transactions            |
+| R2  | [SQLAlchemy MySQL dialect for aiomysql](https://docs.sqlalchemy.org/en/20/dialects/mysql.html#aiomysql)                             | Asynchronous MySQL connections from Python                        |
 | R3  | [MySQL: Introduction to InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-introduction.html)                                   | Transactional storage and relational integrity                    |
 | R4  | [MySQL: Optimisation and indexes](https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html)                                | Choose indexes from query patterns                                |
 | R5  | [MongoDB: Schema validation](https://www.mongodb.com/docs/manual/core/schema-validation/)                                           | Validate flexible documents                                       |
