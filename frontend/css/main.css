@@ -754,6 +754,85 @@ input:focus-visible {
     padding: 0 10px;
 }
 
+.filter-date label {
+    color: var(--muted);
+}
+
+/* ← date → : step one day back or forward */
+.date-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.step-btn {
+    min-width: 48px;
+    min-height: 48px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    background: #fff;
+    color: var(--accent-dark);
+    font: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.step-btn:hover:not(:disabled) {
+    background: var(--accent-soft);
+}
+
+.step-btn:disabled {
+    color: var(--line-strong);
+    background: var(--page);
+    cursor: default;
+}
+
+/* Show: Graph / Readings, with Download CSV on the right */
+.views-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.csv-btn {
+    min-height: 48px;
+    padding: 0 18px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-control);
+    background: #fff;
+    color: var(--accent-dark);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.csv-btn:hover {
+    background: var(--accent-soft);
+}
+
+/* Table title with the period date once on the right */
+.state-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.state-head .state-title {
+    margin: 0;
+}
+
+.row-day {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .history-summary {
     margin: 0 0 14px;
     font-size: 15px;

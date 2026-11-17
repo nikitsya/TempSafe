@@ -51,6 +51,7 @@ data, red band for sensor fault, legend) and three framed buttons: **Graph**, **
 ## History
 
 **Period**: Today (default), 1 hour or a date from the last 30 days (the calendar does not allow older dates).
+The **←** and **→** buttons next to the date open the previous or next day (**→** stops at today).
 All readings of the period are loaded, with no limit, so the graph, Readings and Issues always cover the full period. **Show**: Graph or Readings.
 
 - **Graph**: in its own frame titled **Temperature readings**, with the date (`14 Nov 2026`) in a box above it. There
@@ -61,6 +62,8 @@ All readings of the period are loaded, with no limit, so the graph, Readings and
   hours `8` to `18` for Today or a date (the window grows if there are readings earlier or later), and marks such as
   `15:35` for 1 hour.
 - **Readings**: table with Date (`14 Nov 2026`), Time (`16:41:16`), °C and Status.
+- **Download CSV** (next to Graph and Readings): saves every reading of the period as `tempsafe-2026-11-17.csv`
+  with Date, Time, Temperature (°C) and Status, oldest first. It opens in Excel.
 
 ## Alerts
 
@@ -68,12 +71,14 @@ All readings of the period are loaded, with no limit, so the graph, Readings and
 
 - **Status** (notification history, newest first): one row per change of status. Columns: **Status** (Alert,
   Warning, Normal, Sensor fault or No data, as a coloured dot and word), **Peak** (a dash for Sensor fault and No
-  data), **How long** (or **Now**) and **Date**. When the box is offline or the sensor fails, only the No data or
-  Sensor fault row shows **Now**; the last temperature row ends at the last reading. Rows are lightly tinted with the status colour. There is no Time
+  data) and **How long** (or **Now**). The date is shown once, in a box next to the table title (`17 Nov 2026`); a row
+  that started on an earlier day shows `from 16 Nov` under How long. When the box is offline or the sensor fails, only the No data or
+  Sensor fault row shows **Now**; the last temperature row ends at the last reading. Rows are lightly tinted with the status colour. There is no Date or Time
   column.
 - **Issues**: **Sensor fault** (the box was online but the sensor could not measure) and **No data** (nothing was
-  received: the box was offline, had no connection or readings were missing). Columns: **Problem**, **How long**,
-  **Date** and **Time**, newest first. An ongoing issue shows `since {time}` and **Now**. With no issues the page
+  received: the box was offline, had no connection or readings were missing). Columns: **Problem**, **How long** and
+  **Time**, newest first; the date is shown once next to the title, and a time on another day starts with the day
+  (`16 Nov, 23:50 – 00:10`). An ongoing issue shows `since {time}` and **Now**. With no issues the page
   shows **✓ No issues**.
 
 Durations: `1+ min` means a sensor error or missing readings ended the row. Long durations show hours or days

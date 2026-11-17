@@ -488,6 +488,27 @@ function renderGraph(readings, domain) {
 
 // Issues table: No data and Sensor fault, with how long they lasted, date and time.
 // The meaning of each status is in docs/design/ui/ui-wording.md.
+// Date of the chosen period, shown once above a table: "17 Nov 2026" (or a range).
+function periodDateText() {
+    if (!lastDomain) return '';
+    return dateRange(lastDomain.from, new Date(Math.min(lastDomain.to.getTime() - 1, Date.now())));
+}
+
+// Heading of a table with the period date in a box on the right.
+function tableHead(id, title) {
+    return `<div class="state-head">
+        <h2 class="state-title" id="${id}">${title}</h2>
+        <span class="graph-date">${escapeHtml(periodDateText())}</span>
+    </div>`;
+}
+
+// Day of a row when it is not the day shown above the table: "from 16 Nov".
+function otherDay(date) {
+    if (!date || !lastDomain) return '';
+    const shown = lastDomain.from.toDateString();
+    return date.toDateString() === shown ? '' : `<small class="row-day">from ${escapeHtml(shortDay(date))}</small>`;
+}
+
 function renderIssues(readings, domain) {
     const issues = findIssues(readings, domain);
     if (issues.length === 0) {
@@ -498,23 +519,22 @@ function renderIssues(readings, domain) {
         const minutes = Math.max(1, Math.round((issue.end - issue.start) / 60000));
         const start = clock(issue.start);
         const end = clock(issue.end);
-        const when = issue.ongoing ? `since ${start}` : (start === end ? start : `${start} – ${end}`);
+        const day = issue.start.toDateString() === (lastDomain ? lastDomain.from.toDateString() : '') ? '' : `${shortDay(issue.start)}, `;
+        const when = issue.ongoing ? `since ${day}${start}` : (start === end ? `${day}${start}` : `${day}${start} – ${end}`);
         return `<tr class="${fault ? 'state-fault' : 'state-offline'}">
             <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? '⚠' : '⦸'}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
             <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)}</td>
-            <td data-label="Date">${escapeHtml(dateRange(issue.start, issue.ongoing ? null : issue.end))}</td>
             <td data-label="Time">${escapeHtml(when)}</td>
         </tr>`;
     }).join('');
     return `
         <section class="table-wrap" aria-labelledby="issues-title" role="region" tabindex="0">
-            <h2 class="state-title" id="issues-title">Issues</h2>
+            ${tableHead('issues-title', 'Issues')}
             <table class="state-table">
                 <thead>
                 <tr>
                     <th scope="col">Problem</th>
                     <th scope="col">How long</th>
-                    <th scope="col">Date</th>
                     <th scope="col">Time</th>
                 </tr>
                 </thead>
@@ -652,8 +672,7 @@ function renderAlertPeriods(readings) {
             html: `<tr class="${label.cls}">
                 <th scope="row"><span class="state-pill"><span aria-hidden="true">${label.icon}</span> ${label.text}</span></th>
                 <td class="state-peak" data-label="Peak">${p.peak.toFixed(1)}°C</td>
-                <td data-label="How long">${length}</td>
-                <td data-label="Date">${escapeHtml(dateRange(readingTime(p.start), p.end === null ? null : readingTime(p.unsure ? p.last : p.end)))}</td>
+                <td data-label="How long">${length} ${otherDay(readingTime(p.start))}</td>
             </tr>`
         };
     });
@@ -667,8 +686,7 @@ function renderAlertPeriods(readings) {
             html: `<tr class="${fault ? 'state-fault' : 'state-offline'}">
                 <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? '⚠' : '⦸'}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
                 <td class="state-peak" data-label="Peak">—</td>
-                <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)}</td>
-                <td data-label="Date">${escapeHtml(dateRange(issue.start, issue.ongoing ? null : issue.end))}</td>
+                <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)} ${otherDay(issue.start)}</td>
             </tr>`
         });
     });
@@ -677,14 +695,13 @@ function renderAlertPeriods(readings) {
 
     return `
         <section class="table-wrap" aria-labelledby="state-title" role="region" tabindex="0">
-            <h2 class="state-title" id="state-title">Notification history</h2>
+            ${tableHead('state-title', 'Notification history')}
             <table class="state-table">
                 <thead>
                 <tr>
                     <th scope="col">Status</th>
                     <th scope="col">Peak</th>
                     <th scope="col">How long</th>
-                    <th scope="col">Date</th>
                 </tr>
                 </thead>
                 <tbody>${rows.map((r) => r.html).join('')}</tbody>
@@ -831,13 +848,36 @@ function renderFilter() {
     const max = iso(today);
     // History can be opened for the last 30 days (HISTORY_DAYS).
     const min = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - (HISTORY_DAYS - 1)));
+    // The day the arrows move from: the chosen date, or today.
+    const shownDay = currentRange.key === 'date' ? currentRange.date
+        : currentRange.key === 'around' ? iso(currentRange.from) : max;
     filter.innerHTML = `
         <div class="filter-row">
             <div class="filter-buttons" role="group" aria-label="Period">${buttons}</div>
-            <label class="filter-date">Date
-                <input type="date" id="history-date" min="${min}" max="${max}" value="${currentRange.key === 'date' ? currentRange.date : ''}">
-            </label>
+            <div class="filter-date">
+                <label for="history-date">Date</label>
+                <div class="date-step">
+                    <button type="button" class="step-btn" id="day-prev" aria-label="Previous day" ${shownDay <= min ? 'disabled' : ''}>←</button>
+                    <input type="date" id="history-date" min="${min}" max="${max}" value="${currentRange.key === 'hour' ? '' : shownDay}">
+                    <button type="button" class="step-btn" id="day-next" aria-label="Next day" ${shownDay >= max ? 'disabled' : ''}>→</button>
+                </div>
+            </div>
         </div>`;
+
+    // ← and →: the day before or after the one shown. Today counts as "Today".
+    const goToDay = (day) => {
+        currentRange = day === max ? {key: 'today'} : {key: 'date', date: day};
+        history.replaceState(null, '', location.pathname + location.hash);
+        renderFilter();
+        loadHistory();
+    };
+    const step = (days) => {
+        const d = new Date(`${shownDay}T00:00:00`);
+        d.setDate(d.getDate() + days);
+        return iso(d);
+    };
+    filter.querySelector('#day-prev').addEventListener('click', () => goToDay(step(-1)));
+    filter.querySelector('#day-next').addEventListener('click', () => goToDay(step(1)));
 
     filter.querySelectorAll('[data-range]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -877,13 +917,52 @@ let lastReadings = null;
 let lastDomain = null;   // start and end of the chosen period, for the time axis
 let lastSummary = '';
 
+// Status of a reading as plain text, for the CSV file.
+function statusText(reading) {
+    if (reading.quality === 'sensor_error') return 'Sensor fault';
+    if (readingValue(reading) === null) return 'Unknown';
+    const state = String(reading.temperature_state || '').toLowerCase();
+    return {alert: 'Alert', warning: 'Warning', normal: 'Normal'}[state] || 'Unknown';
+}
+
+// Download every reading of the chosen period as a CSV file (opens in Excel).
+function downloadCsv() {
+    if (!lastReadings || lastReadings.length === 0) return;
+    const rows = [['Date', 'Time', 'Temperature (°C)', 'Status']];
+    lastReadings.slice().reverse().forEach((r) => {   // oldest first
+        const t = readingTime(r);
+        const value = readingValue(r);
+        rows.push([
+            t ? dublinDate(t) : '',
+            t ? t.toLocaleTimeString('en-IE', {hour: '2-digit', minute: '2-digit', second: '2-digit'}) : '',
+            value === null ? '' : value.toFixed(1),
+            statusText(r),
+        ]);
+    });
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    // The BOM lets Excel show °C correctly.
+    const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
+    const dates = rangeDates(currentRange);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `tempsafe-${dates ? dates.start : 'readings'}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(link.href);
+}
+
 function renderViews() {
     const box = document.getElementById('history-views');
     if (!box) return;
-    box.innerHTML = `<div class="view-buttons" role="group" aria-label="Show">${
+    const csv = PAGE === 'history'
+        ? '<button type="button" class="csv-btn" id="download-csv">Download CSV</button>' : '';
+    box.innerHTML = `<div class="views-row"><div class="view-buttons" role="group" aria-label="Show">${
         Object.entries(VIEWS).map(([key, label]) =>
             `<button type="button" class="view-btn" data-view="${key}" aria-pressed="${currentView === key}">${label}</button>`
-        ).join('')}</div>`;
+        ).join('')}</div>${csv}</div>`;
+    const csvButton = box.querySelector('#download-csv');
+    if (csvButton) csvButton.addEventListener('click', downloadCsv);
     box.querySelectorAll('[data-view]').forEach((button) => {
         button.addEventListener('click', () => {
             currentView = button.dataset.view;
