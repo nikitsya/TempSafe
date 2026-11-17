@@ -110,17 +110,9 @@ let recentReadings = [];   // latest 100 readings, newest first (for the Last ho
 let todayStats = null;     // {min, max, alerts, lastAlert} for today
 let alertBanner = null;    // {low: true/false} while an alert is on
 
-// "4 min", "1 h", "1 h 20 min", "2 days" – as short as possible.
+// "4 min", "1 h 20 min", "1 day 16 h", "1 month 3 days" (main.js).
 function shortDuration(ms) {
-    const minutes = Math.max(1, Math.round(ms / 60000));
-    if (minutes < 60) return `${minutes} min`;
-    if (minutes < 1440) {
-        const h = Math.floor(minutes / 60);
-        const m = minutes % 60;
-        return m ? `${h} h ${m} min` : `${h} h`;
-    }
-    const days = Math.round(minutes / 1440);
-    return `${days} day${days === 1 ? '' : 's'}`;
+    return readableDuration(ms / 60000);
 }
 
 async function loadRecentState() {
@@ -305,9 +297,12 @@ function lastHourChart(profile) {
             const gap = Number(b.sequence_no) - Number(a.sequence_no) > 1 ||
                 new Date(b.observed_at) - new Date(a.observed_at) > 90000;
             if (gap || a.quality !== 'valid' || b.quality !== 'valid') continue;
-            svg += `<line class="graph-seg ${color(b)}" x1="${x(new Date(a.observed_at).getTime()).toFixed(1)}" ` +
-                `y1="${y(Number(a.temperature_c)).toFixed(1)}" x2="${x(new Date(b.observed_at).getTime()).toFixed(1)}" ` +
-                `y2="${y(Number(b.temperature_c)).toFixed(1)}"/>`;
+            // The colour changes where the line crosses a limit.
+            limitPieces(new Date(a.observed_at).getTime(), Number(a.temperature_c),
+                new Date(b.observed_at).getTime(), Number(b.temperature_c), profile, color(b)).forEach((s) => {
+                svg += `<line class="graph-seg ${s.cls}" x1="${x(s.t1).toFixed(1)}" y1="${y(s.v1).toFixed(1)}" ` +
+                    `x2="${x(s.t2).toFixed(1)}" y2="${y(s.v2).toFixed(1)}"/>`;
+            });
         }
         const last = valid[valid.length - 1];
         body = `<svg class="mini-chart" role="img" viewBox="0 0 ${W} ${H}"
@@ -347,7 +342,8 @@ async function loadToday() {
         }).format(new Date());
         const all = [];
         let before = null;
-        for (let page = 0; page < 10; page++) {
+        // Every reading of today, page by page: no limit.
+        while (true) {
             let url = `${API_BASE}/boxes/TS-01/readings?limit=100&start_date=${today}&end_date=${today}`;
             if (before !== null) url += `&before_sequence=${before}`;
             const response = await fetch(url);
@@ -355,7 +351,9 @@ async function loadToday() {
             const rows = await response.json();
             all.push(...rows);
             if (rows.length < 100) break;
-            before = rows[rows.length - 1].sequence_no;
+            const next = rows[rows.length - 1].sequence_no;
+            if (before !== null && next >= before) break;   // safety: the API did not move back
+            before = next;
         }
         const values = all.filter((r) => r.quality === 'valid').map((r) => Number(r.temperature_c)).filter(Number.isFinite);
         let alerts = 0;

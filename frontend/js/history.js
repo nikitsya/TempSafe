@@ -419,7 +419,7 @@ function renderGraph(readings, domain) {
     if (showLower) limitLine(profile.lowerC, 'graph-upper', `Lower limit ${profile.lowerC}°C`);
 
     // Temperature line coloured by status: green Normal, amber Warning, red Alert.
-    // Each piece takes the status of the reading it ends at. No line across gaps or faults.
+    // The colour changes where the line crosses a limit. No line across gaps or faults.
     const stateClass = (r) => {
         if (alertKind(r)) return 'line-alert';
         return String(r.temperature_state || '').toLowerCase() === 'warning' ? 'line-warning' : 'line-normal';
@@ -428,8 +428,10 @@ function renderGraph(readings, domain) {
         const v = readingValue(r);
         const prev = points[i - 1];
         if (v === null || !prev || readingValue(prev) === null || hasGap(prev, r)) return;
-        svg += `<line x1="${x(ms(prev)).toFixed(1)}" y1="${y(readingValue(prev)).toFixed(1)}" ` +
-            `x2="${x(ms(r)).toFixed(1)}" y2="${y(v).toFixed(1)}" class="graph-seg ${stateClass(r)}"/>`;
+        limitPieces(ms(prev), readingValue(prev), ms(r), v, readingProfile(r) || profile, stateClass(r)).forEach((s) => {
+            svg += `<line x1="${x(s.t1).toFixed(1)}" y1="${y(s.v1).toFixed(1)}" ` +
+                `x2="${x(s.t2).toFixed(1)}" y2="${y(s.v2).toFixed(1)}" class="graph-seg ${s.cls}"/>`;
+        });
     });
 
     // A reading with no neighbour is drawn as a dot, so it is not lost.
@@ -537,17 +539,7 @@ function periodDate(reading) {
 
 // "45 min", "3 h 20 min", "1 day 2 h" or "8 days".
 function formatDuration(minutes) {
-    if (minutes < 60) return `${minutes} min`;
-    if (minutes < 1440) {
-        const h = Math.floor(minutes / 60);
-        const m = minutes % 60;
-        return m ? `${h} h ${m} min` : `${h} h`;
-    }
-    const hours = Math.round(minutes / 60);
-    const days = Math.floor(hours / 24);
-    const h = hours % 24;
-    const dayText = `${days} day${days === 1 ? '' : 's'}`;
-    return h && days < 7 ? `${dayText} ${h} h` : dayText;
+    return readableDuration(minutes);   // main.js
 }
 
 // Date of a period: "14 Nov 2026", or "4 – 6 Nov 2026" when it crosses midnight.
@@ -631,6 +623,15 @@ function findStatePeriods(readings) {
 function renderAlertPeriods(readings) {
     const periods = findStatePeriods(readings);
     const issues = findIssues(readings, lastDomain);
+    // Box offline or sensor fault now: the last temperature row is not "Now" any more.
+    // It ends at the last reading, and the ongoing No data / Sensor fault row comes first.
+    const ongoing = issues.find((i) => i.ongoing);
+    periods.forEach((p) => {
+        if (p.end === null && ongoing) {
+            p.end = p.last;
+            p.unsure = true;
+        }
+    });
     if (periods.length === 0 && issues.length === 0) {
         return '<p class="period-none">No temperatures in this period</p>';
     }
@@ -638,18 +639,13 @@ function renderAlertPeriods(readings) {
     // Temperature rows.
     const rows = periods.map((p) => {
         const label = STATE_LABEL[p.state];
-        const start = periodTime(p.start);
         let length;
-        let when;
         if (p.end === null) {
             length = '<span class="now-chip">Now</span>';
-            when = `since ${start}`;
         } else {
             const minutes = periodMinutes(p.start, p.unsure ? p.last : p.end);
             // "+" after the number: at least this long ("1+ min", "2+ h 10 min").
             length = minutes === null ? '—' : formatDuration(minutes).replace(/^(\d+)/, p.unsure ? '$1+' : '$1');
-            const end = periodTime(p.unsure ? p.last : p.end);
-            when = end && end !== start ? `${start} – ${end}` : start;
         }
         return {
             at: readingTime(p.start) || new Date(0),
@@ -666,8 +662,6 @@ function renderAlertPeriods(readings) {
     issues.forEach((issue) => {
         const fault = issue.type === 'fault';
         const minutes = Math.max(1, Math.round((issue.end - issue.start) / 60000));
-        const start = clock(issue.start);
-        const end = clock(issue.end);
         rows.push({
             at: issue.start,
             html: `<tr class="${fault ? 'state-fault' : 'state-offline'}">
@@ -824,6 +818,8 @@ function graphWindow(domain, readings) {
     return {from, to};
 }
 
+const HISTORY_DAYS = 30;
+
 function renderFilter() {
     const filter = document.getElementById('history-filter');
     if (!filter) return;
@@ -831,12 +827,15 @@ function renderFilter() {
         `<button type="button" class="filter-btn" data-range="${key}" aria-pressed="${currentRange.key === key}">${r.label}</button>`
     ).join('');
     const today = new Date();
-    const max = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const max = iso(today);
+    // History can be opened for the last 30 days (HISTORY_DAYS).
+    const min = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - (HISTORY_DAYS - 1)));
     filter.innerHTML = `
         <div class="filter-row">
             <div class="filter-buttons" role="group" aria-label="Period">${buttons}</div>
             <label class="filter-date">Date
-                <input type="date" id="history-date" max="${max}" value="${currentRange.key === 'date' ? currentRange.date : ''}">
+                <input type="date" id="history-date" min="${min}" max="${max}" value="${currentRange.key === 'date' ? currentRange.date : ''}">
             </label>
         </div>`;
 
@@ -851,6 +850,13 @@ function renderFilter() {
     const dateInput = filter.querySelector('#history-date');
     dateInput.addEventListener('change', () => {
         if (!dateInput.value) return;
+        // A typed date outside the last 30 days is not loaded.
+        if (dateInput.value < dateInput.min || dateInput.value > dateInput.max) {
+            dateInput.setCustomValidity(`Choose a date from ${dateInput.min} to ${dateInput.max}.`);
+            dateInput.reportValidity();
+            return;
+        }
+        dateInput.setCustomValidity('');
         currentRange = {key: 'date', date: dateInput.value};
         history.replaceState(null, '', location.pathname + location.hash);
         renderFilter();
@@ -941,15 +947,12 @@ async function fetchPage(query) {
     return Array.isArray(page) ? page : [];
 }
 
-// All readings in a calendar period, page by page (newest first), up to
-// MAX_PERIOD_READINGS so a long day does not slow the page down.
-const MAX_PERIOD_READINGS = 1000;
-let periodCut = false;
+// All readings in a calendar period, page by page (newest first). There is no limit:
+// the graph, Issues and Readings always cover the whole period, however often the box measures.
 
 async function fetchPeriod(dates, times) {
     const all = [];
     let before = null;
-    periodCut = false;
     while (true) {
         let query = `limit=${HISTORY_LIMIT}&start_date=${dates.start}&end_date=${dates.end}`;
         if (before !== null) query += `&before_sequence=${before}`;
@@ -957,14 +960,13 @@ async function fetchPeriod(dates, times) {
         if (page === null) return null;
         all.push(...page);
         if (page.length < HISTORY_LIMIT) break;
-        before = page[page.length - 1].sequence_no;
+        const next = page[page.length - 1].sequence_no;
+        // Safety: stop if the API does not move back (would load the same page forever).
+        if (before !== null && next >= before) break;
+        before = next;
         // Pages go back in time: stop once they are older than the period.
         const oldest = readingTime(page[page.length - 1]);
         if (times && oldest && oldest < times.from) break;
-        if (all.length >= MAX_PERIOD_READINGS) {
-            periodCut = true;
-            break;
-        }
     }
     return all;
 }
@@ -1009,10 +1011,8 @@ async function loadHistory() {
 
         lastReadings = readings;
         lastDomain = periodDomain(currentRange);
-        // No "N readings" line (usability). Only say so when a long period was cut,
-        // or name the alert the user opened with View.
-        lastSummary = currentRange.key === 'around' ? rangeLabel(currentRange) :
-            (dates && periodCut ? `Showing the latest ${readings.length} readings in this period.` : '');
+        // No "N readings" line (usability). Only name the alert the user opened with View.
+        lastSummary = currentRange.key === 'around' ? rangeLabel(currentRange) : '';
         showView(false);
 
     } catch (error) {

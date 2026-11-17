@@ -3,7 +3,7 @@
 These values apply to the original UI mock-ups and HTML prototype. The later
 [core scenario mock-ups](core-scenario-mockups.md) document their own visual style.
 
-## Web application (from Sprint 9)
+## Web application 
 
 Clinical and calm, easy to read at a glance in an ambulance. A navy frame, white cards on a cool grey page, one
 accent blue for actions; green, amber and red are used only for status. All text pairs meet WCAG AA.

@@ -213,6 +213,21 @@ function renderNoAccess() {
     section.setAttribute('aria-busy', 'false');
 }
 
+// Limits recorded with the latest reading, or null.
+async function latestReadingLimits() {
+    try {
+        const response = await fetch(`${API_BASE}/boxes/${SETTINGS_BOX_ID}/readings/latest`,
+            {headers: {Accept: 'application/json'}});
+        if (!response.ok) return null;
+        const data = await response.json();
+        const p = data && data.profile;
+        if (!p || p.lower_c == null || p.upper_c == null) return null;
+        return {lower_c: p.lower_c, warning_c: p.warning_c, upper_c: p.upper_c, source_note: p.source_note || ''};
+    } catch (error) {
+        return null;
+    }
+}
+
 async function loadLimits() {
     try {
         const response = await fetch(CONFIG_URL, {headers: {Accept: 'application/json'}});
@@ -224,7 +239,9 @@ async function loadLimits() {
             const data = await response.json().catch(() => ({}));
             // The box has no limits yet: show an empty form.
             if (data.detail === 'No threshold configuration selected') {
-                currentLimits = null;
+                // No limits are selected for the box yet. Fill in the limits recorded
+                // with the latest reading, so the user sees what the box uses now.
+                currentLimits = await latestReadingLimits();
                 renderForm();
                 return;
             }

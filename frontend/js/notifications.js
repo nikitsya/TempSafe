@@ -111,7 +111,7 @@ function alertMessage(period, moment, readings) {
     return {
         kind: period.low ? 'low' : 'high',
         title: 'Alert',
-        text: minutes === null ? nowText : `${nowText} · ${minutes} min`,
+        text: minutes === null ? nowText : `${nowText} · ${readableDuration(minutes)}`,
     };
 }
 
@@ -266,7 +266,7 @@ async function checkDevice() {
         // Offline
         if (status.contact_status === 'not_reporting' && status.last_received_at) {
             const minutes = minutesBetween(status.last_received_at, new Date());
-            const message = {kind: 'offline', title: 'Offline', text: `No data for ${minutes} min`};
+            const message = {kind: 'offline', title: 'Offline', text: `No data for ${readableDuration(minutes)}`};
             if (saved.offline !== status.last_received_at) {
                 offlinePopup = announce(message, 'offline');
                 saved.offline = status.last_received_at;
