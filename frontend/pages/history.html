@@ -3,32 +3,46 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>History – TEMPSAFE</title>
-    <link href="../css/main.css" rel="stylesheet">
+    <title>History – TempSafe</title>
+    <link href="../css/main.css?v=39" rel="stylesheet">
 </head>
-<body>
+<body data-page="history">
 <header class="site-header">
-    <nav aria-label="Main" class="nav">
-        <span class="brand">TEMPSAFE</span>
-        <a href="dashboard.html">Current status</a>
-        <a aria-current="page" href="history.html">History</a>
-        <a data-signout href="../index.html">Sign out</a>
-    </nav>
+    <div class="header-top">
+        <span class="brand">TempSafe</span>
+        <div class="header-right">
+            <a class="signout-link" data-signout href="../index.html">Sign out</a>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <nav aria-label="Main" class="nav">
+            <a href="dashboard.html">Dashboard</a>
+            <a aria-current="page" href="history.html">History</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="settings.html">Settings</a>
+        </nav>
+    </div>
 </header>
 <main class="wide">
+    <h1 class="visually-hidden">History</h1>
     <p class="banner error" hidden id="signout-error" role="alert"></p>
 
-    <div class="top">
-        <h1 class="page-title">History</h1>
-        <span class="muted">Box TS-01</span>
+    <div class="history-controls">
+        <section aria-labelledby="period-title" class="panel">
+            <h2 class="panel-title" id="period-title">Period</h2>
+            <div id="history-filter"></div>
+        </section>
+        <section aria-labelledby="view-title" class="panel">
+            <h2 class="panel-title" id="view-title">Show</h2>
+            <div id="history-views"></div>
+        </section>
     </div>
 
-    <section aria-busy="true" class="card" id="history"></section>
-
-    <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
+    <section aria-busy="true" aria-live="polite" class="card view" id="history" tabindex="-1"></section>
 </main>
-<script src="../js/api.js"></script>
-<script src="../js/main.js"></script>
-<script src="../js/history.js"></script>
+<script src="../js/api.js?v=39"></script>
+<script src="../js/main.js?v=39"></script>
+<script src="../js/notifications.js?v=39"></script>
+<script src="../js/history.js?v=39"></script>
 </body>
 </html>

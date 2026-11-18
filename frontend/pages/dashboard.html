@@ -3,27 +3,32 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-    <title>Current status – TEMPSAFE</title>
-    <link href="../css/main.css" rel="stylesheet">
+    <title>Dashboard – TempSafe</title>
+    <link href="../css/main.css?v=39" rel="stylesheet">
 </head>
 <body>
 <header class="site-header">
-    <nav aria-label="Main" class="nav">
-        <span class="brand">TEMPSAFE</span>
-        <a aria-current="page" href="dashboard.html">Current status</a>
-        <a href="history.html">History</a>
-        <a data-signout href="../index.html">Sign out</a>
-    </nav>
-</header>
-<main>
-    <p class="banner error" hidden id="signout-error" role="alert"></p>
-
-    <div class="top">
-        <h1 class="page-title">Current status</h1>
-        <span class="muted">Box TS-01</span>
+    <div class="header-top">
+        <span class="brand">TempSafe</span>
+        <div class="header-right">
+            <a class="signout-link" data-signout href="../index.html">Sign out</a>
+        </div>
     </div>
-
+    <div class="nav-bar">
+        <nav aria-label="Main" class="nav">
+            <a aria-current="page" href="dashboard.html">Dashboard</a>
+            <a href="history.html">History</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="settings.html">Settings</a>
+        </nav>
+    </div>
+</header>
+<main class="wide">
+    <h1 class="visually-hidden">Dashboard</h1>
+    <p class="banner error" hidden id="signout-error" role="alert"></p>
     <p class="banner error" hidden id="refresh-error" role="status"></p>
+
+    <div id="alert-banner"></div>
 
     <div id="dashboard"></div>
 
@@ -31,12 +36,15 @@
     <p aria-live="polite" class="visually-hidden" id="status-announcer" role="status"></p>
     <p aria-live="assertive" class="visually-hidden" id="alert-announcer" role="alert"></p>
 
-    <a class="btn" href="history.html">History</a>
-
-    <p><span class="api-status down" id="api-status" role="status">Checking API…</span></p>
+    <nav aria-label="More" class="shortcuts">
+        <a class="shortcut" href="history.html#graph"><span aria-hidden="true" class="shortcut-icon">↗</span>Graph</a>
+        <a class="shortcut" href="history.html#readings"><span aria-hidden="true" class="shortcut-icon">☰</span>History</a>
+        <a class="shortcut" href="alerts.html#issues"><span aria-hidden="true" class="shortcut-icon">⚠</span>Issues</a>
+    </nav>
 </main>
-<script src="../js/api.js"></script>
-<script src="../js/main.js"></script>
-<script src="../js/dashboard.js"></script>
+<script src="../js/api.js?v=39"></script>
+<script src="../js/main.js?v=39"></script>
+<script src="../js/notifications.js?v=39"></script>
+<script src="../js/dashboard.js?v=39"></script>
 </body>
 </html>
