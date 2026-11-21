@@ -6,10 +6,12 @@ The Raspberry Pi publisher is implemented in [`device/mqtt_publisher.py`](../../
 readings from the local SQLite
 database and waits for the server's storage confirmation.
 
-The FastAPI service uses FastMQTT to receive readings and save them to MySQL. This version was
-deployed on EC2 on 7 November 2026, replacing the standalone MQTT worker. The broker connection
-was observed during start-up; a fresh Pi-to-MySQL reading and storage acknowledgement still need
-verification. See the [deployment record](deployment.md#current-deployment--verified-8-november-2026).
+The FastAPI service uses FastMQTT to receive readings and save them to MySQL. FastMQTT was
+first deployed on EC2 on 7 November 2026, replacing the standalone MQTT worker. On 21 November,
+commit `20b67cd` added retained configuration delivery and the corresponding broker permissions.
+Retained and repeated configuration publication were verified over TLS; physical Pi adoption and
+a fresh reading/storage-acknowledgement trace remain pending. See the
+[deployment record](deployment.md#current-deployment--verified-21-november-2026).
 
 On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous
 connections were rejected. Broker topic permissions were also checked: the device account could not publish to the

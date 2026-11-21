@@ -75,12 +75,55 @@ On EC2, Nginx listened on ports 80 and 443 and Mosquitto listened on 8883.
 Certbot successfully simulated renewal for both domains. The website renewal
 hook passed its configuration test and reloaded Nginx.
 
-## Current deployment — verified 8 November 2026
+## Current deployment — verified 21 November 2026
 
-The server runs commit `3578cfe77c6738fe2e08366337ec8de4776a58ad`, deployed on
-7 November. This includes the sign-in integration from PR #25. The checkout is detached at that commit; it does not
-track new commits
-automatically. The server directory remains `/home/ubuntu/Smart-Box`.
+The server runs commit `20b67cd551b6676e5af18b87ff4005f9ec042322` from
+[PR #32](https://github.com/nikitsya/TempSafe/pull/32), which adds retained MQTT
+configuration delivery. The previous deployed revision was `3eb7a1c`. The checkout
+at `/home/ubuntu/Smart-Box` is detached at the selected commit and does not follow
+new GitHub commits automatically.
+
+The installed FastMQTT 2.2.0 and gmqtt 0.8.0 versions matched the local test
+environment. No dependency upgrade or database migration was needed. The service
+continues to use one Uvicorn worker and the existing `temsafe` database and credentials.
+
+The broker ACL now grants `device-TS-01` read access and `backend-ingest` write
+access to `tempsafe/boxes/TS-01/configuration`. Existing readings and acknowledgement
+permissions were preserved. Mosquitto was reloaded before the backend was restarted.
+
+Verification after deployment confirmed:
+
+- `tempsafe`, `mosquitto` and `nginx` are active, and the server checkout is clean.
+- HTTPS `/api/health` returns `200` with `{"status":"ok"}`. Anonymous latest-reading
+  and configuration requests return `401`.
+- A uniquely identified diagnostic MQTT client connected over verified TLS and
+  received the retained configuration with QoS 1. Its complete payload matched
+  the selected MySQL profile: `e93a4368-e11a-4f27-8b31-d55d61392548`, with limits
+  `0.00`, `24.00` and `25.00` degrees Celsius.
+- The subscribed client then received a live repeat of the same configuration.
+  No configuration-publication failures appeared in the backend journal during
+  the checks.
+- Temporary read access granted to the backend account for this diagnostic check
+  was removed afterwards; the final ACL contains only the intended permissions.
+
+The existing limits were not changed. This verifies backend-to-broker publication,
+not adoption on the physical Raspberry Pi. Deploy the compatible device scripts
+and verify the saved profile, new sample profile IDs and LED/buzzer behaviour with
+the device operator. Second-sensor ingestion is not part of this deployment.
+
+The private backup directory is
+`/home/ubuntu/tempsafe-deploy-backups/20261121T153549Z-configuration-sync`.
+It contains a non-empty SQL dump, the previous commit and installed package list,
+the previous broker ACL/configuration, service configuration and environment
+files. `configuration-verification.json` records the retained and live-repeat
+checks. Keep these files private; the directory and SQL dump use modes `700` and
+`600` respectively. Restore testing was not performed during this rollout.
+
+## Deployment verification on 8 November 2026
+
+At this earlier check, the server ran commit
+`3578cfe77c6738fe2e08366337ec8de4776a58ad`, deployed on 7 November with sign-in
+integration from PR #25. The following observations describe that revision.
 
 - `tempsafe`, `nginx` and `mosquitto` are active; the MySQL container is healthy.
 - FastMQTT runs inside FastAPI with one Uvicorn worker. The previous
@@ -236,7 +279,8 @@ The Python package is now `tempsafe`, and its distribution is `tempsafe-backend`
 After deploying this change, reinstall with `.venv/bin/python -m pip install -e .`
 and update every Uvicorn service command (including the MQTT override) to
 `tempsafe.main:app`. Run `sudo systemctl daemon-reload` before restarting the
-service. The recorded deployment above predates this package rename.
+service. The 8 November deployment predates this package rename; the 21 November
+verification confirmed that the service already uses `tempsafe.main:app`.
 
 New project settings use the `TEMPSAFE_` prefix. Existing `TEMSAFE_` settings
 remain accepted as a compatibility fallback; an explicitly set new setting takes
