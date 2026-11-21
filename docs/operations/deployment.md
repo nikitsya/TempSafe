@@ -77,7 +77,58 @@ hook passed its configuration test and reloaded Nginx.
 
 ## Current deployment — verified 21 November 2026
 
-The server runs commit `20b67cd551b6676e5af18b87ff4005f9ec042322` from
+The server runs commit `cf815389eb916f02fca2b9485e1f2a7590fe3104` from
+[PR #33](https://github.com/nikitsya/TempSafe/pull/33), which adds dual-sensor
+ingestion and sensor-filtered API queries. It replaced `20b67cd` at approximately
+17:52 UTC. The checkout at `/home/ubuntu/Smart-Box` remains detached at the selected
+commit; future merges do not deploy automatically.
+
+Migration 007 was applied to the existing `temsafe` MySQL database before the
+backend update. It added `sensor_location` and both sensor-filtered indexes.
+All 11,189 existing samples became `inside`. A comparison of every original
+sample field before and after migration confirmed that values, identifiers,
+timestamps and numbering were preserved. The selected box profiles also remained
+unchanged. The backend was stopped briefly for migration and restarted afterwards.
+
+The dependencies, service configuration, broker ACLs, credentials, database name
+and Docker volume were retained. The existing editable installation loads the
+updated checkout without a dependency reinstall. Frontend files were unchanged
+between the two commits and their file hashes matched after deployment.
+
+Verification completed at 17:54 UTC confirmed:
+
+- `tempsafe`, `nginx` and `mosquitto` are active; the server checkout is clean.
+- Public HTTPS health returns `200`. Anonymous readings and configuration
+  requests return `401`.
+- Authenticated latest-reading requests default to `inside` and match an explicit
+  `sensor_location=inside` request. Inside history returns inside samples only.
+- No outside samples were present. Outside history returns `200` with an empty
+  list, and outside latest returns `404`; it does not substitute an inside sample.
+  An invalid sensor location returns `422`.
+- The configuration API still returns the selected database profile. The temporary
+  verification session was revoked and its removal was checked.
+- A uniquely identified diagnostic MQTT client authenticated over verified TLS
+  and subscribed to the readings topic with QoS 1. The deployed backend also had
+  an established broker connection. Existing device/backend permissions for
+  readings, acknowledgements and configuration were verified without changing them.
+
+No synthetic measurements were published or added to production. Fresh physical
+Pi readings, their matching storage acknowledgements and outside response values
+still require a coordinated device check. The frontend owner must handle shared
+sequence gaps before permanent outside collection is enabled; see the
+[dual-sensor handover](dual-sensor-rollout.md#frontend-handover).
+
+The private backup directory is
+`/home/ubuntu/tempsafe-deploy-backups/20261121T174946Z-dual-sensor`.
+It contains a completed SQL dump and checksum, the previous commit and package
+list, configuration backups, frontend hashes, migration comparisons and
+`dual-sensor-verification.json`. The deployment and verification scripts are also
+retained there. The directory is private; restoration and an off-server copy were
+not tested during this deployment.
+
+## Configuration delivery deployment — verified 21 November 2026
+
+The preceding deployment used commit `20b67cd551b6676e5af18b87ff4005f9ec042322` from
 [PR #32](https://github.com/nikitsya/TempSafe/pull/32), which adds retained MQTT
 configuration delivery. The previous deployed revision was `3eb7a1c`. The checkout
 at `/home/ubuntu/Smart-Box` is detached at the selected commit and does not follow
@@ -225,8 +276,9 @@ For each deployment:
    target commit explicitly; do not assume the detached checkout follows `master`.
 2. Back up the database and any configuration files that will change. Keep the
    previous commit available for rollback.
-3. Review the target's dependencies and migrations. The current schema includes
-   migrations 003 and 004 where needed. See the database guide for existing installations.
+3. Review the target's dependencies and migrations. Existing installations need
+   migrations 003 and 004 where their tables are absent, and migration 007 before
+   deploying dual-sensor ingestion if `sensor_location` is absent.
    See the [database guide](../../database/README.md#apply-migrations). Do not run
    the baseline schema over an existing database.
 4. Deploy the selected code and install changed dependencies with
