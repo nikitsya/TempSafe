@@ -30,12 +30,17 @@ def consumer_data():
     return consumer, factory, save, client, payload, message
 
 
-async def test_acknowledgement_follows_successful_storage(consumer_data):
+@pytest.mark.parametrize("location", [None, "inside", "outside"])
+async def test_acknowledgement_follows_successful_storage(consumer_data, location):
     consumer, factory, save, client, payload, message = consumer_data
+    if location is not None:
+        payload["sensor_location"] = location
+        message.payload = json.dumps(payload).encode()
     save.side_effect = lambda *args: client.publish.assert_not_called()
     ack = await consumer.store(message.topic, message.payload, message.retain)
     save.assert_awaited_once()
     assert str(save.call_args.args[1].sample_id) == payload["sample_id"]
+    assert save.call_args.args[1].sensor_location == (location or "inside")
     assert json.loads(ack) == dict(schema_version=1, sample_id=payload["sample_id"], status="stored")
 
 

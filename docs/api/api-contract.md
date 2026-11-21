@@ -64,9 +64,12 @@ limits: `T <= lower_c` or `T > upper_c` is `Alert`; `warning_c <= T <= upper_c`
 is `Warning`; values between `lower_c` and `warning_c` are `Normal`. Missing
 temperatures and sensor errors return `Unknown`.
 
-The latest-reading and box history endpoints classify each sample using its recorded profile.
+The latest-reading and box history endpoints classify each **inside** sample using its recorded profile.
 Use each history row’s `temperature_state` and `profile` for the table, graph and excursion periods.
 A later change to the box’s limits preserves the interpretation of earlier readings.
+Outside samples return `temperature_state: null` and `profile: null`: the box's
+limits do not apply. They retain `profile_id` as the active box configuration at
+measurement time, and still use the same quality and freshness rules.
 
 ## Saving incoming readings
 
@@ -81,6 +84,10 @@ two decimal places; sensor errors require `null`. An unreliable clock requires
 `observed_at: null`. Sample and profile IDs must be UUIDs.
 
 An identical retry returns the existing sample without changing its receipt time.
+`sensor_location` accepts only `inside` or `outside`. Omitted values default to
+`inside` for older publishers; explicit `null` and unknown values are rejected.
+The response always includes the stored location. Changing it on a retry is a
+conflict. Both sensors share the box's sequence counter and the readings topic.
 Reusing its ID or box sequence with different data raises `ValueError`. Missing
 boxes and profiles also raise `ValueError`; invalid payloads fail Pydantic validation.
 The function commits its session, so keep unrelated changes in another session.
@@ -99,6 +106,7 @@ Example request body for `/docs` or an HTTP client:
   "sample_id": "3f927b1e-8261-4ad8-a45e-2ba89a016d14",
   "box_id": "TS-01",
   "sequence_no": 1,
+  "sensor_location": "inside",
   "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
   "observed_at": "2026-01-01T12:00:00Z",
   "clock_reliable": true,
@@ -114,6 +122,14 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 
 ### Endpoints and fields available now
 
+`GET /api/readings`, `GET /api/boxes/{box_id}/readings` and its `/latest` endpoint
+accept `sensor_location=inside|outside`, defaulting to `inside`. For example:
+`/api/boxes/TS-01/readings/latest?sensor_location=outside`.
+Filtering happens before ordering, pagination and the latest-sample selection.
+Keep the same location on every history page. A known box with no samples for
+the requested sensor returns an empty list, or the existing no-readings 404 for
+`/latest`. `GET /api/readings/{sample_id}` returns either sensor by its ID.
+
 | GET endpoint                            | Successful response                                                                                                                                             |
 |-----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `/api/boxes/{box_id}`                   | Box object: `box_id` and `name` (strings).                                                                                                                      |
@@ -122,11 +138,11 @@ Use relative `/api` URLs when served by FastAPI, locally or on AWS.
 
 `GET /api/boxes/{box_id}/status` returns contact and temperature freshness for
 an assigned box. `last_received_at` is the latest server receipt time across
-stored samples, including sensor errors and delayed uploads. `contact_status`
+stored samples from either sensor, including errors and delayed uploads. `contact_status`
 is `reporting` through 90 seconds and `not_reporting` after 90 seconds.
 Before the first sample it is `never_reported` and both timestamps are null.
 
-`observed_at` is the original time of the valid temperature sample with the
+`observed_at` is the original time of the valid **inside** temperature sample with the
 highest sequence number. `freshness` is `fresh` through 90 seconds, `stale`
 afterwards and `unknown` for a missing or future measurement time. Use
 `/readings/latest` for the outcome of the latest sampling attempt, including
@@ -146,17 +162,24 @@ Use the box-specific endpoints for the dashboard, not `/api/readings`, which mix
 |-------------------------------------|----------------------------|-------------------------------------------------------------------------------------------------------|
 | `sample_id`, `box_id`, `profile_id` | string                     | Sample, box and recorded profile identifiers.                                                         |
 | `sequence_no`                       | integer                    | Measurement order within a box; do not reorder by upload time.                                        |
+| `sensor_location`                   | string                     | `inside` or `outside`; sequence numbering is shared by both sensors.                                  |
 | `temperature_c`                     | decimal string or `null`   | Celsius. Check for `null` before `Number(value)`; never turn a missing value into zero.               |
 | `quality`                           | string                     | `valid` or `sensor_error`; an error means temperature is unknown.                                     |
 | `observed_at`                       | timestamp string or `null` | Measurement time; `null` when the device clock is unreliable.                                         |
 | `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                             |
 | `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                           |
-| `temperature_state`                 | string                     | Latest and history endpoints: `Normal`, `Warning`, `Alert` or `Unknown`.                              |
+| `temperature_state`                 | string or `null`           | Inside: `Normal`, `Warning`, `Alert` or `Unknown`. Outside: `null`.                                    |
 | `freshness`                         | string                     | Latest endpoint only: `fresh`, `stale` or `unknown`, calculated from observation time when requested. |
 
 `profile` accompanies the latest reading and each box history row: `profile_id` is a string; `lower_c`, `warning_c` and
 `upper_c`
-are decimal strings in Celsius. It matches the reading’s `profile_id`, including for sensor errors.
+are decimal strings in Celsius. For inside samples it matches the reading's
+`profile_id`, including for sensor errors. For outside samples `profile` is `null`.
+
+After filtering by sensor, non-consecutive sequence numbers are expected. Use
+reliable observation times to detect continuity: gaps over 90 seconds, missing
+times and backwards clock movement break a continuous period. A sequence jump
+alone must not split graph lines or count another alert.
 
 ### Example responses
 
@@ -167,6 +190,7 @@ Latest valid reading — `200 OK` (synthetic response at 12:00:05 UTC on 1 Novem
   "sample_id": "3f927b1e-8261-4ad8-a45e-2ba89a016d14",
   "box_id": "TS-01",
   "sequence_no": 1,
+  "sensor_location": "inside",
   "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
   "observed_at": "2026-11-01T12:00:00Z",
   "clock_reliable": true,
@@ -191,6 +215,7 @@ Latest sensor error — `200 OK` (response at 12:00:35 UTC on the same day); do 
   "sample_id": "8b027b1e-8261-4ad8-a45e-2ba89a016d14",
   "box_id": "TS-01",
   "sequence_no": 2,
+  "sensor_location": "inside",
   "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
   "observed_at": "2026-11-01T12:00:30Z",
   "clock_reliable": true,

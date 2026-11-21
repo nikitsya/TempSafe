@@ -110,6 +110,17 @@ After deploying the updated backend, back up the database and
 run [migration 006](migrations/006_remove_box_contact_settings.sql) with the project database selected. It removes
 obsolete box contact columns where present. Fresh installations use the current baseline.
 
+## Sensor location migration
+
+For an existing database, back up and check
+`SHOW COLUMNS FROM temperature_samples LIKE 'sensor_location';`.
+If absent, apply [007_add_sensor_location.sql](migrations/007_add_sensor_location.sql)
+once **before** deploying the updated backend. It adds `inside`/`outside` and indexes
+for separate histories; existing rows become `inside`. Fresh databases created
+from the current baseline already include these changes: do not run 007 again.
+The unique `(box_id, sequence_no)` key remains shared by both sensors.
+See the [dual-sensor rollout](../docs/operations/dual-sensor-rollout.md).
+
 ## Verify the setup
 
 Select `tempsafe` and run:

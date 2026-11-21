@@ -10,7 +10,7 @@ from tempsafe.api.auth import AllowedBoxes, require_device
 from tempsafe.db import models
 from tempsafe.db.session import get_db
 from tempsafe.monitoring.readings import ReadingConflict, ReadingReferenceNotFound, save_reading
-from tempsafe.schemas import ReadingCreate, ReadingResponse
+from tempsafe.schemas import ReadingCreate, ReadingResponse, SensorLocation
 
 router = APIRouter(tags=["Readings"])
 
@@ -42,12 +42,14 @@ async def get_readings(
         allowed: AllowedBoxes,
         db: Annotated[AsyncSession, Depends(get_db)],
         limit: Annotated[int, Query(ge=1, le=100)] = 20,
+        sensor_location: SensorLocation = "inside",
 ):
-    """Return the most recently received samples, with a maximum of 100 records."""
+    """Return the most recent receipts for one sensor location across allowed boxes."""
     # Sort by receipt time; delayed uploads may have older observation times.
     result = await db.execute(
         select(models.TemperatureSample)
         .where(models.TemperatureSample.box_id.in_(allowed))
+        .where(models.TemperatureSample.sensor_location == sensor_location)
         .order_by(
             models.TemperatureSample.received_at.desc(),
             models.TemperatureSample.sample_id.desc(),

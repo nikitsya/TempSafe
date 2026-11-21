@@ -16,6 +16,7 @@ def as_utc(value: datetime) -> datetime:
 
 
 UTCTimestamp = Annotated[datetime, AfterValidator(as_utc)]
+SensorLocation = Literal["inside", "outside"]
 
 
 class ReadingCreate(BaseModel):
@@ -24,6 +25,7 @@ class ReadingCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     schema_version: Literal[1] = 1
+    sensor_location: SensorLocation = "inside"
     sample_id: UUID
     box_id: str = Field(min_length=1, max_length=64, pattern=r"^[A-Za-z0-9_-]+$")
     sequence_no: int = Field(strict=True, ge=0, le=18446744073709551615)
@@ -71,6 +73,7 @@ class ReadingResponse(BaseModel):
 
     sample_id: str
     box_id: str
+    sensor_location: SensorLocation
     sequence_no: int
     profile_id: str
     observed_at: UTCTimestamp | None
@@ -94,8 +97,8 @@ class ReadingProfileResponse(BaseModel):
 class HistoryReadingResponse(ReadingResponse):
     """Include the recorded profile and calculated temperature state."""
 
-    temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"]
-    profile: ReadingProfileResponse
+    temperature_state: Literal["Normal", "Warning", "Alert", "Unknown"] | None
+    profile: ReadingProfileResponse | None
 
 
 class LatestReadingResponse(HistoryReadingResponse):

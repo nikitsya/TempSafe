@@ -2,6 +2,11 @@
 
 The pytest suite covers database access, API responses, temperature classification,
 payload validation and reading storage, including retries and conflicts.
+Dual-sensor checks cover legacy `inside` defaults, rejected locations, shared
+sequence conflicts, separate history/latest queries, outside samples without
+box-limit classification, and inside freshness unaffected by outside receipts.
+Device queue tests are supplied separately to the hardware owner; see the
+[team handover](../../docs/operations/dual-sensor-rollout.md#device-handover).
 
 ## Before you start
 
