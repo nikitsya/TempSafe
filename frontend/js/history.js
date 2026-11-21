@@ -1,6 +1,6 @@
 // Temperature history graph and table for the prototype box.
 // Loads readings from GET /api/boxes/{box_id}/readings. The API returns them
-// in descending measurement order (sequence_no). The table keeps this order;
+// in descending measurement order (sequence_no, shared by both sensors). The table keeps this order;
 // the graph shows them from oldest (left) to newest (right).
 // Missing temperatures and sensor errors are never shown as 0°C.
 // Each reading has its own recorded profile (limits) and temperature_state,
@@ -77,7 +77,7 @@ function temperatureCell(reading) {
 // Uses the temperature_state that the API calculated with the reading's own limits.
 function statusCell(reading) {
     if (reading.quality === 'sensor_error') {
-        return '<span class="tag alert">⚠ Sensor fault</span>';
+        return '<span class="tag fault">⚠ Sensor fault</span>';
     }
     if (readingValue(reading) === null) {
         return '<span class="tag unknown">? Unknown</span>';
@@ -91,13 +91,49 @@ function statusCell(reading) {
     return '<span class="tag unknown">? Unknown</span>';
 }
 
+// ---- Outside sensor (comparison only; never a status) ----
+
+function outsideValue(reading) {
+    if (!reading || reading.quality !== 'valid' || reading.temperature_c == null) return null;
+    const v = Number(reading.temperature_c);
+    return Number.isFinite(v) ? v : null;
+}
+
+// The outside reading taken closest to an inside reading (within 45 s), or null.
+function outsideNear(reading) {
+    const t = readingTime(reading);
+    if (!t || !lastOutside.length) return null;
+    let best = null;
+    let bestMs = 45 * 1000;
+    for (const o of lastOutside) {
+        const ot = readingTime(o);
+        if (!ot) continue;
+        const ms = Math.abs(ot - t);
+        if (ms <= bestMs) {
+            best = o;
+            bestMs = ms;
+        }
+    }
+    return best;
+}
+
+function outsideCell(reading) {
+    const o = outsideNear(reading);
+    if (!o) return '<span class="muted">—</span>';
+    if (o.quality === 'sensor_error') return '<span class="outside-fault">Sensor fault</span>';
+    const v = outsideValue(o);
+    return v === null ? '<span class="muted">—</span>' : `<span class="outside-value">${v.toFixed(1)}</span>`;
+}
+
 function renderTable(readings, caption) {
+    const hasOutside = lastOutside.length > 0;
     const rows = readings.map((reading) => `
         <tr>
             <td class="period-date">${escapeHtml(periodDate(reading) || '—')}</td>
             <td>${observationCell(reading)}</td>
             <td>${temperatureCell(reading)}</td>
             <td>${statusCell(reading)}</td>
+            ${hasOutside ? `<td>${outsideCell(reading)}</td>` : ''}
         </tr>`).join('');
 
     return `
@@ -110,6 +146,7 @@ function renderTable(readings, caption) {
                     <th scope="col">Time</th>
                     <th scope="col">°C</th>
                     <th scope="col">Status</th>
+                    ${hasOutside ? '<th scope="col">Outside °C</th>' : ''}
                 </tr>
                 </thead>
                 <tbody>${rows}</tbody>
@@ -138,15 +175,13 @@ function secondsBetween(earlier, later) {
 // No reading for longer than this means data is missing (same limit as NO NEW DATA).
 const MAX_GAP_SECONDS = 90;
 
-// True when readings are missing between two readings: the device numbers
-// every sample, so a jump in sequence_no or a long time gap means a gap.
+// True when readings are missing between two readings of the inside sensor. Inside and outside
+// share the box-wide sequence counter, so only time counts: more than 90 s, or a time going
+// backwards. Readings without a reliable clock use their receipt time (FR-03).
 function hasGap(earlier, later) {
     if (!earlier || !later) return false;
-    const a = Number(earlier.sequence_no);
-    const b = Number(later.sequence_no);
-    if (Number.isFinite(a) && Number.isFinite(b) && b - a > 1) return true;
     const seconds = secondsBetween(earlier, later);
-    return seconds !== null && seconds > MAX_GAP_SECONDS;
+    return seconds === null || seconds < 0 || seconds > MAX_GAP_SECONDS;
 }
 
 function graphTime(reading) {
@@ -259,13 +294,25 @@ function renderGraph(readings, domain) {
     const points = readings.slice().reverse().filter((r) => readingTime(r));   // oldest first
     const known = points.map(readingValue).filter((v) => v !== null);
     const issues = findIssues(readings, domain);
+    // Outside sensor: comparison line only, oldest first, inside the shown window.
+    const outsidePoints = lastOutside.slice().reverse().filter((r) => {
+        const t = readingTime(r);
+        return t && (!domain || (t >= domain.from && t < domain.to));
+    });
+    const outsideKnown = outsidePoints.map(outsideValue).filter((v) => v !== null);
+    known.push(...outsideKnown);
 
     if (known.length === 0) {
         return `<div class="banner" role="status"><strong>No temperatures in this period</strong></div>` +
             `<button type="button" class="view-btn" data-goto-view="readings">See readings</button>`;
     }
 
-    const W = 820, H = 380, L = 62, R = 20, T = 34, B = 64;
+    // On a phone the whole day fits the screen width (no sideways scrolling, test 18 Nov T2-04).
+    // The drawing is narrower, so the same text stays readable when it is scaled down.
+    const phone = window.matchMedia('(max-width: 600px)').matches;
+    const W = phone ? 420 : 820, H = phone ? 300 : 380, L = phone ? 40 : 62, R = phone ? 10 : 20;
+    const T = 34, B = phone ? 52 : 64;
+    const charW = 8;
     const plotTop = T, plotBottom = H - B, plotW = W - L - R;
     const ms = (r) => readingTime(r).getTime();
 
@@ -383,7 +430,7 @@ function renderGraph(readings, domain) {
     let lastLabelX = -Infinity;   // right edge of the last label
     const addLabel = (t, text, anchor) => {
         const tx = x(t.getTime());
-        const width = text.length * 8 + 4;
+        const width = text.length * charW + 4;
         const left = anchor === 'start' ? tx : tx - width / 2;
         if (left < lastLabelX + 10) return;
         lastLabelX = left + width;
@@ -434,6 +481,23 @@ function renderGraph(readings, domain) {
         });
     });
 
+    // Outside the box: thin dashed blue line, never coloured by status. It breaks at gaps over
+    // 90 s and at outside sensor faults; outside data never fills in for missing inside data.
+    let outsidePath = '';
+    let penDown = false;
+    outsidePoints.forEach((r, i) => {
+        const v = outsideValue(r);
+        const prev = outsidePoints[i - 1];
+        if (v === null) {
+            penDown = false;
+            return;
+        }
+        const continues = penDown && prev && !hasGap(prev, r);
+        outsidePath += `${continues ? 'L' : 'M'}${x(ms(r)).toFixed(1)} ${y(v).toFixed(1)}`;
+        penDown = true;
+    });
+    if (outsidePath) svg += `<path class="graph-outside" d="${outsidePath}"/>`;
+
     // A reading with no neighbour is drawn as a dot, so it is not lost.
     // Every reading also has an invisible larger target with its time and temperature (hover).
     points.forEach((r, i) => {
@@ -463,7 +527,8 @@ function renderGraph(readings, domain) {
     legend += '<li><span class="legend-line line-normal" aria-hidden="true"></span>Normal</li>';
     legend += '<li><span class="legend-line line-warning" aria-hidden="true"></span>Warning</li>';
     legend += '<li><span class="legend-line line-alert" aria-hidden="true"></span>Alert</li>';
-    legend += '<li><span class="legend-upper" aria-hidden="true"></span>Limit</li>';
+    legend += limitLegend(profile, showLower);
+    if (outsideKnown.length) legend += '<li><span class="legend-outside" aria-hidden="true"></span>Outside the box</li>';
     if (faults) legend += '<li><span class="legend-band legend-fault" aria-hidden="true"></span>Sensor fault</li>';
     if (noData) legend += '<li><span class="legend-band legend-nodata" aria-hidden="true"></span>No data</li>';
     legend += '</ul>';
@@ -502,6 +567,18 @@ function tableHead(id, title) {
     </div>`;
 }
 
+// "14:05 – 14:23"; a time on another day than the one shown starts with the day ("16 Nov, 23:50").
+function timeSpan(start, end) {
+    const withDay = (d) => {
+        if (!d) return '';
+        const other = lastDomain && d.toDateString() !== lastDomain.from.toDateString();
+        return other ? `${shortDay(d)}, ${clock(d)}` : clock(d);
+    };
+    const a = withDay(start);
+    const b = withDay(end);
+    return !b || a === b ? a : `${a} – ${b}`;
+}
+
 // Day of a row when it is not the day shown above the table: "from 16 Nov".
 function otherDay(date) {
     if (!date || !lastDomain) return '';
@@ -522,7 +599,7 @@ function renderIssues(readings, domain) {
         const day = issue.start.toDateString() === (lastDomain ? lastDomain.from.toDateString() : '') ? '' : `${shortDay(issue.start)}, `;
         const when = issue.ongoing ? `since ${day}${start}` : (start === end ? `${day}${start}` : `${day}${start} – ${end}`);
         return `<tr class="${fault ? 'state-fault' : 'state-offline'}">
-            <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? '⚠' : '⦸'}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
+            <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? ICON.fault : ICON.nodata}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
             <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)}</td>
             <td data-label="Time">${escapeHtml(when)}</td>
         </tr>`;
@@ -590,11 +667,20 @@ function periodMinutes(start, end) {
 // or Sensor fault and Offline (the box could not measure or sent nothing), with the
 // peak temperature, how long it lasted, the date and the time.
 // A sensor error or missing readings ends a temperature row; its length then shows "+".
+// Status icons as small SVGs: they sit exactly in the centre of the circle (test 18 Nov, T1-13).
+const ICON = {
+    check: '<svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    cross: '<svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+    bang: '<svg viewBox="0 0 16 16"><path d="M8 3v6.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/></svg>',
+    fault: '<svg viewBox="0 0 16 16"><path d="M2 9h3l2-5 2.5 9L12 7h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    nodata: '<svg viewBox="0 0 16 16"><path d="M4 8h8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+};
+
 const STATE_LABEL = {
-    high: {text: 'Alert', icon: '✕', cls: 'state-hot'},
-    low: {text: 'Alert', icon: '✕', cls: 'state-hot'},
-    warning: {text: 'Warning', icon: '!', cls: 'state-warning'},
-    normal: {text: 'Normal', icon: '✓', cls: 'state-normal'},
+    high: {text: 'Alert', icon: ICON.cross, cls: 'state-hot'},
+    low: {text: 'Alert', icon: ICON.cross, cls: 'state-hot'},
+    warning: {text: 'Warning', icon: ICON.bang, cls: 'state-warning'},
+    normal: {text: 'Normal', icon: ICON.check, cls: 'state-normal'},
 };
 
 function readingState(reading) {
@@ -649,8 +735,10 @@ function renderAlertPeriods(readings) {
     // Box offline or sensor fault now: the last temperature row is not "Now" any more.
     // It ends at the last reading, and the ongoing No data / Sensor fault row comes first.
     const ongoing = issues.find((i) => i.ongoing);
+    // A past day (or a period that ended) has nothing "Now": its last status ends at its last reading.
+    const periodIsLive = !lastDomain || lastDomain.to.getTime() > Date.now() - MAX_GAP_SECONDS * 1000;
     periods.forEach((p) => {
-        if (p.end === null && ongoing) {
+        if (p.end === null && (ongoing || !periodIsLive)) {
             p.end = p.last;
             p.unsure = true;
         }
@@ -662,20 +750,28 @@ function renderAlertPeriods(readings) {
     // Temperature rows.
     const rows = periods.map((p) => {
         const label = STATE_LABEL[p.state];
+        const startTime = readingTime(p.start);
         let length;
+        let time;
         if (p.end === null) {
             length = '<span class="now-chip">Now</span>';
+            time = `since ${clock(startTime)}`;
         } else {
+            const endTime = readingTime(p.unsure ? p.last : p.end);
             const minutes = periodMinutes(p.start, p.unsure ? p.last : p.end);
-            // "+" after the number: at least this long ("1+ min", "2+ h 10 min").
-            length = minutes === null ? '—' : formatDuration(minutes).replace(/^(\d+)/, p.unsure ? '$1+' : '$1');
+            // Readings stopped before the status changed: say "at least" in words (usability test).
+            length = minutes === null ? '—' : p.unsure
+                ? `<span title="Exact end unknown: readings stopped">at least ${formatDuration(minutes)}</span>`
+                : formatDuration(minutes);
+            time = timeSpan(startTime, endTime);
         }
         return {
             at: readingTime(p.start) || new Date(0),
             html: `<tr class="${label.cls}">
                 <th scope="row"><span class="state-pill"><span aria-hidden="true">${label.icon}</span> ${label.text}</span></th>
                 <td class="state-peak" data-label="Peak">${p.peak.toFixed(1)}°C</td>
-                <td data-label="How long">${length} ${otherDay(readingTime(p.start))}</td>
+                <td data-label="How long">${length}</td>
+                <td data-label="Time">${escapeHtml(time)}</td>
             </tr>`
         };
     });
@@ -687,9 +783,10 @@ function renderAlertPeriods(readings) {
         rows.push({
             at: issue.start,
             html: `<tr class="${fault ? 'state-fault' : 'state-offline'}">
-                <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? '⚠' : '⦸'}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
+                <th scope="row"><span class="state-pill"><span aria-hidden="true">${fault ? ICON.fault : ICON.nodata}</span> ${fault ? 'Sensor fault' : 'No data'}</span></th>
                 <td class="state-peak" data-label="Peak">—</td>
-                <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)} ${otherDay(issue.start)}</td>
+                <td data-label="How long">${issue.ongoing ? '<span class="now-chip">Now</span>' : formatDuration(minutes)}</td>
+                <td data-label="Time">${escapeHtml(issue.ongoing ? `since ${clock(issue.start)}` : timeSpan(issue.start, issue.end))}</td>
             </tr>`
         });
     });
@@ -705,6 +802,7 @@ function renderAlertPeriods(readings) {
                     <th scope="col">Status</th>
                     <th scope="col">Peak</th>
                     <th scope="col">How long</th>
+                    <th scope="col">Time</th>
                 </tr>
                 </thead>
                 <tbody>${rows.map((r) => r.html).join('')}</tbody>
@@ -728,6 +826,27 @@ const RANGES = {
     hour: {label: '1 hour'},
 };
 let currentRange = {key: 'today'};
+
+// History and Alerts share the chosen period in this browser tab (test 18 Nov, T1-01):
+// pick 15 Nov in History, open Alerts, and Alerts shows 15 Nov too. Today resets it.
+const RANGE_KEY = 'tempsafe.period';
+
+function saveRange(range) {
+    if (range.key !== 'date' && range.key !== 'today' && range.key !== 'hour') return;
+    try {
+        sessionStorage.setItem(RANGE_KEY, JSON.stringify(range));
+    } catch (error) { /* storage off: each page starts at Today */ }
+}
+
+(function readSavedRange() {
+    try {
+        const saved = JSON.parse(sessionStorage.getItem(RANGE_KEY) || 'null');
+        if (saved && (saved.key === 'today' || saved.key === 'hour')) currentRange = {key: saved.key};
+        if (saved && saved.key === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(saved.date)) {
+            currentRange = {key: 'date', date: saved.date};
+        }
+    } catch (error) { /* keep Today */ }
+})();
 
 // Opened with View from an alert: ?from=…&to=… (milliseconds) shows that time.
 (function readAroundFromUrl() {
@@ -855,6 +974,10 @@ function renderFilter() {
     const max = iso(today);
     // History can be opened for the last 30 days (HISTORY_DAYS).
     const min = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate() - (HISTORY_DAYS - 1)));
+    // A saved date outside the last 30 days (or in the future) goes back to Today.
+    if (currentRange.key === 'date' && (currentRange.date < min || currentRange.date > iso(today))) {
+        currentRange = {key: 'today'};
+    }
     // The day the arrows move from: the chosen date, or today.
     const shownDay = currentRange.key === 'date' ? currentRange.date
         : currentRange.key === 'around' ? iso(currentRange.from) : max;
@@ -935,16 +1058,24 @@ function statusText(reading) {
 // Download every reading of the chosen period as a CSV file (opens in Excel).
 function downloadCsv() {
     if (!lastReadings || lastReadings.length === 0) return;
-    const rows = [['Date', 'Time', 'Temperature (°C)', 'Status']];
+    // Each column names its sensor; the outside value is the reading closest in time (within 45 s).
+    const hasOutside = lastOutside.length > 0;
+    const rows = [['Date', 'Time', 'Inside temperature (°C)', 'Status']
+        .concat(hasOutside ? ['Outside temperature (°C)'] : [])];
     lastReadings.slice().reverse().forEach((r) => {   // oldest first
         const t = readingTime(r);
         const value = readingValue(r);
-        rows.push([
+        const row = [
             t ? dublinDate(t) : '',
             t ? t.toLocaleTimeString('en-IE', {hour: '2-digit', minute: '2-digit', second: '2-digit'}) : '',
             value === null ? '' : value.toFixed(1),
             statusText(r),
-        ]);
+        ];
+        if (hasOutside) {
+            const o = outsideNear(r);
+            row.push(!o ? '' : o.quality === 'sensor_error' ? 'Sensor fault' : (outsideValue(o) === null ? '' : outsideValue(o).toFixed(1)));
+        }
+        rows.push(row);
     });
     const csv = rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\r\n');
     // The BOM lets Excel show °C correctly.
@@ -1010,12 +1141,14 @@ function showView(focus) {
 }
 
 // One request to the readings API. Returns null after handling 401 or 404.
-async function fetchPage(query) {
+async function fetchPage(query, quiet = false) {
     const container = document.getElementById('history');
     const response = await fetch(
         `${API_BASE}/boxes/${HISTORY_BOX_ID}/readings?${query}`,
         {headers: {Accept: 'application/json'}}
     );
+    // Outside data is extra: if it cannot be loaded, History still shows the inside data.
+    if (quiet && !response.ok) return [];
     // Not signed in or the session has ended.
     if (response.status === 401) {
         goToSignIn();
@@ -1036,13 +1169,18 @@ async function fetchPage(query) {
 // All readings in a calendar period, page by page (newest first). There is no limit:
 // the graph, Issues and Readings always cover the whole period, however often the box measures.
 
-async function fetchPeriod(dates, times) {
+// sensor: 'inside' (default, the box status) or 'outside' (comparison only). Paging keeps the sensor.
+async function fetchPeriod(dates, times, sensor = 'inside') {
     const all = [];
     let before = null;
+    const outside = sensor === 'outside';
     while (true) {
         let query = `limit=${HISTORY_LIMIT}&start_date=${dates.start}&end_date=${dates.end}`;
+        if (outside) query += '&sensor_location=outside';
         if (before !== null) query += `&before_sequence=${before}`;
-        const page = await fetchPage(query);
+        let page = await fetchPage(query, outside);
+        // An older backend ignores sensor_location: keep only rows that say they are outside.
+        if (outside && page) page = page.filter((r) => r.sensor_location === 'outside');
         if (page === null) return null;
         all.push(...page);
         if (page.length < HISTORY_LIMIT) break;
@@ -1057,6 +1195,9 @@ async function fetchPeriod(dates, times) {
     return all;
 }
 
+let historyRequest = 0;
+let lastOutside = [];   // outside-sensor readings of the shown period, newest first
+
 async function loadHistory() {
     const container = document.getElementById('history');
     if (!container) return;
@@ -1064,30 +1205,48 @@ async function loadHistory() {
     container.setAttribute('aria-busy', 'true');
     showMessage(container, '', 'Loading…', '');
 
-    const dates = rangeDates(currentRange);
+    // Only the newest request may draw: after quick clicks an older, slower answer
+    // must not be shown on the axis of the newly chosen period (test 18 Nov, T1-09).
+    const requestId = ++historyRequest;
+    const range = currentRange;
+    saveRange(range);
+    const domain = periodDomain(range);
+    const dates = rangeDates(range);
     // Only "1 hour" needs an extra time check after the dates.
-    let times = currentRange.key === 'hour' ? rangeTimes(currentRange) : null;
-    if (currentRange.key === 'around') times = {from: currentRange.from, to: currentRange.to};
+    let times = range.key === 'hour' ? rangeTimes(range) : null;
+    if (range.key === 'around') times = {from: range.from, to: range.to};
 
     try {
         let readings;
+        let outsideReadings = [];
         if (!dates) {
             readings = await fetchPage(`limit=${HISTORY_LIMIT}`);
         } else {
-            readings = await fetchPeriod(dates, times);
+            // Inside and outside are requested separately, at the same time (dual-sensor API).
+            [readings, outsideReadings] = await Promise.all([
+                fetchPeriod(dates, times),
+                fetchPeriod(dates, times, 'outside').catch(() => []),
+            ]);
         }
+        if (requestId !== historyRequest) return;   // a newer period was chosen meanwhile
         if (readings === null) return;   // already handled (sign-in or no access)
+        outsideReadings = outsideReadings || [];
 
         if (times) {
-            readings = readings.filter((r) => {
+            const inTimes = (r) => {
                 const t = readingTime(r);
                 return t !== null && t >= times.from && t < times.to;
-            });
+            };
+            readings = readings.filter(inTimes);
+            outsideReadings = outsideReadings.filter(inTimes);
         }
 
         if (readings.length === 0) {
             lastReadings = null;
-            if (dates) {
+            if (range.key === 'hour' && times) {
+                showMessage(container, '', 'No readings in the last 60 minutes',
+                    `${dateRange(times.from, times.to)}, ${clock(times.from)} – ${clock(times.to)}`);
+            } else if (dates) {
                 showMessage(container, '', 'No readings in this period', 'Choose another period.');
             } else {
                 showMessage(container, '', 'No readings yet', 'Check the box is on.');
@@ -1096,16 +1255,17 @@ async function loadHistory() {
         }
 
         lastReadings = readings;
-        lastDomain = periodDomain(currentRange);
+        lastOutside = outsideReadings;
+        lastDomain = domain;
         // No "N readings" line (usability). Only name the alert the user opened with View.
-        lastSummary = currentRange.key === 'around' ? rangeLabel(currentRange) : '';
+        lastSummary = range.key === 'around' ? rangeLabel(range) : '';
         showView(false);
 
     } catch (error) {
         console.error('History error:', error);
         showMessage(container, 'error', "Can't load", 'Check your internet and refresh.');
     } finally {
-        container.setAttribute('aria-busy', 'false');
+        if (requestId === historyRequest) container.setAttribute('aria-busy', 'false');
     }
 }
 

@@ -66,8 +66,7 @@ function newestAlertPeriod(readings) {
     if (newestIndex === -1) return null;
     let startIndex = newestIndex;
     for (let i = newestIndex + 1; i < readings.length; i++) {
-        const gap = Number(readings[i - 1].sequence_no) - Number(readings[i].sequence_no) > 1;
-        if (!isAlertReading(readings[i]) || gap) break;
+        if (!isAlertReading(readings[i]) || readingGap(readings[i], readings[i - 1])) break;
         startIndex = i;
     }
     const alertReadings = readings.slice(newestIndex, startIndex + 1);
