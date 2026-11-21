@@ -15,7 +15,7 @@ erDiagram
     boxes ||--o{ box_access: permits
     boxes ||--o{ threshold_profiles: has
     boxes ||--o{ temperature_samples: records
-    threshold_profiles ||--o{ temperature_samples: classifies
+    threshold_profiles ||--o{ temperature_samples: recorded_with
     temperature_samples ||--o| sample_reviews: has
     app_users ||--o{ sample_reviews: records
 
@@ -55,6 +55,7 @@ erDiagram
         CHAR sample_id PK "36 characters"
         VARCHAR box_id FK "Part of composite foreign key"
         BIGINT sequence_no "Unsigned; unique within box"
+        ENUM sensor_location "inside or outside; default inside"
         CHAR profile_id FK "Part of composite foreign key"
         DATETIME observed_at "Nullable"
         BOOLEAN clock_reliable
@@ -84,8 +85,11 @@ listed below rather than marking their individual columns as independently uniqu
   sessions. MySQL deletes its sessions when the account is deleted.
 - `threshold_profiles` stores temperature limits for one box. Its check constraint
   requires `lower_c < warning_c < upper_c`.
-- `temperature_samples` stores measurements and sensor errors. Each sample belongs
-  to one box and references the profile used for that measurement.
+- `temperature_samples` stores measurements and sensor errors from both sensors.
+  `sensor_location` distinguishes `inside` (SCD41) and `outside` (AM2302).
+  Each sample belongs to one box and records its active profile. Only inside
+  samples are classified against that profile's limits; outside samples provide
+  comparison temperatures and do not affect box alarms.
 - `sample_reviews` stores at most one acknowledgement per sample, linked to one
   reviewing user. It is not a complete audit history of multiple reviews.
 
@@ -97,16 +101,34 @@ another box's profile. The separate foreign key on `temperature_samples.box_id`
 references `boxes.box_id`.
 
 The unique pair `(box_id, sequence_no)` prevents duplicate sequence numbers within
-a box, while allowing different boxes to use the same sequence number.
+a box, while allowing different boxes to use the same sequence number. Both sensors
+share this counter: filtering to one sensor can leave gaps between sequence numbers
+without any missing measurements. Indexes on `(box_id, sensor_location, sequence_no)`
+and `(box_id, sensor_location, observed_at)` support separate sensor histories.
 
 When thresholds change, create a new profile and preserve the old one. Existing
-samples keep their recorded `profile_id`, so their historical classification does
+inside samples keep their recorded `profile_id`, so their historical classification does
 not change. Profile immutability is a project rule; the schema does not itself
 prevent an UPDATE to the threshold values.
 
 A `valid` sample must have a temperature between -40 and 80 degrees Celsius. A
 `sensor_error` sample must have a NULL temperature. Validity describes the
 measurement, not whether its temperature is within the configured limits.
+
+## Raspberry Pi queue and upgrade
+
+This diagram describes the server's **MySQL** database. On the Raspberry Pi,
+the existing **SQLite** table is named `readings`, not `temperature_samples`.
+Both store `sensor_location`; no separate outside readings table is needed.
+SQLite also keeps `uploaded`, which changes only after a matching MQTT storage
+acknowledgement. The proposed device package also adds `device_configuration` for the last
+adopted profile.
+
+[Migration 007](../../database/migrations/007_add_sensor_location.sql) adds the
+server column and indexes. The separately supplied device initialiser upgrades
+the existing SQLite queue; the hardware owner integrates those changes. Both assign `inside` to legacy samples and preserve identifiers, sequence
+numbers and temperatures. Follow the [rollout order](../operations/dual-sensor-rollout.md)
+before starting the updated Pi publisher.
 
 ## Desired box configuration
 

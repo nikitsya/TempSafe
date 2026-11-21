@@ -52,6 +52,14 @@ Publish the [ReadingCreate JSON payload](../api/api-contract.md#saving-incoming-
 readings topic, with a maximum MQTT payload of 4096 bytes. The box and profile must already exist in
 MySQL. Preserve the sample UUID, persistent sequence and observation time on every retry.
 
+The version 1 readings payload now includes `sensor_location: "inside"` or
+`"outside"`. Older payloads without it are treated as `inside`; `null` and unknown
+locations are rejected. Both sensors use the existing readings and acknowledgement
+topics and one persistent box-wide sequence counter. Each attempt has its own UUID.
+The acknowledgement shape below does not change. Deploy the database migration and
+backend first: an older strict backend rejects the new field. See the
+[dual-sensor rollout](dual-sensor-rollout.md).
+
 After a database commit, or an identical retry of a stored record, the subscriber publishes:
 
 ```json
@@ -113,8 +121,9 @@ is unchanged.
 
 ### Configuration rollout
 
-1. Review the compatible device changes and backend changes together. The device scripts on this
-   branch still use local constants; server publication alone does not replace them.
+1. Review the compatible device changes and backend changes together. The separate device package
+   stores the active profile locally for inside alarms and new samples from both sensors.
+   Its integration belongs to the hardware owner; those files are not in this backend change.
 2. Back up the broker's active ACL file, locate its existing user entries and add read access to
    the configuration topic for `device-TS-01` and write access for `backend-ingest`. See
    [`deploy/mosquitto.acl.example`](../../deploy/mosquitto.acl.example) for the complete topic rules.
@@ -122,7 +131,8 @@ is unchanged.
    Reload Mosquitto and verify both permissions. Do this before starting the new Pi publisher:
    its combined acknowledgement/configuration subscription must succeed before it sends readings.
 3. Deploy the reviewed backend revision using the existing application update procedure. No
-   database migration is required when `box_configuration` already exists. Enable MQTT and retain
+   configuration-specific migration is required when `box_configuration` already exists; dual-sensor
+   ingestion additionally requires migration 007. Enable MQTT and retain
    the existing single-worker setup and TLS configuration.
 4. Deploy the compatible Pi subscriber and logger together. Change the limits through Settings
    and verify the retained JSON, the saved Pi profile, LED/buzzer behaviour and new readings with
