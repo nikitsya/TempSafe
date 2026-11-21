@@ -1,13 +1,17 @@
 """Check assigned box configuration and historical integrity against isolated MySQL."""
 
+import json
 from datetime import datetime
 from decimal import Decimal
+from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
 from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from tempsafe.db.models import Box, BoxConfiguration, TemperatureSample, ThresholdProfile
+from tempsafe.monitoring.configuration import ConfigurationPublisher
 
 pytestmark = pytest.mark.anyio
 
@@ -69,3 +73,27 @@ async def test_change_preserves_history_and_identical_retry(configured_api):
     assert (await db.get(ThresholdProfile, original["profile_id"])).upper_c == Decimal("25")
     assert await db.scalar(
         select(func.count()).select_from(ThresholdProfile).where(ThresholdProfile.box_id == box_id)) == 2
+
+
+async def test_publisher_reads_the_selected_profile_from_mysql(configured_api):
+    client, db, box_id = configured_api
+    mqtt = Mock()
+    mqtt.client.is_connected = True
+    factory = async_sessionmaker(
+        bind=await db.connection(), join_transaction_mode="create_savepoint", expire_on_commit=False,
+    )
+    publisher = ConfigurationPublisher(mqtt, box_id, factory)
+    await publisher.publish_current()
+    mqtt.client.publish.assert_not_called()
+
+    for upper in ("25.00", "26.00"):
+        response = await client.put(f"/api/boxes/{box_id}/configuration", json=SETTINGS | {"upper_c": upper})
+        assert response.status_code == 200
+        await publisher.publish_current()
+        call = mqtt.client.publish.call_args
+        assert call.args[0] == f"tempsafe/boxes/{box_id}/configuration"
+        assert call.kwargs == {"qos": 1, "retain": True}
+        assert json.loads(call.args[1]) == {
+            "schema_version": 1, "box_id": box_id, "profile_id": response.json()["profile_id"],
+            "lower_c": "0.00", "warning_c": "24.00", "upper_c": upper,
+        }

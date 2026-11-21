@@ -161,6 +161,40 @@ async def test_lifespan_stops_mqtt_before_closing_database_pool(monkeypatch, fai
     dispose.assert_awaited_once()
 
 
+async def test_lifespan_cancels_configuration_worker_before_mqtt_shutdown(monkeypatch):
+    import asyncio
+    from tempsafe import main
+
+    started = asyncio.Event()
+    stopped = asyncio.Event()
+
+    async def run():
+        started.set()
+        try:
+            await asyncio.Event().wait()
+        finally:
+            stopped.set()
+
+    publisher = Mock(run=run)
+    mqtt = Mock(mqtt_startup=AsyncMock(), mqtt_shutdown=AsyncMock())
+
+    async def disconnect():
+        assert stopped.is_set()
+        assert main.app.state.configuration_publisher is None
+
+    mqtt.mqtt_shutdown.side_effect = disconnect
+    dispose = AsyncMock(side_effect=mqtt.mqtt_shutdown.assert_awaited_once)
+    monkeypatch.setattr(main, "create_mqtt", lambda: mqtt)
+    monkeypatch.setattr(main, "ConfigurationPublisher", lambda *args: publisher)
+    monkeypatch.setattr(main, "engine", Mock(dispose=dispose))
+
+    async with main.app.router.lifespan_context(main.app):
+        await asyncio.wait_for(started.wait(), timeout=1)
+        assert main.app.state.configuration_publisher is publisher
+
+    dispose.assert_awaited_once()
+
+
 def test_mqtt_disabled_or_missing_configuration(monkeypatch):
     from tempsafe.mqtt import create_mqtt
     monkeypatch.setenv("MQTT_ENABLED", "false")
