@@ -277,7 +277,11 @@ async function checkDevice() {
             if (offlinePopup) offlinePopup.remove();
             offlinePopup = null;
             const now = Array.isArray(readings) ? currentTemperature(readings) : null;
-            announce({kind: 'back', title: 'Back online', text: now === null ? 'No temperature yet' : `${now.toFixed(1)}°C`}, 'online');
+            announce({
+                kind: 'back',
+                title: 'Back online',
+                text: now === null ? 'No temperature yet' : `${now.toFixed(1)}°C`
+            }, 'online');
             saved.offline = null;
         }
 

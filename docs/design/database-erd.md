@@ -126,7 +126,8 @@ adopted profile.
 
 [Migration 007](../../database/migrations/007_add_sensor_location.sql) adds the
 server column and indexes. The separately supplied device initialiser upgrades
-the existing SQLite queue; the hardware owner integrates those changes. Both assign `inside` to legacy samples and preserve identifiers, sequence
+the existing SQLite queue; the hardware owner integrates those changes. Both assign `inside` to legacy samples and
+preserve identifiers, sequence
 numbers and temperatures. Follow the [rollout order](../operations/dual-sensor-rollout.md)
 before starting the updated Pi publisher.
 

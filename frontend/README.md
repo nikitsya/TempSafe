@@ -16,22 +16,22 @@ or password-reset form. See the [deployment notes](../docs/operations/deployment
 
 ## Structure
 
-| Path                   | Purpose                                                          |
-|------------------------|------------------------------------------------------------------|
-| `index.html`           | Sign-in page (entry point)                                       |
-| `pages/dashboard.html` | Latest API reading for prototype box `TS-01`                     |
-| `pages/history.html`   | Readings by period: temperature graph or readings table          |
-| `pages/alerts.html`    | Alert history and issues (sensor faults, no data) by period      |
-| `pages/settings.html`  | View and change the temperature limits of the assigned box       |
-| `css/main.css`         | Shared styles: colour tokens, typography, layout and components  |
-| `js/api.js`            | API helper and redirects to the sign-in page                     |
-| `js/main.js`           | API connection check and sign-out handling                       |
-| `js/sample-data.js`    | Legacy fixtures; not loaded by the application pages             |
-| `js/dashboard.js`      | Dashboard status, details, freshness and automatic refresh       |
-| `js/history.js`        | Periods, graph with issue bands, readings, alerts and issues     |
-| `js/settings.js`       | Limits form, checks, confirmation step and save request          |
-| `js/notifications.js`  | Pop-ups and browser notifications when an alert starts and ends  |
-| `js/signin.js`         | Form validation, login request and sign-in messages              |
+| Path                   | Purpose                                                         |
+|------------------------|-----------------------------------------------------------------|
+| `index.html`           | Sign-in page (entry point)                                      |
+| `pages/dashboard.html` | Latest API reading for prototype box `TS-01`                    |
+| `pages/history.html`   | Readings by period: temperature graph or readings table         |
+| `pages/alerts.html`    | Alert history and issues (sensor faults, no data) by period     |
+| `pages/settings.html`  | View and change the temperature limits of the assigned box      |
+| `css/main.css`         | Shared styles: colour tokens, typography, layout and components |
+| `js/api.js`            | API helper and redirects to the sign-in page                    |
+| `js/main.js`           | API connection check and sign-out handling                      |
+| `js/sample-data.js`    | Legacy fixtures; not loaded by the application pages            |
+| `js/dashboard.js`      | Dashboard status, details, freshness and automatic refresh      |
+| `js/history.js`        | Periods, graph with issue bands, readings, alerts and issues    |
+| `js/settings.js`       | Limits form, checks, confirmation step and save request         |
+| `js/notifications.js`  | Pop-ups and browser notifications when an alert starts and ends |
+| `js/signin.js`         | Form validation, login request and sign-in messages             |
 
 ## Authentication behaviour
 
@@ -73,7 +73,8 @@ Other current limitations:
 
 Settings reads `GET /api/boxes/TS-01/configuration` and saves with `PUT` after the browser
 checks the numbers (-40 to 80°C, two decimals, Too cold < Warning < Too hot) and the user
-confirms the change. The page sends a fixed `source_note` ("Set on the TEMPSAFE website"). Saving creates a new profile on
+confirms the change. The page sends a fixed `source_note` ("Set on the TEMPSAFE website"). Saving creates a new profile
+on
 the server. The Raspberry Pi still uses its own constants and profile ID, so new limits
 affect LEDs, the buzzer and new readings only after the device receives and adopts them.
 
@@ -102,7 +103,7 @@ application availability, not MySQL, the sensor or whether the user is signed in
 Every signed-in page checks the latest 100 readings every 15 seconds and announces two moments
 once each: an alert starts ("Too hot — 26.4°C · 4 min", kept up to date while it lasts) and it
 ends ("Back in range — 22.8°C"). The server decides Alert with the
-limits set in Settings. They appear as a pop-up on the website and, if the
-**Notifications** switch in Settings is on, as a browser notification; clicking it opens Alerts.
+limits set in Settings. They appear as a pop-up on the website and, if the **Notifications** switch in Settings is on,
+as a browser notification; clicking it opens Alerts.
 On a first visit only an alert that is still on is announced. The state is stored in the browser.
 Notifications when the website is closed would need Web Push from the backend.

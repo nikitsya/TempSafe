@@ -8,10 +8,10 @@ by editing these files.
 
 ## Storage and compatibility
 
-| Location | Existing table | Required change |
-|----------|----------------|-----------------|
-| Raspberry Pi, SQLite | `readings` | Device owner adds `sensor_location`, preserving `uploaded` and the shared counter. |
-| Server, MySQL | `temperature_samples` | Migration 007 adds `sensor_location` and indexes for sensor-filtered queries. |
+| Location             | Existing table        | Required change                                                                    |
+|----------------------|-----------------------|------------------------------------------------------------------------------------|
+| Raspberry Pi, SQLite | `readings`            | Device owner adds `sensor_location`, preserving `uploaded` and the shared counter. |
+| Server, MySQL        | `temperature_samples` | Migration 007 adds `sensor_location` and indexes for sensor-filtered queries.      |
 
 Locations are `inside` and `outside`. All legacy server rows and payloads without
 the field mean `inside`. A new attempt gets its own UUID and the next **box-wide**

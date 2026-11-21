@@ -570,7 +570,10 @@ function dateRange(start, end) {
     if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
         return `${start.getDate()} – ${end.toLocaleDateString('en-IE', full)}`;
     }
-    return `${start.toLocaleDateString('en-IE', {day: 'numeric', month: 'short'})} – ${end.toLocaleDateString('en-IE', full)}`;
+    return `${start.toLocaleDateString('en-IE', {
+        day: 'numeric',
+        month: 'short'
+    })} – ${end.toLocaleDateString('en-IE', full)}`;
 }
 
 function periodMinutes(start, end) {
@@ -775,7 +778,11 @@ function rangeLabel(range) {
         return `Alert on ${shortDay(range.from)}, ${clock(range.from)} – ${clock(range.to)}`;
     }
     if (range.key === 'date' && range.date) {
-        return new Date(`${range.date}T00:00:00`).toLocaleDateString('en-IE', {day: 'numeric', month: 'long', year: 'numeric'});
+        return new Date(`${range.date}T00:00:00`).toLocaleDateString('en-IE', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
     }
     return RANGES[range.key] ? RANGES[range.key].label : 'Today';
 }

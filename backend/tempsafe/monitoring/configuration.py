@@ -49,8 +49,8 @@ class ConfigurationPublisher:
                 profile = await db.scalar(
                     select(ThresholdProfile)
                     .join(BoxConfiguration, (
-                        (BoxConfiguration.profile_id == ThresholdProfile.profile_id)
-                        & (BoxConfiguration.box_id == ThresholdProfile.box_id)
+                            (BoxConfiguration.profile_id == ThresholdProfile.profile_id)
+                            & (BoxConfiguration.box_id == ThresholdProfile.box_id)
                     ))
                     .where(BoxConfiguration.box_id == self.box_id)
                 )

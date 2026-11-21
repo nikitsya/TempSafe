@@ -93,8 +93,6 @@ function formatClock(date) {
 }
 
 
-
-
 // Age of the last reading for Details (FR-04): "5 s ago", "3 min ago", "2 h ago".
 function ageText(seconds) {
     if (seconds < 60) return `${seconds} s ago`;
@@ -482,8 +480,8 @@ function convertReading(data, box = null) {
         status = 'unknown';
     }
 
-    // The API says the reading is older than 90 seconds.
-    // The browser age is also checked, so that cached data becomes stale
+        // The API says the reading is older than 90 seconds.
+        // The browser age is also checked, so that cached data becomes stale
     // when the refresh fails.
     else if (data.freshness === 'stale' || ageSeconds > 90) {
         status = 'stale';
