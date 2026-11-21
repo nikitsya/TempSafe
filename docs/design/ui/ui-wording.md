@@ -105,7 +105,7 @@ same text. Each start and end is announced once.
 
 | Situation          | Heading / text                                                                      | Notes                                                                                     |
 |--------------------|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
-| Notifications      | Notifications [On/Off switch]                                                       | If the browser blocks notifications, the switch is off and explains how to allow the site |
+| Notifications      | Notifications [On/Off switch]                                                       | Off: *Get a message from this browser when the box goes into Alert or back in range, even on another tab. Your browser will ask for permission when you turn this on.* On: *This browser shows a message when the box goes into Alert or back in range.* Blocked or unsupported: the switch is off and explains how to allow the site |
 | Limits form        | Temperature limits: **Minimum**, **Warning from**, **Maximum**                      | No hints; current values are filled in                                                    |
 | Rules              | Alert at or below Minimum or above Maximum; Warning from Warning from up to Maximum | FR-05                                                                                     |
 | Confirm            | Change the limits?                                                                  | Now / New, with **Confirm** and **Cancel**                                                |
