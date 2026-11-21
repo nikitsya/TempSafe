@@ -1,6 +1,19 @@
 # Internal and External Temperature Experiment
 
-**Status:** Planned; no results recorded yet.
+**Status:** Initial sensor check completed; the box experiment is still planned.
+
+## Initial two-sensor check — 19 November 2026
+
+The SCD41 and AM2302 were read together on the Raspberry Pi using
+`external_temperature_test.py`. The script printed readings to the terminal without saving
+or publishing them. During the check, the AM2302 was warmed by holding it in a hand.
+
+Both sensors returned readings. In the captured output, the outside reading rose from
+22.3 °C to 27.2 °C while the inside reading changed from 20.9 °C to 20.5 °C.
+This confirms that the outside reading responded during this check; it does not establish
+sensor accuracy or predict the behaviour of a real medication box.
+
+![Terminal output from the initial two-sensor check](../../assets/testing/hardware/external-sensor-initial-check.png)
 
 ## Purpose
 
