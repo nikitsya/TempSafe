@@ -79,6 +79,8 @@ async def stored_box(payload, app_lifespan):
     {"profile_id": "not-a-uuid"},
     {"received_at": "2026-01-01T12:00:00Z"},
     {"schema_version": 2},
+    {"sensor_location": "roof"},
+    {"sensor_location": None},
 ])
 def test_invalid_payload_is_rejected(payload, changes):
     """Reject invalid data before opening a database session."""
@@ -90,6 +92,7 @@ async def test_save_and_identical_retry(stored_box):
     """Commit a sample, then accept an equivalent retry in another session."""
     async with AsyncSessionLocal() as db:
         saved = await save_reading(db, ReadingCreate(**stored_box))
+        assert saved.sensor_location == "inside"
         assert saved.observed_at == datetime(2026, 1, 1, 12)
         received_at = saved.received_at
 
@@ -107,9 +110,21 @@ async def test_save_and_identical_retry(stored_box):
         assert count == 1
 
 
+async def test_outside_retry_and_shared_sequence(stored_box, device_client):
+    outside = stored_box | {"sensor_location": "outside"}
+    first = await device_client.post("/api/readings", json=outside)
+    assert first.status_code == 200 and first.json()["sensor_location"] == "outside"
+    assert (await device_client.post("/api/readings", json=outside)).json() == first.json()
+    conflicting = stored_box | {"sample_id": str(uuid4())}
+    assert (await device_client.post("/api/readings", json=conflicting)).status_code == 409
+    inside = conflicting | {"sequence_no": 2}
+    assert (await device_client.post("/api/readings", json=inside)).status_code == 200
+
+
 @pytest.mark.parametrize("changes", [
     {"temperature_c": "24.00"},
     {"sequence_no": 2},
+    {"sensor_location": "outside"},
     {"sample_id": "6ddf0f28-bec1-4d74-a320-51d095156dec"},
     {"observed_at": "2026-01-01T12:01:00Z"},
     {"quality": "sensor_error", "temperature_c": None},

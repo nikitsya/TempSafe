@@ -99,6 +99,7 @@ async def test_measurement_is_written_and_read_back(grant_boxes, client):
             "sample_id": sample_id,
             "box_id": box_id,
             "sequence_no": 1,
+            "sensor_location": "inside",
             "profile_id": profile_id,
             "observed_at": observed_at.isoformat() + "Z",
             "clock_reliable": True,

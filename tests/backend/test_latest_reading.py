@@ -12,6 +12,68 @@ from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
 pytestmark = pytest.mark.anyio
 
 
+async def test_sensor_histories_are_separate(latest_reading_data):
+    client, db, boxes, profiles = latest_reading_data
+    for sequence, location in [(1, "inside"), (2, "outside"), (3, "inside"), (4, "outside")]:
+        db.add(TemperatureSample(
+            sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+            sequence_no=sequence, sensor_location=location,
+            observed_at=datetime(2026, 1, 1, 12, 9, sequence), clock_reliable=True,
+            temperature_c=30, quality="valid",
+        ))
+    await db.flush()
+    url = f"/api/boxes/{boxes[0]}/readings"
+    inside = (await client.get(url)).json()
+    outside = (await client.get(url, params={"sensor_location": "outside"})).json()
+    assert [r["sequence_no"] for r in inside] == [3, 1]
+    assert all(r["temperature_state"] == "Alert" for r in inside)
+    assert [r["sequence_no"] for r in outside] == [4, 2]
+    assert all(r["temperature_state"] is None and r["profile"] is None for r in outside)
+    assert all(r["profile_id"] == profiles[0] for r in outside)
+    page = await client.get(url, params={"sensor_location": "outside", "before_sequence": 4, "limit": 1})
+    assert [r["sequence_no"] for r in page.json()] == [2]
+    assert (await client.get(url + "/latest")).json()["sequence_no"] == 3
+    latest = (await client.get(url + "/latest", params={"sensor_location": "outside"})).json()
+    assert latest["sequence_no"] == 4 and latest["freshness"] == "fresh"
+    for path in [url, url + "/latest", "/api/readings"]:
+        assert (await client.get(path, params={"sensor_location": "roof"})).status_code == 422
+    generic = (await client.get("/api/readings", params={"sensor_location": "outside"})).json()
+    assert len(generic) == 2 and all(r["sensor_location"] == "outside" for r in generic)
+
+
+async def test_outside_does_not_hide_missing_inside_data(latest_reading_data):
+    client, db, boxes, profiles = latest_reading_data
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+        sequence_no=2, sensor_location="outside", quality="valid", temperature_c=30,
+        observed_at=datetime(2026, 1, 1, 12, 10), clock_reliable=True,
+        received_at=datetime(2026, 1, 1, 12, 10),
+    ))
+    await db.flush()
+    url = f"/api/boxes/{boxes[0]}"
+    assert (await client.get(url + "/readings/latest")).status_code == 404
+    status = (await client.get(url + "/status")).json()
+    assert status["contact_status"] == "reporting"
+    assert status["freshness"] == "unknown" and status["observed_at"] is None
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+        sequence_no=1, quality="valid", temperature_c=5,
+        observed_at=datetime(2026, 1, 1, 12), clock_reliable=True,
+        received_at=datetime(2026, 1, 1, 12),
+    ))
+    await db.flush()
+    assert (await client.get(url + "/status")).json()["freshness"] == "stale"
+    db.add(TemperatureSample(
+        sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
+        sequence_no=3, sensor_location="outside", quality="sensor_error",
+        observed_at=datetime(2026, 1, 1, 12, 10), clock_reliable=True,
+    ))
+    await db.flush()
+    outside = (await client.get(url + "/readings/latest?sensor_location=outside")).json()
+    assert outside["quality"] == "sensor_error" and outside["temperature_c"] is None
+    assert outside["temperature_state"] is None and outside["profile"] is None
+
+
 @pytest.fixture
 async def latest_reading_data(monkeypatch, grant_boxes, client, db):
     """Share one uncommitted session with the endpoint and roll it back afterwards."""
@@ -117,6 +179,7 @@ async def test_latest_state_uses_recorded_profile(latest_reading_data, temperatu
         "sample_id": sample_id,
         "box_id": box_ids[0],
         "sequence_no": 1,
+        "sensor_location": "inside",
         "profile_id": profile_ids[0],
         "observed_at": "2026-01-01T12:00:00Z",
         "clock_reliable": True,

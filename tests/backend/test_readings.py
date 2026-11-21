@@ -35,6 +35,7 @@ def test_readings_list_returns_sample(reading_client):
     client, db = reading_client
     sample = TemperatureSample(
         sample_id="test-sample", box_id="test-box", sequence_no=1,
+        sensor_location="inside",
         profile_id="test-profile", observed_at=None, clock_reliable=False,
         received_at=datetime(2026, 1, 1, 12, microsecond=123456), temperature_c=Decimal("5.25"),
         quality="valid",
