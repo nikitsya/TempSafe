@@ -3,7 +3,32 @@
 These values apply to the original UI mock-ups and HTML prototype. The later
 [core scenario mock-ups](core-scenario-mockups.md) document their own visual style.
 
-## Colours
+## Web application
+
+Clinical and calm, easy to read at a glance in an ambulance. A navy frame, white cards on a cool grey page, one
+accent blue for actions; green, amber and red are used only for status. All text pairs meet WCAG AA.
+
+| Token       | Hex       | Use                                            |
+|-------------|-----------|------------------------------------------------|
+| `--navy`    | `#14233F` | Header and menu, main text                     |
+| `--accent`  | `#1E5AA8` | Buttons, links, selected tab and focus outline |
+| `--page`    | `#F4F6F9` | Page background                                |
+| `--line`    | `#DDE3EB` | Card borders and table lines                   |
+| `--muted`   | `#56647B` | Labels and secondary text                      |
+| `--normal`  | `#1B7A43` | Normal                                         |
+| `--warning` | `#8A5800` | Warning (lines `#C48A12`)                      |
+| `--alert`   | `#B42318` | Alert                                          |
+| `--grey`    | `#536074` | No data, offline, last reading                 |
+| `--fault`   | `#7C2D12` | Sensor fault                                   |
+
+- Typeface: IBM Plex Sans 400–700, self-hosted in `frontend/css/fonts` (SIL Open Font Licence), tabular numbers.
+- Sentence case for all labels, buttons, tabs and status words.
+- Radius 14 px for cards, 8 px for controls, round pills for status tags. No shadows except pop-ups.
+- The status tile is the strongest element: a coloured band on the left, the status word and a large temperature.
+- Period and view choosers are segmented controls; the selected option is white with blue text.
+- Touch targets are at least 44 px high.
+
+## Original prototype colours
 
 | Token                    | Hex                   | Use                                |
 |--------------------------|-----------------------|------------------------------------|

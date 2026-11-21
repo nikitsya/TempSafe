@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>Alerts – TempSafe</title>
+    <link href="../css/main.css?v=39" rel="stylesheet">
+</head>
+<body data-page="alerts">
+<header class="site-header">
+    <div class="header-top">
+        <span class="brand">TempSafe</span>
+        <div class="header-right">
+            <a class="signout-link" data-signout href="../index.html">Sign out</a>
+        </div>
+    </div>
+    <div class="nav-bar">
+        <nav aria-label="Main" class="nav">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="history.html">History</a>
+            <a aria-current="page" href="alerts.html">Alerts</a>
+            <a href="settings.html">Settings</a>
+        </nav>
+    </div>
+</header>
+<main class="wide">
+    <h1 class="visually-hidden">Alerts</h1>
+    <p class="banner error" hidden id="signout-error" role="alert"></p>
+
+    <div class="history-controls">
+        <section aria-labelledby="period-title" class="panel">
+            <h2 class="panel-title" id="period-title">Period</h2>
+            <div id="history-filter"></div>
+        </section>
+        <section aria-labelledby="view-title" class="panel">
+            <h2 class="panel-title" id="view-title">Show</h2>
+            <div id="history-views"></div>
+        </section>
+    </div>
+
+    <section aria-busy="true" aria-live="polite" class="card view" id="history" tabindex="-1"></section>
+</main>
+<script src="../js/api.js?v=39"></script>
+<script src="../js/main.js?v=39"></script>
+<script src="../js/notifications.js?v=39"></script>
+<script src="../js/history.js?v=39"></script>
+</body>
+</html>

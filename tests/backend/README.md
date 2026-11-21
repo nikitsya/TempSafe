@@ -2,6 +2,11 @@
 
 The pytest suite covers database access, API responses, temperature classification,
 payload validation and reading storage, including retries and conflicts.
+Dual-sensor checks cover legacy `inside` defaults, rejected locations, shared
+sequence conflicts, separate history/latest queries, outside samples without
+box-limit classification, and inside freshness unaffected by outside receipts.
+Device queue tests are supplied separately to the hardware owner; see the
+[team handover](../../docs/operations/dual-sensor-rollout.md#device-handover).
 
 ## Before you start
 
@@ -29,17 +34,18 @@ python -m pytest tests/backend/test_save_reading.py -v
 
 ## Test files
 
-| File                     | Coverage                                                                           |
-|--------------------------|------------------------------------------------------------------------------------|
-| `test_auth.py`           | Login, session expiry/revocation, box assignments and device credentials.          |
-| `test_configuration.py`  | Assigned-box access and versioned thresholds.                                      |
-| `test_database.py`       | Database connection, stored reading retrieval and missing readings.                |
-| `test_boxes.py`          | Box responses and unknown boxes.                                                   |
-| `test_readings.py`       | Reading lists and limit validation.                                                |
-| `test_latest_reading.py` | Latest readings, recorded profiles, UTC/freshness, box history and sequence order. |
-| `test_save_reading.py`   | Input validation, storage, retries, conflicts and POST responses.                  |
-| `test_mqtt.py`           | MQTT validation, topic checks and acknowledgement after storage (mock storage).    |
-| `test_temperature.py`    | Temperature thresholds and sensor errors.                                          |
+| File                             | Coverage                                                                                                |
+|----------------------------------|---------------------------------------------------------------------------------------------------------|
+| `test_auth.py`                   | Login, session expiry/revocation, box assignments and device credentials.                               |
+| `test_configuration.py`          | Assigned-box access, versioned thresholds and publication of the selected MySQL profile.                |
+| `test_configuration_delivery.py` | Retained payloads, commit ordering, reconnects, retries and current-profile selection without a broker. |
+| `test_database.py`               | Database connection, stored reading retrieval and missing readings.                                     |
+| `test_boxes.py`                  | Box responses and unknown boxes.                                                                        |
+| `test_readings.py`               | Reading lists and limit validation.                                                                     |
+| `test_latest_reading.py`         | Latest readings, recorded profiles, UTC/freshness, box history and sequence order.                      |
+| `test_save_reading.py`           | Input validation, storage, retries, conflicts and POST responses.                                       |
+| `test_mqtt.py`                   | MQTT validation, topic checks and acknowledgement after storage (mock storage).                         |
+| `test_temperature.py`            | Temperature thresholds and sensor errors.                                                               |
 
 A successful run has no failures or errors. If a test fails, inspect the error and
 check the database connection, table setup and selected Python environment.

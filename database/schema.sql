@@ -5,8 +5,8 @@ SET SESSION time_zone = '+00:00';
 
 CREATE TABLE boxes
 (
-    box_id                     VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+    box_id VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
+    name   VARCHAR(100) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_0900_as_cs;
@@ -54,6 +54,7 @@ CREATE TABLE temperature_samples
     sample_id      CHAR(36) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
     box_id         VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
     sequence_no    BIGINT UNSIGNED                                   NOT NULL,
+    sensor_location ENUM ('inside','outside')                        NOT NULL DEFAULT 'inside',
     profile_id     CHAR(36) CHARACTER SET ascii COLLATE ascii_bin    NOT NULL,
     observed_at    DATETIME(6)                                       NULL,
     clock_reliable BOOLEAN                                           NOT NULL,
@@ -62,6 +63,8 @@ CREATE TABLE temperature_samples
     quality        ENUM ('valid','sensor_error')                     NOT NULL,
     UNIQUE KEY uq_box_sequence (box_id, sequence_no),
     KEY ix_box_time (box_id, observed_at),
+    KEY ix_box_sensor_sequence (box_id, sensor_location, sequence_no),
+    KEY ix_box_sensor_time (box_id, sensor_location, observed_at),
     CONSTRAINT fk_sample_box FOREIGN KEY (box_id) REFERENCES boxes (box_id),
     CONSTRAINT fk_sample_profile_box FOREIGN KEY (profile_id, box_id)
         REFERENCES threshold_profiles (profile_id, box_id),

@@ -50,5 +50,7 @@ Keep the server running while using the site. Stop it with **Ctrl+C**.
 ## MQTT lifecycle
 
 FastMQTT starts with FastAPI when `MQTT_ENABLED=true`. Leave it disabled for HTTP-only development.
+The configuration worker publishes the selected profile for `MQTT_BOX_ID` after a successful API
+commit, on connection and every 30 seconds. It stops before MQTT and the MySQL pool are closed.
 Configure broker credentials in the environment; see the [MQTT guide](../../docs/operations/mqtt.md).
 Use one Uvicorn worker and no production reload. The separate MQTT worker service is no longer used.

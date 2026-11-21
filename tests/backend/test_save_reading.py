@@ -4,19 +4,23 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from fastapi.testclient import TestClient
-from mysql.connector.errors import IntegrityError as MySQLIntegrityError
 from pydantic import ValidationError
 from sqlalchemy import delete, func, select
-from sqlalchemy.exc import IntegrityError
 
 from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
-from tempsafe.db.session import SessionLocal
-from tempsafe.main import app
+from tempsafe.db.session import AsyncSessionLocal
 from tempsafe.monitoring.readings import save_reading
 from tempsafe.schemas import ReadingCreate
 
+pytestmark = pytest.mark.anyio
+
 DEVICE_KEY = uuid4().hex
+
+
+@pytest.fixture
+def device_client(client):
+    client.headers["X-Device-Key"] = DEVICE_KEY
+    return client
 
 
 @pytest.fixture
@@ -35,25 +39,25 @@ def payload(monkeypatch, grant_boxes):
 
 
 @pytest.fixture
-def stored_box(payload):
+async def stored_box(payload, app_lifespan):
     """Commit only test parents, then remove this test's samples and parents."""
-    with SessionLocal() as db:
+    async with AsyncSessionLocal() as db:
         try:
             db.add(Box(box_id=payload["box_id"], name="Reading storage test"))
-            db.flush()
+            await db.flush()
             db.add(ThresholdProfile(
                 profile_id=payload["profile_id"], box_id=payload["box_id"],
                 lower_c=0, warning_c=24, upper_c=25,
                 source_note="Synthetic profile for storage tests.", is_demo=True,
             ))
-            db.commit()
+            await db.commit()
             yield payload
         finally:
-            db.rollback()
-            db.execute(delete(TemperatureSample).where(TemperatureSample.box_id == payload["box_id"]))
-            db.execute(delete(ThresholdProfile).where(ThresholdProfile.box_id == payload["box_id"]))
-            db.execute(delete(Box).where(Box.box_id == payload["box_id"]))
-            db.commit()
+            await db.rollback()
+            await db.execute(delete(TemperatureSample).where(TemperatureSample.box_id == payload["box_id"]))
+            await db.execute(delete(ThresholdProfile).where(ThresholdProfile.box_id == payload["box_id"]))
+            await db.execute(delete(Box).where(Box.box_id == payload["box_id"]))
+            await db.commit()
 
 
 @pytest.mark.parametrize("changes", [
@@ -75,6 +79,8 @@ def stored_box(payload):
     {"profile_id": "not-a-uuid"},
     {"received_at": "2026-01-01T12:00:00Z"},
     {"schema_version": 2},
+    {"sensor_location": "roof"},
+    {"sensor_location": None},
 ])
 def test_invalid_payload_is_rejected(payload, changes):
     """Reject invalid data before opening a database session."""
@@ -82,47 +88,60 @@ def test_invalid_payload_is_rejected(payload, changes):
         ReadingCreate(**(payload | changes))
 
 
-def test_save_and_identical_retry(stored_box):
+async def test_save_and_identical_retry(stored_box):
     """Commit a sample, then accept an equivalent retry in another session."""
-    with SessionLocal() as db:
-        saved = save_reading(db, ReadingCreate(**stored_box))
+    async with AsyncSessionLocal() as db:
+        saved = await save_reading(db, ReadingCreate(**stored_box))
+        assert saved.sensor_location == "inside"
         assert saved.observed_at == datetime(2026, 1, 1, 12)
         received_at = saved.received_at
 
     # Different offsets representing the same instant are the same observation.
     retry = stored_box | {"observed_at": "2026-01-01T12:00:00Z"}
 
-    with SessionLocal() as db:
-        saved = save_reading(db, ReadingCreate(**retry))
+    async with AsyncSessionLocal() as db:
+        saved = await save_reading(db, ReadingCreate(**retry))
         assert saved.sample_id == stored_box["sample_id"]
         assert saved.received_at == received_at
 
-        count = db.scalar(select(func.count()).select_from(TemperatureSample).where(
+        count = await db.scalar(select(func.count()).select_from(TemperatureSample).where(
             TemperatureSample.box_id == stored_box["box_id"]
         ))
         assert count == 1
 
 
+async def test_outside_retry_and_shared_sequence(stored_box, device_client):
+    outside = stored_box | {"sensor_location": "outside"}
+    first = await device_client.post("/api/readings", json=outside)
+    assert first.status_code == 200 and first.json()["sensor_location"] == "outside"
+    assert (await device_client.post("/api/readings", json=outside)).json() == first.json()
+    conflicting = stored_box | {"sample_id": str(uuid4())}
+    assert (await device_client.post("/api/readings", json=conflicting)).status_code == 409
+    inside = conflicting | {"sequence_no": 2}
+    assert (await device_client.post("/api/readings", json=inside)).status_code == 200
+
+
 @pytest.mark.parametrize("changes", [
     {"temperature_c": "24.00"},
     {"sequence_no": 2},
+    {"sensor_location": "outside"},
     {"sample_id": "6ddf0f28-bec1-4d74-a320-51d095156dec"},
     {"observed_at": "2026-01-01T12:01:00Z"},
     {"quality": "sensor_error", "temperature_c": None},
 ])
-def test_conflicting_retry_preserves_original(stored_box, changes):
+async def test_conflicting_retry_preserves_original(stored_box, changes):
     """Reject changed payloads and new IDs reusing the same box sequence."""
-    with SessionLocal() as db:
-        save_reading(db, ReadingCreate(**stored_box))
+    async with AsyncSessionLocal() as db:
+        await save_reading(db, ReadingCreate(**stored_box))
 
-    with SessionLocal() as db:
+    async with AsyncSessionLocal() as db:
         with pytest.raises(ValueError, match="conflicts"):
-            save_reading(db, ReadingCreate(**(stored_box | changes)))
+            await save_reading(db, ReadingCreate(**(stored_box | changes)))
 
-    with SessionLocal() as db:
-        rows = db.scalars(select(TemperatureSample).where(
+    async with AsyncSessionLocal() as db:
+        rows = (await db.scalars(select(TemperatureSample).where(
             TemperatureSample.box_id == stored_box["box_id"]
-        )).all()
+        ))).all()
 
         assert len(rows) == 1
         assert rows[0].sample_id == stored_box["sample_id"]
@@ -131,11 +150,11 @@ def test_conflicting_retry_preserves_original(stored_box, changes):
 
 
 @pytest.mark.parametrize("case", ["missing_box", "missing_profile", "wrong_box"])
-def test_parent_records_are_required(stored_box, case):
+async def test_parent_records_are_required(stored_box, case):
     """Require an existing box and a profile owned by that box."""
     data = stored_box.copy()
 
-    with SessionLocal() as db:
+    async with AsyncSessionLocal() as db:
         other_box_id = f"pytest-{uuid4()}"
 
         try:
@@ -145,28 +164,28 @@ def test_parent_records_are_required(stored_box, case):
                 data["profile_id"] = str(uuid4())
             else:
                 db.add(Box(box_id=other_box_id, name="Other test box"))
-                db.commit()
+                await db.commit()
                 data["box_id"] = other_box_id
             with pytest.raises(ValueError, match="not found"):
-                save_reading(db, ReadingCreate(**data))
-            assert db.get(TemperatureSample, data["sample_id"]) is None
+                await save_reading(db, ReadingCreate(**data))
+            assert await db.get(TemperatureSample, data["sample_id"]) is None
 
         finally:
-            db.rollback()
-            db.execute(delete(Box).where(Box.box_id == other_box_id))
-            db.commit()
+            await db.rollback()
+            await db.execute(delete(Box).where(Box.box_id == other_box_id))
+            await db.commit()
 
 
 @pytest.mark.parametrize("changes", [
     {"quality": "sensor_error", "temperature_c": None},
     {"clock_reliable": False, "observed_at": None},
 ])
-def test_error_and_unreliable_clock_samples_are_saved(stored_box, changes):
+async def test_error_and_unreliable_clock_samples_are_saved(stored_box, changes):
     """Preserve sensor failures and unknown observation times in history."""
     data = ReadingCreate(**(stored_box | changes))
 
-    with SessionLocal() as db:
-        saved = save_reading(db, data)
+    async with AsyncSessionLocal() as db:
+        saved = await save_reading(db, data)
         assert saved.quality == data.quality
         assert saved.temperature_c == data.temperature_c
         assert saved.clock_reliable == data.clock_reliable
@@ -175,47 +194,48 @@ def test_error_and_unreliable_clock_samples_are_saved(stored_box, changes):
 
 
 @pytest.mark.parametrize("conflicting", [False, True])
-def test_duplicate_insert_race(stored_box, monkeypatch, conflicting):
+async def test_duplicate_insert_race(stored_box, monkeypatch, conflicting):
     """Simulate another worker committing between our lookup and insert."""
-    with SessionLocal() as db:
-        def competing_commit():
+    async with AsyncSessionLocal() as db:
+        commit = db.commit
+
+        async def competing_commit():
             winner = stored_box | ({"temperature_c": "23.00"} if conflicting else {})
-            with SessionLocal() as other_db:
-                save_reading(other_db, ReadingCreate(**winner))
-            raise IntegrityError("INSERT", {}, MySQLIntegrityError("Duplicate entry", errno=1062))
+            async with AsyncSessionLocal() as other_db:
+                await save_reading(other_db, ReadingCreate(**winner))
+            await commit()
 
         monkeypatch.setattr(db, "commit", competing_commit)
 
         if conflicting:
             with pytest.raises(ValueError, match="conflicts"):
-                save_reading(db, ReadingCreate(**stored_box))
+                await save_reading(db, ReadingCreate(**stored_box))
         else:
-            saved = save_reading(db, ReadingCreate(**stored_box))
+            saved = await save_reading(db, ReadingCreate(**stored_box))
             assert saved.sample_id == stored_box["sample_id"]
 
-        assert db.scalar(select(func.count()).select_from(TemperatureSample).where(
+        assert await db.scalar(select(func.count()).select_from(TemperatureSample).where(
             TemperatureSample.box_id == stored_box["box_id"]
         )) == 1
 
 
-def test_post_reading_and_retry(stored_box):
+async def test_post_reading_and_retry(stored_box, device_client):
     """Persist through HTTP and return the same sample for an equivalent retry."""
-    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
-        response = client.post("/api/readings", json=stored_box)
-        assert response.status_code == 200
-        saved = response.json()
-        assert saved["sample_id"] == stored_box["sample_id"]
-        assert saved["observed_at"] == "2026-01-01T12:00:00Z"
-        assert saved["temperature_c"] == "24.50"
-        assert saved["received_at"].endswith("Z")
-        retry = stored_box | {"observed_at": "2026-01-01T12:00:00Z"}
-        response = client.post("/api/readings", json=retry)
-        assert response.status_code == 200
-        assert response.json() == saved
-        assert client.get(f"/api/readings/{saved['sample_id']}").json() == saved
+    response = await device_client.post("/api/readings", json=stored_box)
+    assert response.status_code == 200
+    saved = response.json()
+    assert saved["sample_id"] == stored_box["sample_id"]
+    assert saved["observed_at"] == "2026-01-01T12:00:00Z"
+    assert saved["temperature_c"] == "24.50"
+    assert saved["received_at"].endswith("Z")
+    retry = stored_box | {"observed_at": "2026-01-01T12:00:00Z"}
+    response = await device_client.post("/api/readings", json=retry)
+    assert response.status_code == 200
+    assert response.json() == saved
+    assert (await device_client.get(f"/api/readings/{saved['sample_id']}")).json() == saved
 
-    with SessionLocal() as db:
-        assert db.scalar(select(func.count()).select_from(TemperatureSample).where(
+    async with AsyncSessionLocal() as db:
+        assert await db.scalar(select(func.count()).select_from(TemperatureSample).where(
             TemperatureSample.box_id == stored_box["box_id"]
         )) == 1
 
@@ -224,40 +244,37 @@ def test_post_reading_and_retry(stored_box):
     {"temperature_c": "23.00"},
     {"sample_id": "6ddf0f28-bec1-4d74-a320-51d095156dec"},
 ])
-def test_post_conflicting_reading(stored_box, changes):
+async def test_post_conflicting_reading(stored_box, changes, device_client):
     """Return 409 for reused identifiers and preserve the stored reading."""
-    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
-        original = client.post("/api/readings", json=stored_box)
-        assert original.status_code == 200
-        response = client.post("/api/readings", json=stored_box | changes)
-        assert response.status_code == 409
-        assert "conflicts" in response.json()["detail"]
-        assert client.get(f"/api/readings/{stored_box['sample_id']}").json() == original.json()
+    original = await device_client.post("/api/readings", json=stored_box)
+    assert original.status_code == 200
+    response = await device_client.post("/api/readings", json=stored_box | changes)
+    assert response.status_code == 409
+    assert "conflicts" in response.json()["detail"]
+    assert (await device_client.get(f"/api/readings/{stored_box['sample_id']}")).json() == original.json()
 
 
 @pytest.mark.parametrize("field, detail", [
     ("box_id", "Device cannot submit readings for this box"),
     ("profile_id", "Temperature profile not found for this box"),
 ])
-def test_post_missing_reference(stored_box, field, detail):
+async def test_post_missing_reference(stored_box, field, detail, device_client):
     """Return 404 when a required parent record is missing."""
-    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
-        response = client.post("/api/readings", json=stored_box | {field: str(uuid4())})
-        assert response.status_code == (403 if field == "box_id" else 404)
-        assert response.json() == {"detail": detail}
+    response = await device_client.post("/api/readings", json=stored_box | {field: str(uuid4())})
+    assert response.status_code == (403 if field == "box_id" else 404)
+    assert response.json() == {"detail": detail}
 
 
 @pytest.mark.parametrize("changes", [
     {"quality": "sensor_error", "temperature_c": None},
     {"clock_reliable": False, "observed_at": None},
 ])
-def test_post_missing_sensor_or_clock_data(stored_box, changes):
+async def test_post_missing_sensor_or_clock_data(stored_box, changes, device_client):
     """Preserve explicitly missing measurements and unreliable clock data."""
-    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
-        response = client.post("/api/readings", json=stored_box | changes)
-        assert response.status_code == 200
-        for field, value in changes.items():
-            assert response.json()[field] == value
+    response = await device_client.post("/api/readings", json=stored_box | changes)
+    assert response.status_code == 200
+    for field, value in changes.items():
+        assert response.json()[field] == value
 
 
 @pytest.mark.parametrize("changes", [
@@ -266,8 +283,7 @@ def test_post_missing_sensor_or_clock_data(stored_box, changes):
     {"received_at": "2026-01-01T12:00:00Z"},
     {"observed_at": "0999-01-01T12:00:00Z"},
 ])
-def test_post_invalid_reading(payload, changes):
+async def test_post_invalid_reading(payload, changes, device_client):
     """Return 422 for invalid payloads, including unsupported database dates."""
-    with TestClient(app, headers={"X-Device-Key": DEVICE_KEY}) as client:
-        response = client.post("/api/readings", json=payload | changes)
-        assert response.status_code == 422
+    response = await device_client.post("/api/readings", json=payload | changes)
+    assert response.status_code == 422

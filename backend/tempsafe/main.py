@@ -1,5 +1,8 @@
 """FastAPI application entry point."""
 
+import asyncio
+import os
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -10,8 +13,40 @@ from tempsafe.api.boxes import router as boxes_router
 from tempsafe.api.configuration import router as configuration_router
 from tempsafe.api.health import router as health_router
 from tempsafe.api.readings import router as readings_router
-from tempsafe.mqtt import lifespan
+from tempsafe.db.session import AsyncSessionLocal, engine
+from tempsafe.monitoring.configuration import ConfigurationPublisher
+from tempsafe.mqtt import create_mqtt
 from tempsafe.pages import router as pages_router
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    """Run MQTT ingestion and configuration delivery, then release their resources."""
+    mqtt = None
+    configuration_task = None
+    _app.state.configuration_publisher = None
+    try:
+        mqtt = create_mqtt()
+        if mqtt is not None:
+            publisher = ConfigurationPublisher(mqtt, os.getenv("MQTT_BOX_ID", "TS-01"), AsyncSessionLocal)
+            _app.state.configuration_publisher = publisher
+            await asyncio.wait_for(mqtt.mqtt_startup(), timeout=15)
+            configuration_task = asyncio.create_task(publisher.run(), name="mqtt-configuration")
+        yield
+    finally:
+        _app.state.configuration_publisher = None
+        try:
+            if configuration_task is not None:
+                configuration_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await configuration_task
+        finally:
+            try:
+                if mqtt is not None:
+                    await mqtt.mqtt_shutdown()
+            finally:
+                await engine.dispose()
+
 
 # Create the application and set the information shown in the API documentation.
 app = FastAPI(

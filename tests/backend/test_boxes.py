@@ -1,6 +1,6 @@
 """Check box responses using a substituted database session."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,7 +14,7 @@ from tempsafe.main import app
 def box_client(grant_boxes):
     """Provide a test client without querying the real database."""
     grant_boxes("test-box")
-    db = Mock()
+    db = Mock(execute=AsyncMock(return_value=Mock()))
     db.execute.return_value.scalars.return_value.first.return_value = None
 
     def override_get_db():

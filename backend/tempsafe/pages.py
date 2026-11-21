@@ -31,3 +31,15 @@ def dashboard(request: Request):
 def history(request: Request):
     """Render the history page; its JavaScript requests authenticated sample history."""
     return templates.TemplateResponse(request, "pages/history.html")
+
+
+@router.get("/pages/settings.html", include_in_schema=False, name="settings")
+def settings(request: Request):
+    """Render the settings page; its JavaScript reads and saves the box limits."""
+    return templates.TemplateResponse(request, "pages/settings.html")
+
+
+@router.get("/pages/alerts.html", include_in_schema=False, name="alerts")
+def alerts(request: Request):
+    """Render the alerts page; its JavaScript shows temperature alerts and device issues."""
+    return templates.TemplateResponse(request, "pages/alerts.html")

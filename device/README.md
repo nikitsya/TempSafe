@@ -26,7 +26,7 @@ directory when copying them to the Raspberry Pi.
 - The tested passive buzzer uses BCM GPIO17 (physical pin 11), two 220 ohm
   resistors in series (440 ohms total) and a shared ground connection.
 - Required Python packages are `gpiozero`, `adafruit-blinka` (provides
-  `board`), `adafruit-circuitpython-scd4x`, SQLAlchemy 2.x and paho-mqtt.
+  `board`), `adafruit-circuitpython-scd4x`, SQLAlchemy 2.x, aiosqlite and paho-mqtt.
   The hardware libraries also require the appropriate Raspberry Pi system
   configuration; installing Python packages on Windows does not provide
   access to the Pi's GPIO or I2C hardware.
@@ -40,10 +40,10 @@ cd /home/user/scd41
 source .venv/bin/activate
 ```
 
-For an existing hardware environment that does not yet have SQLAlchemy:
+Install the asynchronous SQLite dependencies in the device environment:
 
 ```bash
-python -m pip install "SQLAlchemy>=2,<3"
+python -m pip install "SQLAlchemy[asyncio]>=2,<3" "aiosqlite>=0.20,<1"
 ```
 
 For MQTT support:
@@ -78,13 +78,13 @@ an exact fixed-rate scheduler.
 These are the prototype's configured thresholds, not a determination that
 medicines are suitable for use.
 
-On Alert, a background thread drives the passive buzzer at 500 Hz with
+On Alert, an asynchronous task drives the passive buzzer at 500 Hz with
 50% PWM duty cycle: one second of sound followed by two seconds of silence.
 Normal, Warning and handled sensor read errors disable repetition; a tone
 already in progress can finish its remaining fraction of a second.
 Temperature changes are acted on when the next reading is processed.
 The buzzer runs locally without a network dependency. `Ctrl+C` during the
-measurement loop stops the thread and switches off and releases both outputs.
+measurement loop stops the task and switches off and releases both outputs.
 
 Successful readings have `quality="valid"`. Handled sensor read errors are
 stored with `quality="sensor_error"` and a NULL temperature. Database errors

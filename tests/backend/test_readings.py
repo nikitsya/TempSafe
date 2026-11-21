@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,7 +16,7 @@ from tempsafe.main import app
 def reading_client(grant_boxes):
     """Replace the database session for these HTTP response tests only."""
     grant_boxes("test-box")
-    db = Mock()
+    db = Mock(execute=AsyncMock(return_value=Mock()))
     db.execute.return_value.scalars.return_value.all.return_value = []
 
     def override_get_db():
@@ -35,6 +35,7 @@ def test_readings_list_returns_sample(reading_client):
     client, db = reading_client
     sample = TemperatureSample(
         sample_id="test-sample", box_id="test-box", sequence_no=1,
+        sensor_location="inside",
         profile_id="test-profile", observed_at=None, clock_reliable=False,
         received_at=datetime(2026, 1, 1, 12, microsecond=123456), temperature_c=Decimal("5.25"),
         quality="valid",

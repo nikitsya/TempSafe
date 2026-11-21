@@ -86,6 +86,9 @@ class TemperatureSample(Base):
     sample_id: Mapped[str] = mapped_column(CHAR(36), primary_key=True)
     box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"))
     sequence_no: Mapped[int] = mapped_column(BIGINT(unsigned=True))
+    sensor_location: Mapped[str] = mapped_column(
+        ENUM("inside", "outside"), default="inside", server_default="inside"
+    )
     profile_id: Mapped[str] = mapped_column(CHAR(36))
     observed_at: Mapped[datetime | None] = mapped_column(DATETIME(fsp=6))
     clock_reliable: Mapped[bool] = mapped_column(Boolean)

@@ -6,12 +6,12 @@ import logging
 import os
 import re
 import ssl
-from contextlib import asynccontextmanager
 
 from fastapi_mqtt import FastMQTT, MQTTConfig
 from sqlalchemy.exc import SQLAlchemyError
-from starlette.concurrency import run_in_threadpool
 
+from tempsafe.db.session import AsyncSessionLocal
+from tempsafe.monitoring.readings import save_reading
 from tempsafe.schemas import ReadingCreate
 from tempsafe.settings import project_setting
 
@@ -31,8 +31,8 @@ class ReadingConsumer:
         self.session_factory = session_factory
         self.save = save
 
-    def store(self, topic, payload, retained=False):
-        """Validate and commit in a worker thread, returning an application acknowledgement."""
+    async def store(self, topic, payload, retained=False):
+        """Acknowledge a validated reading once storage succeeds."""
         try:
             if topic != self.readings_topic or retained:
                 raise ValueError("Unexpected topic or retained reading")
@@ -41,9 +41,9 @@ class ReadingConsumer:
             reading = ReadingCreate.model_validate_json(payload)
             if reading.box_id != self.box_id:
                 raise ValueError("Payload box does not match the authorised topic")
-            with self.session_factory() as session:
+            async with self.session_factory() as session:
                 # save_reading commits, or returns an identical previously stored sample.
-                self.save(session, reading)
+                await self.save(session, reading)
         except ValueError:
             # Do not log payloads, credentials or database parameters.
             LOGGER.warning("Rejected invalid or conflicting MQTT reading")
@@ -68,9 +68,6 @@ def create_mqtt():
         LOGGER.info("MQTT ingestion disabled; set MQTT_ENABLED=true to enable it")
         return None
 
-    from tempsafe.db.session import SessionLocal
-    from tempsafe.monitoring.readings import save_reading
-
     if project_setting("TEMPSAFE_LOCAL_MQTT") == "1":
         config = MQTTConfig(host="mosquitto", port=1883)
     else:
@@ -86,7 +83,7 @@ def create_mqtt():
         )
     config.reconnect_retries = -1
     config.reconnect_delay = 6
-    consumer = ReadingConsumer(os.getenv("MQTT_BOX_ID", "TS-01"), SessionLocal, save_reading)
+    consumer = ReadingConsumer(os.getenv("MQTT_BOX_ID", "TS-01"), AsyncSessionLocal, save_reading)
     mqtt = FastMQTT(
         config=config,
         client_id=os.getenv("MQTT_CLIENT_ID", "tempsafe-api-TS-01"),
@@ -96,11 +93,8 @@ def create_mqtt():
 
     @mqtt.subscribe(consumer.readings_topic, qos=1, retain_as_published=True)
     async def receive(client, topic, payload, qos, properties):
-        # Serialise database writes; synchronous MySQL work must not block the event loop.
         async with processing:
-            acknowledgement = await run_in_threadpool(
-                consumer.store, topic, payload, bool((properties or {}).get("retain", False))
-            )
+            acknowledgement = await consumer.store(topic, payload, bool((properties or {}).get("retain", False)))
             if acknowledgement is not None:
                 if not client.is_connected:
                     LOGGER.warning("MQTT disconnected before acknowledgement; device must retry")
@@ -115,16 +109,3 @@ def create_mqtt():
             LOGGER.info("Subscribed to %s", consumer.readings_topic)
 
     return mqtt
-
-
-@asynccontextmanager
-async def lifespan(_app):
-    """Start and stop MQTT alongside FastAPI."""
-    mqtt = create_mqtt()
-    try:
-        if mqtt is not None:
-            await asyncio.wait_for(mqtt.mqtt_startup(), timeout=15)
-        yield
-    finally:
-        if mqtt is not None:
-            await mqtt.mqtt_shutdown()
