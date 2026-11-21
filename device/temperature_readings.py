@@ -6,22 +6,16 @@ import adafruit_scd4x
 import board
 from gpiozero import LED, PWMOutputDevice
 
+from configuration import (
+    ensure_active_configuration,
+    get_active_configuration,
+    get_temperature_state,
+)
 from database import Base, engine, AsyncSessionLocal
 from models import Reading
 
 
 BOX_ID = "TS-01"
-PROFILE_ID = "e93a4368-e11a-4f27-8b31-d55d61392548"
-
-
-def get_temperature_state(temperature):
-    if temperature <= 0 or temperature > 25:
-        return "Alert"
-
-    if 24 <= temperature <= 25:
-        return "Warning"
-
-    return "Normal"
 
 
 def update_led(led, state):
@@ -62,7 +56,7 @@ def read_temperature(sensor):
     return round(sensor.temperature, 2)
 
 
-async def save_reading(temperature, quality, observed_at):
+async def save_reading(temperature, quality, observed_at, configuration):
     async with AsyncSessionLocal.begin() as session:
         session.add(Reading(
             sample_id=str(uuid4()),
@@ -71,7 +65,7 @@ async def save_reading(temperature, quality, observed_at):
             quality=quality,
             clock_reliable=1,
             box_id=BOX_ID,
-            profile_id=PROFILE_ID,
+            profile_id=configuration.profile_id,
         ))
 
     print(
@@ -80,8 +74,13 @@ async def save_reading(temperature, quality, observed_at):
     )
 
 
-async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
+async def monitor_temperature(sensor, led, buzzer, buzzer_alert, configuration):
     while True:
+        try:
+            configuration = await get_active_configuration()
+        except Exception as error:
+            print("Configuration error; using the last active profile:", error)
+
         try:
             temperature = await asyncio.to_thread(
                 read_temperature, sensor
@@ -108,7 +107,7 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
             await sensor_error_flash(led)
 
         else:
-            state = get_temperature_state(temperature)
+            state = get_temperature_state(temperature, configuration)
             update_led(led, state)
 
             if state == "Alert":
@@ -120,7 +119,9 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
             print(f"State: {state}")
 
         try:
-            await save_reading(temperature, quality, observed_at)
+            await save_reading(
+                temperature, quality, observed_at, configuration
+            )
         except Exception as error:
             print("Database error: reading was not saved:", error)
 
@@ -138,6 +139,7 @@ async def main():
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.create_all)
 
+        configuration = await ensure_active_configuration()
         buzzer_alert = asyncio.Event()
 
         try:
@@ -147,7 +149,7 @@ async def main():
                 )
                 tasks.create_task(
                     monitor_temperature(
-                        sensor, led, buzzer, buzzer_alert
+                        sensor, led, buzzer, buzzer_alert, configuration
                     )
                 )
         finally:

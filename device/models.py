@@ -16,3 +16,15 @@ class Reading(Base):
     box_id = Column(Text, nullable=False)
     profile_id = Column(Text, nullable=False)
     uploaded = Column(Integer, nullable=False, server_default=text("0"))
+
+
+class DeviceConfiguration(Base):
+    """Keep the latest valid threshold profile available to the device."""
+
+    __tablename__ = "device_configuration"
+
+    box_id = Column(Text, primary_key=True)
+    profile_id = Column(Text, nullable=False)
+    lower_c = Column(REAL, nullable=False)
+    warning_c = Column(REAL, nullable=False)
+    upper_c = Column(REAL, nullable=False)
