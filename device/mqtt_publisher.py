@@ -9,7 +9,12 @@ from threading import Event
 from time import monotonic
 from uuid import UUID
 
-from database import AsyncSessionLocal, engine
+from configuration import (
+    configuration_from_payload,
+    ensure_active_configuration,
+    save_active_configuration,
+)
+from database import AsyncSessionLocal, Base, engine
 from models import Reading
 
 BOX_ID = "TS-01"
@@ -19,6 +24,7 @@ MQTT_USERNAME = "device-TS-01"
 
 READINGS_TOPIC = f"tempsafe/boxes/{BOX_ID}/readings"
 ACKS_TOPIC = f"tempsafe/boxes/{BOX_ID}/acks"
+CONFIGURATION_TOPIC = f"tempsafe/boxes/{BOX_ID}/configuration"
 
 subscription_ready = Event()
 
@@ -31,19 +37,22 @@ def on_connect(client, userdata, flags, reason_code, properties):
         return
 
     print("Connected to MQTT broker")
-    result, _ = client.subscribe(ACKS_TOPIC, qos=1)
+    result, _ = client.subscribe([
+        (ACKS_TOPIC, 1),
+        (CONFIGURATION_TOPIC, 1),
+    ])
 
     if result != mqtt.MQTT_ERR_SUCCESS:
-        print("Could not request acknowledgement subscription")
+        print("Could not request MQTT subscriptions")
 
 
 def on_subscribe(client, userdata, mid, reason_codes, properties):
     if not reason_codes or any(code.is_failure for code in reason_codes):
-        print("Acknowledgement subscription rejected")
+        print("MQTT subscription rejected")
         return
 
     subscription_ready.set()
-    print("Ready to receive acknowledgements")
+    print("Ready to receive acknowledgements and configuration")
 
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
@@ -52,13 +61,23 @@ def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
 
 
 acknowledgements = SimpleQueue()
+configuration_updates = SimpleQueue()
 
 
 def on_message(client, userdata, message):
-    if message.topic != ACKS_TOPIC or message.retain:
+    if len(message.payload) > 4096:
         return
 
-    if len(message.payload) > 4096:
+    if message.topic == CONFIGURATION_TOPIC:
+        try:
+            configuration_updates.put(
+                configuration_from_payload(message.payload)
+            )
+        except ValueError:
+            print("Invalid configuration ignored")
+        return
+
+    if message.topic != ACKS_TOPIC or message.retain:
         return
 
     try:
@@ -80,6 +99,26 @@ def on_message(client, userdata, message):
         return
 
     acknowledgements.put(sample_id)
+
+
+async def apply_pending_configuration_updates():
+    """Save every valid configuration received by the MQTT callback thread."""
+    while True:
+        try:
+            configuration = configuration_updates.get_nowait()
+        except Empty:
+            return
+
+        try:
+            await save_active_configuration(configuration)
+        except Exception as error:
+            print("Configuration was not saved:", error)
+            continue
+
+        print(
+            "Active configuration updated:",
+            configuration.profile_id,
+        )
 
 
 def make_payload(reading):
@@ -193,6 +232,10 @@ async def send_and_wait(client, sample_id, payload):
 
 
 async def main():
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    await ensure_active_configuration()
+
     client = create_client()
     retry_delay = 2
 
@@ -201,6 +244,8 @@ async def main():
 
     try:
         while True:
+            await apply_pending_configuration_updates()
+
             if not subscription_ready.is_set():
                 await asyncio.sleep(1)
                 continue
