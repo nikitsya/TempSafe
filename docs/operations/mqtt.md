@@ -32,8 +32,9 @@ It predates the FastMQTT deployment and does not verify the current ingestion se
 - Device username: `device-TS-01`; supply its separate password privately.
 - Backend username: `backend-ingest`; never distribute this account to devices.
 - Device publishes to `tempsafe/boxes/TS-01/readings` and subscribes to `tempsafe/boxes/TS-01/acks`.
+- The device also subscribes to `tempsafe/boxes/TS-01/configuration` for its active threshold profile.
 - Backend permissions are the reverse. No wildcard access is required.
-- Use QoS 1 and `retain=false` for readings and acknowledgements.
+- Use QoS 1 and `retain=false` for readings and acknowledgements. Use QoS 1 and `retain=true` for configuration.
 - The AWS rules recorded on 3 November allow TCP 8883 from `0.0.0.0/0`, supporting
   devices that change Wi-Fi networks or use a mobile hotspot.
   TLS, device credentials and topic ACLs remain mandatory. See [network rules](deployment.md#network-access).
@@ -68,7 +69,36 @@ The subscriber uses clean MQTT sessions: the local device outbox and application
 when the subscriber is offline. QoS 1 alone does not guarantee database delivery.
 Invalid data, unknown references, conflicting retries and database failures receive no `stored`
 acknowledgement. Preserve those records and investigate subscriber logs rather than deleting them or
-generating replacement identifiers. Retained messages are not supported.
+generating replacement identifiers. Retained messages are not supported for readings or acknowledgements.
+
+## Device threshold configuration contract
+
+After the configuration API has committed a newly selected profile for a box, the backend publishes
+this retained message to `tempsafe/boxes/{box_id}/configuration`:
+
+```json
+{
+  "schema_version": 1,
+  "box_id": "TS-01",
+  "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
+  "lower_c": "0.00",
+  "warning_c": "24.00",
+  "upper_c": "25.00"
+}
+```
+
+The values use the same string representation as the threshold configuration API. The device must
+accept a message only when its `box_id` matches, `profile_id` is present, all limits are finite decimal
+values, and `lower_c < warning_c < upper_c`. It then saves the complete configuration locally and uses
+both the limits and `profile_id` for subsequent readings.
+
+The retained configuration lets a device obtain the current profile after a restart or Wi-Fi outage.
+While disconnected, it continues to apply its last valid locally stored configuration. A new configuration
+does not reinterpret older samples: they retain the profile ID recorded when they were measured.
+
+The backend must publish only after the database transaction has selected the profile. The device account
+needs read access only to its own configuration topic; the backend account needs write access to that topic.
+The existing readings and acknowledgement topics are unchanged.
 
 ## Deploy on the existing EC2 server
 
