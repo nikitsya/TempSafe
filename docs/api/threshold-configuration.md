@@ -1,8 +1,11 @@
 # Box threshold configuration API
 
-A signed-in user can set temperature limits for their assigned box.
-The Raspberry Pi currently uses local constants; saving this configuration does
-not prove that the device has received or adopted it.
+A signed-in user can set temperature limits for their assigned box. When MQTT is
+enabled, the backend publishes the selected profile for `MQTT_BOX_ID` using the
+[device configuration contract](../operations/mqtt.md#device-threshold-configuration-contract).
+Saving this configuration does not prove that the device has received or adopted it.
+The Pi needs the compatible configuration subscriber; the device scripts on this
+branch still use local constants.
 
 ## Access and setup
 
@@ -55,8 +58,22 @@ key prevents selecting another box's profile. Writes lock the box row, create th
 profile and update the selection in one transaction. A failure rolls back both.
 Concurrent writes are serialised; the last completed update becomes selected.
 Sending the same settings as the currently selected profile returns that profile
-without creating a duplicate. This is not general request-id deduplication after
+without creating a duplicate and requests publication again. This is not general request-id deduplication after
 intervening configuration changes.
+
+After a successful commit, the API wakes the configuration worker without waiting
+for MQTT. The worker reads the currently selected profile from MySQL, rather than
+keeping a potentially obsolete request payload. It locks the same box row as the
+API while reading and queuing publication, so concurrent settings changes cannot
+queue an older profile after a newer one. Run one backend worker as documented.
+
+The selected profile in `box_configuration` is the durable source for retries;
+there is no new migration. Publication repeats on connection and every 30 seconds,
+including after a failed attempt or lost broker retained state. Each attempt has
+a 10-second timeout. A failed MQTT attempt does not undo saved settings. With
+`MQTT_ENABLED=false`, settings are saved without publication; enabling MQTT later
+publishes the selected profile. Only the configured `MQTT_BOX_ID` is published by
+this backend instance, even if the API manages other boxes.
 
 Old profiles are never updated or deleted by these endpoints. Each sample retains
 its recorded profile, so latest-reading classification remains historical even
@@ -71,4 +88,7 @@ missing boxes, unchanged retries, profile retrieval and historical classificatio
 the [test guide](../../tests/backend/README.md).
 
 The configuration table was deployed on 7 November 2026; see the
-[deployment record](../operations/deployment.md). These API changes do not change the Raspberry Pi’s local constants.
+[deployment record](../operations/deployment.md). Retained delivery requires a
+separate backend deployment, broker ACL update and compatible Pi scripts. Follow
+the configuration rollout and integration checks in the MQTT guide; local tests do
+not establish that the hosted service or physical device has been updated.

@@ -1,0 +1,11 @@
+# Merge these topic rules into the existing users in the broker's active ACL file.
+# Preserve other accounts and their rules when updating an existing installation.
+user device-TS-01
+topic write tempsafe/boxes/TS-01/readings
+topic read tempsafe/boxes/TS-01/acks
+topic read tempsafe/boxes/TS-01/configuration
+
+user backend-ingest
+topic read tempsafe/boxes/TS-01/readings
+topic write tempsafe/boxes/TS-01/acks
+topic write tempsafe/boxes/TS-01/configuration

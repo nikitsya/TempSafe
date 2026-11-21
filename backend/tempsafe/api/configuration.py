@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,6 +31,7 @@ async def set_configuration(
         box_id: str,
         settings: ThresholdSettingsCreate,
         db: Annotated[AsyncSession, Depends(get_db)],
+        request: Request,
 ):
     """Atomically create a profile and select it; serialise writes per box."""
     try:
@@ -42,22 +43,24 @@ async def set_configuration(
         # A retry with unchanged values must not create another profile.
         if current and all(getattr(current, key) == value for key, value in settings.model_dump().items()):
             response = ThresholdSettingsResponse.model_validate(current)
-            await db.commit()
-            return response
-        profile = ThresholdProfile(
-            profile_id=str(uuid4()), box_id=box_id, is_demo=True, **settings.model_dump()
-        )
-        db.add(profile)
-        await db.flush()
-        if configuration is None:
-            db.add(BoxConfiguration(box_id=box_id, profile_id=profile.profile_id))
         else:
-            configuration.profile_id = profile.profile_id
-        await db.flush()
-        await db.refresh(profile)
-        response = ThresholdSettingsResponse.model_validate(profile)
+            profile = ThresholdProfile(
+                profile_id=str(uuid4()), box_id=box_id, is_demo=True, **settings.model_dump()
+            )
+            db.add(profile)
+            await db.flush()
+            if configuration is None:
+                db.add(BoxConfiguration(box_id=box_id, profile_id=profile.profile_id))
+            else:
+                configuration.profile_id = profile.profile_id
+            await db.flush()
+            await db.refresh(profile)
+            response = ThresholdSettingsResponse.model_validate(profile)
         await db.commit()
-        return response
     except Exception:
         await db.rollback()
         raise
+    publisher = getattr(request.app.state, "configuration_publisher", None)
+    if publisher is not None:
+        publisher.request_publish(box_id)
+    return response

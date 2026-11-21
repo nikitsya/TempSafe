@@ -32,8 +32,10 @@ It predates the FastMQTT deployment and does not verify the current ingestion se
 - Device username: `device-TS-01`; supply its separate password privately.
 - Backend username: `backend-ingest`; never distribute this account to devices.
 - Device publishes to `tempsafe/boxes/TS-01/readings` and subscribes to `tempsafe/boxes/TS-01/acks`.
+- A compatible device also subscribes to `tempsafe/boxes/TS-01/configuration` for its active threshold profile.
 - Backend permissions are the reverse. No wildcard access is required.
 - Use QoS 1 and `retain=false` for readings and acknowledgements.
+- Use QoS 1 and `retain=true` for configuration.
 - The AWS rules recorded on 3 November allow TCP 8883 from `0.0.0.0/0`, supporting
   devices that change Wi-Fi networks or use a mobile hotspot.
   TLS, device credentials and topic ACLs remain mandatory. See [network rules](deployment.md#network-access).
@@ -68,7 +70,65 @@ The subscriber uses clean MQTT sessions: the local device outbox and application
 when the subscriber is offline. QoS 1 alone does not guarantee database delivery.
 Invalid data, unknown references, conflicting retries and database failures receive no `stored`
 acknowledgement. Preserve those records and investigate subscriber logs rather than deleting them or
-generating replacement identifiers. Retained messages are not supported.
+generating replacement identifiers. Retained messages are not supported for readings or acknowledgements.
+
+## Device threshold configuration contract
+
+After the configuration API commits a selected profile, the backend requests publication to
+`tempsafe/boxes/{box_id}/configuration`. The payload matches the device implementation in
+[`feature/device-configuration-sync`](https://github.com/nikitsya/TempSafe/tree/feature/device-configuration-sync):
+
+```json
+{
+  "schema_version": 1,
+  "box_id": "TS-01",
+  "profile_id": "e93a4368-e11a-4f27-8b31-d55d61392548",
+  "lower_c": "0.00",
+  "warning_c": "24.00",
+  "upper_c": "25.00"
+}
+```
+
+Limits are decimal strings, as in the configuration API. The device must validate the schema
+version, box and profile identifiers and finite limits with `lower_c < warning_c < upper_c`.
+It saves the complete profile locally and uses its limits and `profile_id` for subsequent samples,
+LED and buzzer decisions. Previously queued samples keep their original profile IDs. During an
+outage the device continues using its last valid saved configuration.
+
+One background worker publishes only for `MQTT_BOX_ID`. It reads the selected profile from MySQL
+after each API wake-up, on connection and every 30 seconds. Each attempt times out after 10 seconds.
+Repeated publication repairs failed sends and lost retained broker state, including after a backend
+restart. It always re-reads the selected profile; obsolete request payloads are not kept for retries.
+The worker locks the same box row as API updates until it has queued publication, preserving order
+with concurrent settings changes. A missing box or selection produces no configuration message.
+
+`PUT /api/boxes/{box_id}/configuration` confirms database storage, not device adoption. An MQTT
+failure does not roll back that commit. With MQTT disabled, the worker does not run. The API can
+manage other boxes, but this instance publishes only for its configured box. There is no separate
+device configuration acknowledgement; use the new sample's `profile_id` and the device's saved
+profile and outputs during integration checks. The readings and storage acknowledgement contract
+is unchanged.
+
+### Configuration rollout
+
+1. Review the compatible device changes and backend changes together. The device scripts on this
+   branch still use local constants; server publication alone does not replace them.
+2. Back up the broker's active ACL file, locate its existing user entries and add read access to
+   the configuration topic for `device-TS-01` and write access for `backend-ingest`. See
+   [`deploy/mosquitto.acl.example`](../../deploy/mosquitto.acl.example) for the complete topic rules.
+   Merge the additions into the active ACL rather than replacing unrelated accounts or rules.
+   Reload Mosquitto and verify both permissions. Do this before starting the new Pi publisher:
+   its combined acknowledgement/configuration subscription must succeed before it sends readings.
+3. Deploy the reviewed backend revision using the existing application update procedure. No
+   database migration is required when `box_configuration` already exists. Enable MQTT and retain
+   the existing single-worker setup and TLS configuration.
+4. Deploy the compatible Pi subscriber and logger together. Change the limits through Settings
+   and verify the retained JSON, the saved Pi profile, LED/buzzer behaviour and new readings with
+   the selected `profile_id`. Old readings must retain their original profiles.
+5. With the Pi disconnected, change the limits again. Reconnect and verify it receives the latest
+   configuration. Restart the Pi and check its saved limits. In an isolated environment, also test
+   a broker outage during an API save, backend restart and two rapid settings changes; the final
+   retained profile must match `GET /api/boxes/{box_id}/configuration`.
 
 ## Deploy on the existing EC2 server
 
@@ -121,7 +181,8 @@ and avoid conflicting values in the environment files.
 Keep the client ID unique; another client using it can disconnect the running subscriber.
 
 FastMQTT starts and stops with FastAPI using `lifespan`, and registers the readings handler with
-`@mqtt.subscribe(...)`. Database writes run in a thread so they do not block HTTP requests.
+`@mqtt.subscribe(...)`. Database operations use asynchronous SQLAlchemy sessions.
+The configuration worker is cancelled before MQTT disconnects and the MySQL pool closes.
 TLS certificate and hostname verification remain enabled. Initial connection failure or a 15-second
 startup timeout prevents application startup; systemd retries the service. After a lost connection,
 the client retries indefinitely and renews its subscription.
