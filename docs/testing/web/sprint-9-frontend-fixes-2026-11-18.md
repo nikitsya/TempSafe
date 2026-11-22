@@ -1,0 +1,43 @@
+# TempSafe · Front-end fixes after the usability test · 18 November 2026
+
+This report answers the [usability test of 18 November](sprint-9-frontend-test-2026-11-18.md). For each finding it
+says what changed and how it was checked. It covers the bugs and the points that both testers raised. I checked
+everything in Chrome on a desktop and at iPhone width (390 px), with test data covering two full days. The automated
+accessibility check (axe) found no problems on any page.
+
+## Fixed
+
+| Finding                                                                                     | What changed                                                                                                                                                                               | How it was checked                                                      |
+|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| **T1-02** · A past day's last status showed **Now**                                          | **Now** appears only for today. On a past day the last status ends at its last reading and says, for example, **at least 2 h 43 min**, 21:16 – 23:59.                                      | Alerts → Status for yesterday: no **Now**; for today: **Now** as before |
+| **T1-11 / T2-07** · No start and end time for temperature events                            | **Notification history** has a **Time** column again: `14:05 – 14:23`, or `since 14:05` while it lasts. A time on another day starts with the day (`16 Nov, 23:50`). The date stays once above the table. | Both tables show Status, Peak, How long and Time                        |
+| **T1-12 / T2-07** · Nobody understood **1+ h 45 min**                                         | The **+** is gone. The text says **at least 1 h 45 min**, and the tooltip says *Exact end unknown: readings stopped*.                                                                      | Rows ended by a gap or sensor error                                     |
+| **T1-01** · The chosen date was reset when moving between History and Alerts               | History and Alerts share the chosen period in the browser tab. Choose 15 Nov in History, open Alerts, and it shows 15 Nov. **Today** goes back to today. The Dashboard always shows today. | History → Alerts → History with an earlier date                         |
+| **T1-09** · A mixed-up graph after quick switching                                          | Only the newest request may draw. An older, slower answer is ignored, so the axis, date, data and tooltips always belong to the period that was chosen last.                               | Clicked 1 hour → a date → 1 hour quickly: the graph matches 1 hour       |
+| **T1-08** · An empty **1 hour** did not say which hour                                       | With no readings the page says **No readings in the last 60 minutes** and the exact dates and times.                                                                                      | 1 hour with the box off                                                 |
+| **T1-04** · **1 days ago**, and no date on **Last measured**                                 | Correct singular and plural with the shared duration format (**1 day 16 h ago**). When the last reading is not from today, the date comes first: **16 Nov 2026 · 1 day 23 h ago**.          | Dashboard with an old last reading                                      |
+| **T2-01** · **−3.4 – 30.9 °C** read as two negative numbers                                   | **Today's range** shows two labelled values: **Min −3.4 °C** and **Max 30.9 °C**, with a real minus sign.                                                                                  | Dashboard on desktop and phone                                          |
+| **T1-03** · The amber dotted line was not explained                                          | The legend names both lines with the box's values: **Warning from 24 °C** (dotted amber) and **Maximum 25 °C** (dashed red), plus **Minimum** when it is shown. The same on History and on **Last hour**. | Legends on both graphs                                                  |
+| **T1-05 / T2-06** · The Dashboard buttons did not say where they lead                        | **Graph / History / Issues** are now **Day graph**, **All readings** and **Alerts and issues**. The last one opens Alerts → Status, which lists temperature events and device problems together. | Each button opens the named view                                        |
+| **T2-04** · On iPhone the graph scrolled sideways and lost its title, scale and legend       | On a phone the whole day fits the screen width, with readable labels. No sideways scrolling.                                                                                              | iPhone width: page and graph are 390 px wide                            |
+| **T2-10** · **Sensor fault** looked like a red temperature **Alert**                         | Sensor fault is violet everywhere: rows, graph band, legend, Readings tag and pop-up.                                                                                                      | Alerts, History and Readings                                            |
+| **T1-13** · The symbols in the circles sat too low                                           | The status symbols are drawn as small icons and sit exactly in the centre.                                                                                                               | Zoomed screenshot of Status rows                                        |
+| *Dual-sensor handover* (21 Nov) · A jump in `sequence_no` was read as missing data | Inside and outside now share the box-wide counter, so the website no longer uses sequence jumps. A gap is only a time gap over 90 s, an unknown time or a time going backwards, in `dashboard.js`, `history.js` and `notifications.js`. | A full day with interleaved inside and outside readings: no grey bands, one continuous status period |
+| *Found while testing* · **Last hour** was grey for its first 10 minutes                      | The Dashboard loaded the latest 100 readings, only 50 minutes at 30 s. It now loads the whole hour.                                                                                      | Last hour with steady readings: no grey band                            |
+
+I also updated [ui-wording.md](../../design/ui/ui-wording.md) to match.
+
+## For team discussion
+
+These came from one tester or need a team decision, so I have not built them yet.
+
+| Finding                                       | Suggestion                                                                                                    |
+|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| T2-02, T2-03 · Problems of the day on the Dashboard | A short list of today's Alert, No data and Sensor fault events under the Dashboard chart, and a clickable **Alerts today** |
+| T2-05 · Value under the finger                | A vertical marker that follows the finger or pointer and shows the nearest time and temperature              |
+| T1-10 · 2 and 7 days with a summary           | Possible instead of **1 hour**; needs agreed rules for counting episodes                                     |
+| T1-06 · Filter "All problems"                 | Today **Alerts and issues** opens Status, which already includes Warning and Alert as well as device problems |
+| T1-07 · Colours next to the limits in Settings | Must match the new legend; the contrast of amber text needs a check                                          |
+| T2-07 · **Duration** instead of **How long**; hide Peak for No data | Wording decision for the team                                                                 |
+| T2-08 · Hide Warning on the graph             | One tester's preference; Warning is part of FR-05, so I kept it                                              |
+| T2-09 · Show which box is open                | Earlier usability feedback asked to remove **Box TS-01**; the team should decide once more than one box exists |

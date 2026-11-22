@@ -66,8 +66,7 @@ function newestAlertPeriod(readings) {
     if (newestIndex === -1) return null;
     let startIndex = newestIndex;
     for (let i = newestIndex + 1; i < readings.length; i++) {
-        const gap = Number(readings[i - 1].sequence_no) - Number(readings[i].sequence_no) > 1;
-        if (!isAlertReading(readings[i]) || gap) break;
+        if (!isAlertReading(readings[i]) || readingGap(readings[i], readings[i - 1])) break;
         startIndex = i;
     }
     const alertReadings = readings.slice(newestIndex, startIndex + 1);
@@ -148,9 +147,9 @@ function showPopup(message, seq) {
         }
     });
     area.prepend(popup);
-    return popup;
     // Keep at most three pop-ups on screen.
     while (area.children.length > 3) area.lastElementChild.remove();
+    return popup;
 }
 
 function showBrowserNotification(message) {
@@ -200,8 +199,14 @@ async function checkAlerts() {
         const period = newestAlertPeriod(readings);
         if (!period) return;
 
-        const seq = Number(period.start.sequence_no);
         const saved = readNotifyState();
+        let seq = Number(period.start.sequence_no);
+        // The page loads only the latest 100 readings. When an alert started before them,
+        // its first reading is not in the list and the start seems to move forward on every
+        // check. It is still the same alert, so it must not be announced again (test 22 Nov:
+        // "Back in range" every 15 s with one reading every 5 s).
+        const startCut = readings.indexOf(period.start) === readings.length - 1;
+        if (startCut && saved && seq > saved.seq) seq = saved.seq;
         const ongoing = !period.end;
         const save = (ended) => storageSet(NOTIFY_STATE_KEY, JSON.stringify({seq, ended}));
 
@@ -277,7 +282,11 @@ async function checkDevice() {
             if (offlinePopup) offlinePopup.remove();
             offlinePopup = null;
             const now = Array.isArray(readings) ? currentTemperature(readings) : null;
-            announce({kind: 'back', title: 'Back online', text: now === null ? 'No temperature yet' : `${now.toFixed(1)}°C`}, 'online');
+            announce({
+                kind: 'back',
+                title: 'Back online',
+                text: now === null ? 'No temperature yet' : `${now.toFixed(1)}°C`
+            }, 'online');
             saved.offline = null;
         }
 

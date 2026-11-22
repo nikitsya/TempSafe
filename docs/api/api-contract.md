@@ -168,7 +168,7 @@ Use the box-specific endpoints for the dashboard, not `/api/readings`, which mix
 | `observed_at`                       | timestamp string or `null` | Measurement time; `null` when the device clock is unreliable.                                         |
 | `clock_reliable`                    | boolean                    | Whether the observation time can be used.                                                             |
 | `received_at`                       | timestamp string           | Server receipt time; always present, not a substitute for measurement time.                           |
-| `temperature_state`                 | string or `null`           | Inside: `Normal`, `Warning`, `Alert` or `Unknown`. Outside: `null`.                                    |
+| `temperature_state`                 | string or `null`           | Inside: `Normal`, `Warning`, `Alert` or `Unknown`. Outside: `null`.                                   |
 | `freshness`                         | string                     | Latest endpoint only: `fresh`, `stale` or `unknown`, calculated from observation time when requested. |
 
 `profile` accompanies the latest reading and each box history row: `profile_id` is a string; `lower_c`, `warning_c` and

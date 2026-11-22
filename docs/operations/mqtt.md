@@ -9,8 +9,11 @@ database and waits for the server's storage confirmation.
 The FastAPI service uses FastMQTT to receive readings and save them to MySQL. FastMQTT was
 first deployed on EC2 on 7 November 2026, replacing the standalone MQTT worker. On 21 November,
 commit `20b67cd` added retained configuration delivery and the corresponding broker permissions.
-Retained and repeated configuration publication were verified over TLS; physical Pi adoption and
-a fresh reading/storage-acknowledgement trace remain pending. See the
+Retained and repeated configuration publication were verified over TLS. Later that day,
+commit `cf81538` deployed dual-sensor ingestion after migration 007. Authenticated
+sensor-filtered API queries, a diagnostic TLS/QoS 1 subscription and the backend's
+broker connection were verified. No synthetic readings were added to production;
+physical Pi adoption and a fresh reading/storage-acknowledgement trace remain pending. See the
 [deployment record](deployment.md#current-deployment--verified-21-november-2026).
 
 On 3 November 2026, the operator reported successful authenticated message delivery and verified that anonymous

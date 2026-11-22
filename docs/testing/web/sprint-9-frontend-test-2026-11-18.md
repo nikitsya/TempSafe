@@ -12,21 +12,21 @@ Testing [tempsafe.app](https://tempsafe.app) after deployment of commit `3eb7a1c
 
 Initial testing on a computer. Findings T1-01–T1-13.
 
-| ID | Finding | Type |
-|---|---|---|
-| T1-01 | Moving from History to Alerts resets the selected date | Usability |
-| T1-02 | The final status of a past day is labelled Now | Incorrect historical display |
-| T1-03 | The dotted Warning threshold line needs its own explanation | Graph clarity |
-| T1-04 | Last measured hides the date and rounds elapsed time down | Ambiguous time label |
-| T1-05 | Dashboard links labelled Graph and History do not explain their destinations | Navigation clarity |
-| T1-06 | It is unclear where to view all problem periods together | Finding problem events |
-| T1-07 | Link Settings thresholds to graph and status colours | Interface clarity suggestion |
-| T1-08 | 1 hour unexpectedly replaces the selected day with the latest hour | Unclear period selection |
-| T1-09 | Switching periods produces an inconsistent graph in 1 hour mode | Possible data refresh error |
-| T1-10 | Add 2-day and 7-day views with a summary of recurring excursions | Historical analysis suggestion |
-| T1-11 | Temperature Alert rows lack start and end times | Finding event times |
-| T1-12 | The plus sign in durations is unexplained | Ambiguous duration label |
-| T1-13 | No data and Sensor fault symbols are off-centre inside their circles | Visual alignment |
+| ID    | Finding                                                                      | Type                           |
+|-------|------------------------------------------------------------------------------|--------------------------------|
+| T1-01 | Moving from History to Alerts resets the selected date                       | Usability                      |
+| T1-02 | The final status of a past day is labelled Now                               | Incorrect historical display   |
+| T1-03 | The dotted Warning threshold line needs its own explanation                  | Graph clarity                  |
+| T1-04 | Last measured hides the date and rounds elapsed time down                    | Ambiguous time label           |
+| T1-05 | Dashboard links labelled Graph and History do not explain their destinations | Navigation clarity             |
+| T1-06 | It is unclear where to view all problem periods together                     | Finding problem events         |
+| T1-07 | Link Settings thresholds to graph and status colours                         | Interface clarity suggestion   |
+| T1-08 | 1 hour unexpectedly replaces the selected day with the latest hour           | Unclear period selection       |
+| T1-09 | Switching periods produces an inconsistent graph in 1 hour mode              | Possible data refresh error    |
+| T1-10 | Add 2-day and 7-day views with a summary of recurring excursions             | Historical analysis suggestion |
+| T1-11 | Temperature Alert rows lack start and end times                              | Finding event times            |
+| T1-12 | The plus sign in durations is unexplained                                    | Ambiguous duration label       |
+| T1-13 | No data and Sensor fault symbols are off-centre inside their circles         | Visual alignment               |
 
 ### T1-01 · Preserve the selected date between History and Alerts
 
@@ -118,8 +118,8 @@ Evidence: [History graph for 15 November](../../assets/testing/sprint-9-2026-11-
 Both sections display “No readings in this period”. Dashboard does not show the
 calendar date associated with 19:18.
 
-During the server check before this test, the latest TS-01 record was from
-**16 November 2026 at 19:18:20**, with quality `sensor_error`. There were no records
+During the server check before this test, the latest TS-01 record was from **16 November 2026 at 19:18:20**, with
+quality `sensor_error`. There were no records
 for 17 November. The added records covered 13–15 November. The empty History and
 Alerts views therefore match the checked database contents; these screenshots do
 not establish that records for 17 November were lost.
@@ -216,11 +216,11 @@ Keep input fields neutral and add small colour indicators and explanatory text
 beside the labels. Use the same palette as the graph and Alerts. For the current
 profile, the explanations could be:
 
-| Setting | Indicator colour | Explanation under the current rules |
-|---|---|---|
-| Minimum · 0°C | Red | Alert at 0°C and below |
-| Warning from · 24°C | Yellow/amber | Warning from 24°C to 25°C inclusive |
-| Maximum · 25°C | Red | Alert above 25°C |
+| Setting             | Indicator colour | Explanation under the current rules |
+|---------------------|------------------|-------------------------------------|
+| Minimum · 0°C       | Red              | Alert at 0°C and below              |
+| Warning from · 24°C | Yellow/amber     | Warning from 24°C to 25°C inclusive |
+| Maximum · 25°C      | Red              | Alert above 25°C                    |
 
 Do not confuse a threshold indicator's colour with the state of the value itself:
 exactly 25°C currently means Warning, not Alert. Exactly 0°C means Alert.
@@ -383,8 +383,8 @@ When reducing detail in a weekly graph, averaging must not hide short peaks.
 Calculate summaries from the complete selected dataset. If different threshold
 profiles were used, assess readings against the thresholds that applied to those records.
 
-Related to T1-06 (all problem periods), T1-08 (the purpose of 1 hour), and T1-09
-(consistency between the filter and loaded data).
+Related to T1-06 (all problem periods), T1-08 (the purpose of 1 hour), and T1-09 (consistency between the filter and
+loaded data).
 
 ### T1-11 · Show the times of temperature events
 
@@ -480,18 +480,18 @@ The prototype screenshots show 11 November and illustrate information presentati
 they are not data from the tested version for 18 November. Task completion time
 and interaction delays were not measured.
 
-| ID | Finding | Type |
-|---|---|---|
-| T2-01 | Today’s range is read as two negative values | Range clarity |
-| T2-02 | Dashboard does not help users find the day's problem periods | Event overview |
-| T2-03 | Alerts today provides no direct route to the two events | Event navigation |
-| T2-04 | Scrolling the mobile graph loses labels and context | Mobile graph |
-| T2-05 | It is difficult to display temperature and time tooltips | Graph interaction |
-| T2-06 | Graph, History, Alerts, Status and Issues overlap in meaning | Navigation clarity |
-| T2-07 | How long, Peak and event durations raise questions | Event presentation |
-| T2-08 | The participant would remove Warning from the overview graph | Tester preference |
-| T2-09 | The selected box and account are unclear | Device and account context |
-| T2-10 | Sensor fault and temperature Alert colours are too similar | Distinguishing events |
+| ID    | Finding                                                      | Type                       |
+|-------|--------------------------------------------------------------|----------------------------|
+| T2-01 | Today’s range is read as two negative values                 | Range clarity              |
+| T2-02 | Dashboard does not help users find the day's problem periods | Event overview             |
+| T2-03 | Alerts today provides no direct route to the two events      | Event navigation           |
+| T2-04 | Scrolling the mobile graph loses labels and context          | Mobile graph               |
+| T2-05 | It is difficult to display temperature and time tooltips     | Graph interaction          |
+| T2-06 | Graph, History, Alerts, Status and Issues overlap in meaning | Navigation clarity         |
+| T2-07 | How long, Peak and event durations raise questions           | Event presentation         |
+| T2-08 | The participant would remove Warning from the overview graph | Tester preference          |
+| T2-09 | The selected box and account are unclear                     | Device and account context |
+| T2-10 | Sensor fault and temperature Alert colours are too similar   | Distinguishing events      |
 
 ### T2-01 · Make the daily range unambiguous
 
@@ -675,8 +675,8 @@ on excursions outside limits and periods without data.
 
 This is a presentation preference, not a universal rule for graphs or a reported
 Warning calculation error. It differs from tester 1's suggestions to explain the
-Warning threshold more clearly (T1-03) and link threshold colours to Settings
-(T1-07). Both observations are retained separately. Removing warnings from the
+Warning threshold more clearly (T1-03) and link threshold colours to Settings (T1-07). Both observations are retained
+separately. Removing warnings from the
 data or notification mechanism was not discussed as a requirement during the session.
 
 ### T2-09 · Show which box and account are in use
