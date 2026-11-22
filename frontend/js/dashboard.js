@@ -260,12 +260,28 @@ function mainTile(reading) {
 function todayTiles(reading) {
     // Two labelled values, so "-3.4 – 30.9" is not read as two minus numbers (test 18 Nov, T2-01).
     const num = (v) => {
-        const r = Math.round(v * 10) / 10;   // so -0.04 shows as 0.0, not −0.0
+        const r = Number(v.toFixed(1));   // same rounding as the main tile; -0.04 shows as 0.0, not −0.0
         return `${r < 0 ? '−' : ''}${Math.abs(r).toFixed(1)}`;
     };
-    const range = todayStats && todayStats.min !== null
-        ? `<span class="range-pair"><span><small>Min</small> ${num(todayStats.min)}<small>°C</small></span>` +
-          `<span><small>Max</small> ${num(todayStats.max)}<small>°C</small></span></span>` : '—';
+    // Today's range is reloaded every minute, so the readings since then are added here.
+    // Otherwise Max could stay below the temperature shown now.
+    let low = todayStats ? todayStats.min : null;
+    let high = todayStats ? todayStats.max : null;
+    const today = todayLabel();
+    recentReadings.forEach((r) => {
+        if (r.quality !== 'valid' || r.temperature_c == null) return;
+        const v = Number(r.temperature_c);
+        if (!Number.isFinite(v) || dayLabel(new Date(r.observed_at)) !== today) return;
+        low = low === null ? v : Math.min(low, v);
+        high = high === null ? v : Math.max(high, v);
+    });
+    if (reading.temperatureC !== null && reading.observedDay === today) {
+        low = low === null ? reading.temperatureC : Math.min(low, reading.temperatureC);
+        high = high === null ? reading.temperatureC : Math.max(high, reading.temperatureC);
+    }
+    const range = low !== null
+        ? `<span class="range-pair"><span><small>Min</small> ${num(low)}<small>°C</small></span>` +
+          `<span><small>Max</small> ${num(high)}<small>°C</small></span></span>` : '—';
     const alerts = todayStats ? String(todayStats.alerts) : '—';
     const alertSub = todayStats && todayStats.lastAlert ? `last at ${formatClock(todayStats.lastAlert)}` : 'none today';
     // Not today: show the date as well, so "19:18" is not read as today or yesterday (T1-04).
@@ -301,37 +317,82 @@ function outsideTrend() {
     return {latest, now, change, stale, time};
 }
 
-// Early heads-up (experiment 20 Nov): outside has reached "Warning from" and is rising by at least
-// 0.3°C in 2 minutes, while the inside temperature is still below "Warning from". Fresh data only.
-function earlyWarning(profile) {
+// ---- Forecast: when may the inside reach Warning? ----
+// Requested by the lecturer (22 Nov) and based on Hanna's heating run of 20 Nov
+// (docs/testing/hardware/external-temperature-experiment.md, "Proposed follow-up").
+const FORECAST_WINDOW_MS = 2 * 60 * 1000;   // inside readings of the last 2 minutes
+const FORECAST_MIN_READINGS = 4;            // fewer readings: the rise is not confirmed
+const FORECAST_MIN_RATE = 0.2;              // °C per minute; slower is not a confirmed rise
+const FORECAST_MARGIN = 0.85;               // heating speeds up, so a straight line is late:
+                                            // in the run, 85% of it was never later than reality
+
+// How fast the inside temperature is rising, in °C per minute: a straight line fitted to the
+// inside readings of the last 2 minutes. null when there are too few readings, or a gap,
+// sensor error or unreliable time inside that window.
+function insideRate() {
+    const latest = recentReadings[0];
+    if (!latest || latest.quality !== 'valid' || !latest.clock_reliable) return null;
+    const end = new Date(latest.observed_at).getTime();
+    const points = [];
+    for (let i = 0; i < recentReadings.length; i++) {
+        const r = recentReadings[i];
+        const t = new Date(r.observed_at).getTime();
+        if (end - t > FORECAST_WINDOW_MS) break;
+        if (r.quality !== 'valid' || !r.clock_reliable) return null;
+        if (i > 0 && readingGap(r, recentReadings[i - 1])) return null;
+        points.push({t: (t - end) / 60000, v: Number(r.temperature_c)});
+    }
+    if (points.length < FORECAST_MIN_READINGS) return null;
+    const n = points.length;
+    const mt = points.reduce((a, p) => a + p.t, 0) / n;
+    const mv = points.reduce((a, p) => a + p.v, 0) / n;
+    const den = points.reduce((a, p) => a + (p.t - mt) ** 2, 0);
+    if (den === 0) return null;
+    return points.reduce((a, p) => a + (p.t - mt) * (p.v - mv), 0) / den;
+}
+
+// The forecast card is shown only when all of these are true (Hanna's proposal + lecturer):
+// - the outside reading is fresh, has reached "Warning from" of the active profile and is rising;
+// - the inside reading is fresh, valid and still below "Warning from";
+// - the inside rise is confirmed: at least 0.2°C per minute over the last 2 minutes (4+ readings).
+// The time comes from the INSIDE readings only: (Warning from − inside now) ÷ inside rate.
+function warningForecast(profile) {
     const trend = outsideTrend();
     const inside = recentReadings[0];
     const warning = profile ? Number(profile.warningC) : NaN;
     if (!trend || trend.stale || trend.now === null || trend.change === null || !Number.isFinite(warning)) return null;
     if (!inside || inside.quality !== 'valid' || readingGap(inside, {observed_at: new Date().toISOString()})) return null;
     const insideC = Number(inside.temperature_c);
-    if (trend.now >= warning && trend.change >= 0.3 && insideC < warning) {
-        return {outside: trend.now, inside: insideC, warning};
-    }
-    return null;
+    if (!(trend.now >= warning && trend.change >= 0.3 && insideC < warning)) return null;
+    const rate = insideRate();
+    if (rate === null || rate < FORECAST_MIN_RATE) return null;
+    const minutes = ((warning - insideC) / rate) * FORECAST_MARGIN;
+    return {outside: trend.now, inside: insideC, warning, rate, minutes};
+}
+
+// "less than a minute", "about 1 minute", "about 3 minutes" (rounded down, never later than measured).
+function forecastText(minutes) {
+    if (minutes < 1) return 'in less than a minute';
+    const n = Math.floor(minutes);
+    return `in about ${n} minute${n === 1 ? '' : 's'}`;
 }
 
 function renderOutsideBanner(profile) {
     const box = document.getElementById('outside-banner');
     if (!box) return;
-    const early = alertBanner ? null : earlyWarning(profile);
-    if (!early) {
+    const forecast = alertBanner ? null : warningForecast(profile);
+    if (!forecast) {
         box.innerHTML = '';
         return;
     }
-    const fmt = (v) => Number.isInteger(v) ? String(v) : v.toFixed(1);
+    const when = forecastText(forecast.minutes);
     box.innerHTML = `
         <section aria-labelledby="outside-banner-title" class="info-banner" role="status">
             <span aria-hidden="true" class="info-banner-icon">i</span>
             <div>
-                <h2 id="outside-banner-title">Outside the box is getting warmer</h2>
-                <p>Outside ${early.outside.toFixed(1)}°C and rising. Inside is still ${early.inside.toFixed(1)}°C
-                    (Warning from ${fmt(early.warning)}°C). Check where the box is kept.</p>
+                <h2 id="outside-banner-title">Warning ${when}</h2>
+                <p>Inside is warming fast. Check where the box is kept.</p>
+                <p class="forecast-note">Estimate from the last 2 minutes.</p>
             </div>
         </section>`;
 }

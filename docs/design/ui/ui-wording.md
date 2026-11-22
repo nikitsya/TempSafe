@@ -122,9 +122,9 @@ Shown only when the box sends outside readings. It is information, never a statu
 | Dashboard tile        | **Outside the box** · `25.5°C` · `↑ Rising, +2.9°C in 2 min` / `↓ Falling, −0.8°C in 2 min` / `Steady`              |
 | Tile, outside fault   | **Sensor fault** · No outside temperature                                                                          |
 | Tile, old data        | Value in grey · `Last reading 20:46`                                                                               |
-| Information banner    | **Outside the box is getting warmer** · Outside 25.5°C and rising. Inside is still 22.3°C (Warning from 24°C). Check where the box is kept. |
+| Forecast card         | **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. (`in about 1 minute`, `in less than a minute`) |
 | Graph legend          | Outside the box (dashed blue line)                                                                                 |
 | Readings column       | **Outside °C** (`25.5`, `Sensor fault` or `—`)                                                                     |
 | CSV columns           | `Inside temperature (°C)`, `Outside temperature (°C)`                                                              |
 
-See [outside-temperature-display.md](outside-temperature-display.md) for when the banner shows.
+See [outside-temperature-display.md](outside-temperature-display.md) for when the forecast card shows and how the time is calculated.

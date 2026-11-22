@@ -1692,6 +1692,13 @@ input[aria-invalid="true"] {
     margin-top: 8px;
 }
 
+/* Small line in the blue forecast card: the time is an estimate */
+.info-banner .forecast-note {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--muted, #5b6472);
+}
+
 /* Readings table: Sensor fault tag in its own colour */
 .tag.fault {
     background: #f1eafa;

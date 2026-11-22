@@ -19,8 +19,11 @@ That gives three rules for the design:
 1. Never use the status colours (green, amber, red) for the outside reading. It is shown in **blue**, the colour of
    information on this website.
 2. Never show it as **Warning** or **Alert**, and never add it to the notification history.
-3. Do not promise a time. The experiment measured about 2.5 minutes once, on a cardboard bench prototype. The
-   message says what is happening now, not when a limit will be reached.
+3. The blue card is a **forecast**, as the lecturer asked on 22 November and as Hanna proposed after her experiment:
+   it says when the inside may reach Warning. The time comes from the inside readings, is rounded down and says
+   *about*, because it is based on one bench experiment. The card is short (title and one line), because the inside
+   and outside values are already in the tiles below it. It is a hint, not a new status: FR-05 has only Normal,
+   Warning and Alert, so a small line in the card says that the time is an estimate from the last 2 minutes.
 
 ## Where it appears
 
@@ -30,7 +33,7 @@ outside data none of it appears, so the website looks exactly as before until th
 | Place                        | What is shown                                                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | Dashboard · tile             | **Outside the box** `25.5°C` and `↑ Rising, +2.9°C in 2 min`, `↓ Falling …` or `Steady`. An outside fault shows **Sensor fault · No outside temperature**; old data shows the value in grey and `Last reading 20:46` |
-| Dashboard · info banner      | **Outside the box is getting warmer** · Outside 25.5°C and rising. Inside is still 22.3°C (Warning from 24°C). Check where the box is kept. |
+| Dashboard · forecast card  | **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. |
 | Last hour and History graphs | A thin **dashed blue line**, *Outside the box* in the legend. It breaks at gaps over 90 s and at outside faults          |
 | Readings table               | Column **Outside °C**: the outside reading closest in time (within 45 s), `Sensor fault`, or `—`                        |
 | CSV download                 | Columns **Inside temperature (°C)** and **Outside temperature (°C)**                                                     |
@@ -39,25 +42,51 @@ outside data none of it appears, so the website looks exactly as before until th
 Outside data never fills in for missing inside data. When the inside sensor has a gap, the inside line breaks and
 the grey **No data** band shows, whatever the outside sensor says.
 
-![Dashboard with the outside tile, banner and dashed line](../../assets/design/outside-temperature/dashboard.png)
+![Dashboard with the outside tile, forecast card and dashed line](../../assets/design/outside-temperature/dashboard.png)
 
 ![History graph with the outside line](../../assets/design/outside-temperature/history.png)
 
 ![Dashboard on a phone](../../assets/design/outside-temperature/phone.png)
 
-## When the information banner shows
+## When the forecast card shows
 
-All of these must be true, with the limits of the active profile:
+All of these must be true, with the limits of the active profile (Hanna's proposed follow-up plus the lecturer's
+request):
 
-- the newest outside reading is valid and less than 90 s old;
-- it has reached **Warning from** (24°C now);
-- it rose by at least **0.3°C** over the last 2 minutes (the experiment's proposal);
+- the newest outside reading is valid, less than 90 s old, has reached **Warning from** (24°C now) and rose by at
+  least 0.3°C over the last 2 minutes;
 - the newest inside reading is valid, fresh and still **below Warning from**;
+- the inside rise is **confirmed**: a straight line through the inside readings of the last 2 minutes (at least 4
+  readings, no gap, no sensor error, reliable time) rises by at least **0.2°C per minute**;
 - no Alert banner is showing.
 
-It disappears by itself when any of these stops being true. It is a calm banner (blue, an *i* icon,
-`role="status"`), not a pop-up and not a browser notification, so it does not add to alarm fatigue. A browser
-notification for it could be a later option behind its own switch in Settings, off by default.
+If the rise is not confirmed, the card is not shown.
+
+**The time** is calculated from the inside readings only:
+
+```
+minutes = (Warning from − inside now) ÷ inside rise per minute × 0.85
+```
+
+It is shown rounded down: `in about 3 minutes`, `in about 1 minute`, `in less than a minute`. The 0.85 is a safety
+margin from Hanna's run: heating speeds up, so a straight line is a little late. Checked on her CSV, played back
+through the website:
+
+| Inside  | Outside | Card says          | Inside really reached 24°C after |
+|---------|---------|--------------------|----------------------------------|
+| 21.3°C  | 23.4°C  | no card (outside below 24°C) | 3.8 min                  |
+| 21.8°C  | 24.5°C  | about 3 minutes    | 3.0 min                          |
+| 22.0°C  | 25.0°C  | about 2 minutes    | 2.6 min                          |
+| 22.3°C  | 25.5°C  | about 2 minutes    | 2.3 min                          |
+| 22.6°C  | 26.0°C  | about 1 minute     | 1.8 min                          |
+| 23.0°C  | 26.6°C  | about 1 minute     | 1.3 min                          |
+| 23.4°C  | 27.2°C  | less than a minute | 0.8 min                          |
+
+During heating the outside air was on average about **1.9°C warmer** than inside the box (up to 4°C), which is why the
+outside reaches 24°C while the inside is still around 22°C. That difference gives the warning time.
+
+The card disappears by itself when any condition stops being true. It is a calm card (blue, an *i* icon,
+`role="status"`), not a pop-up and not a browser notification, so it does not add to alarm fatigue.
 
 ## How the website reads the API
 
@@ -77,13 +106,14 @@ Following the frontend handover:
 
 | Principle                   | How it is met                                                                                |
 |-----------------------------|----------------------------------------------------------------------------------------------|
-| P3 Simple and Intuitive Use | Same pages and places as now; plain wording ("Outside the box is getting warmer")           |
+| P3 Simple and Intuitive Use | Same pages and places as now; plain wording ("Warning in about 2 minutes") |
 | P4 Perceptible Information  | Value, arrow and words for the trend, not colour alone; dashed line and legend on the graphs |
 | P5 Tolerance for Error      | Information only; it cannot raise or clear an Alert, so a wrong outside reading is harmless  |
-| P6 Low Physical Effort      | No extra page or action; the banner goes away by itself                                      |
+| P6 Low Physical Effort      | No extra page or action; the card goes away by itself                                        |
 
 ## Still open
 
 - The outside sensor is not running on the box yet: the device package from the rollout document has to be
   installed on the Pi first.
-- The 0.3°C in 2 minutes threshold comes from one experiment and should be checked with more runs.
+- The thresholds (0.3°C outside, 0.2°C per minute inside) and the 0.85 margin come from one experiment and should be
+  checked with more runs and the real box.

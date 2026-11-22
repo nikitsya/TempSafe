@@ -147,9 +147,9 @@ function showPopup(message, seq) {
         }
     });
     area.prepend(popup);
-    return popup;
     // Keep at most three pop-ups on screen.
     while (area.children.length > 3) area.lastElementChild.remove();
+    return popup;
 }
 
 function showBrowserNotification(message) {
@@ -199,8 +199,14 @@ async function checkAlerts() {
         const period = newestAlertPeriod(readings);
         if (!period) return;
 
-        const seq = Number(period.start.sequence_no);
         const saved = readNotifyState();
+        let seq = Number(period.start.sequence_no);
+        // The page loads only the latest 100 readings. When an alert started before them,
+        // its first reading is not in the list and the start seems to move forward on every
+        // check. It is still the same alert, so it must not be announced again (test 22 Nov:
+        // "Back in range" every 15 s with one reading every 5 s).
+        const startCut = readings.indexOf(period.start) === readings.length - 1;
+        if (startCut && saved && seq > saved.seq) seq = saved.seq;
         const ongoing = !period.end;
         const save = (ended) => storageSet(NOTIFY_STATE_KEY, JSON.stringify({seq, ended}));
 
