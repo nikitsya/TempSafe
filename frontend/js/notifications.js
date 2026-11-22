@@ -201,14 +201,20 @@ async function checkAlerts() {
 
         const saved = readNotifyState();
         let seq = Number(period.start.sequence_no);
+        const last = Number(period.newest.sequence_no);   // newest alert reading of this period
         // The page loads only the latest 100 readings. When an alert started before them,
         // its first reading is not in the list and the start seems to move forward on every
-        // check. It is still the same alert, so it must not be announced again (test 22 Nov:
-        // "Back in range" every 15 s with one reading every 5 s).
+        // check (test 22 Nov: "Back in range" every 15 s with one reading every 5 s).
+        // It is the same alert only if it still includes the last alert reading we saw.
+        // Otherwise it is a new alert, for example one that started while the site was
+        // closed after the previous alert had ended, and it is announced once.
         const startCut = readings.indexOf(period.start) === readings.length - 1;
-        if (startCut && saved && seq > saved.seq) seq = saved.seq;
+        if (startCut && saved && seq > saved.seq) {
+            const seen = Number.isFinite(saved.last) ? saved.last : (saved.ended ? null : seq);
+            if (seen !== null && seq <= seen) seq = saved.seq;
+        }
         const ongoing = !period.end;
-        const save = (ended) => storageSet(NOTIFY_STATE_KEY, JSON.stringify({seq, ended}));
+        const save = (ended) => storageSet(NOTIFY_STATE_KEY, JSON.stringify({seq, ended, last}));
 
         if (!saved || seq > saved.seq) {
             // A new alert (or the first visit). Old alerts that already ended stay quiet.
@@ -221,7 +227,9 @@ async function checkAlerts() {
             return;
         }
         if (seq === saved.seq && ongoing) {
-            // Still on: update the pop-up, or show it again after a page change.
+            // Still on: remember the newest alert reading, then update the pop-up,
+            // or show it again after a page change.
+            if (saved.last !== last) save(false);
             const message = alertMessage(period, 'start', readings);
             if (livePopup && livePopup.isConnected) {
                 updateLivePopup(message);
