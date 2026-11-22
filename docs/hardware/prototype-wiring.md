@@ -4,7 +4,23 @@
 
 Keep the Raspberry Pi outside the monitored box to reduce heat affecting the sensor readings.
 
+The original image below documents the baseline single-sensor assembly. The Fritzing file
+now also includes the experimental external sensor; its exported image is shown below.
+
 ![Prototype wiring: SCD41, LED and passive buzzer](../assets/hardware/prototype-wiring.png)
+
+## Experimental external sensor
+
+![Experimental two-sensor wiring](fritzing/two-sensor-experiment.png)
+
+The experimental AM2302/DHT22 uses 3.3 V power, GPIO4 (physical pin 7) for data,
+and ground. A 10 kΩ pull-up resistor connects DATA to 3.3 V; the sensor's third
+pin is unconnected. The diagram uses a Raspberry Pi 4 graphic to represent the
+40-pin header; the tested device is a Raspberry Pi 5.
+
+An initial check read both sensors in the terminal. The external sensor is not yet
+integrated into the normal logger, SQLite queue or MQTT publisher. See the
+[experiment plan and initial check](../testing/hardware/external-temperature-experiment.md).
 
 ## Sensor connections
 

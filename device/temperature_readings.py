@@ -1,27 +1,23 @@
 import asyncio
-from datetime import datetime, timezone
+from math import isfinite
+from time import monotonic
 from uuid import uuid4
 
 import adafruit_scd4x
 import board
 from gpiozero import LED, PWMOutputDevice
 
-from database import Base, engine, AsyncSessionLocal
+from configuration import (
+    ensure_active_configuration,
+    get_active_configuration,
+    get_temperature_state,
+)
+from database import engine, AsyncSessionLocal, initialise_database
 from models import Reading
+from observation_clock import observation_time
 
 
 BOX_ID = "TS-01"
-PROFILE_ID = "e93a4368-e11a-4f27-8b31-d55d61392548"
-
-
-def get_temperature_state(temperature):
-    if temperature <= 0 or temperature > 25:
-        return "Alert"
-
-    if 24 <= temperature <= 25:
-        return "Warning"
-
-    return "Normal"
 
 
 def update_led(led, state):
@@ -59,19 +55,23 @@ def read_temperature(sensor):
     if not sensor.data_ready:
         return None
 
-    return round(sensor.temperature, 2)
+    temperature = sensor.temperature
+    if temperature is None or not isfinite(temperature) or not -40 <= temperature <= 80:
+        raise ValueError("Inside temperature is missing or outside the sensor range")
+    return round(temperature, 2)
 
 
-async def save_reading(temperature, quality, observed_at):
+async def save_reading(temperature, quality, observed_at, configuration):
     async with AsyncSessionLocal.begin() as session:
         session.add(Reading(
             sample_id=str(uuid4()),
             observed_at=observed_at,
             temperature_c=temperature,
             quality=quality,
-            clock_reliable=1,
+            clock_reliable=int(observed_at is not None),
             box_id=BOX_ID,
-            profile_id=PROFILE_ID,
+            profile_id=configuration.profile_id,
+            sensor_location="inside",
         ))
 
     print(
@@ -80,27 +80,36 @@ async def save_reading(temperature, quality, observed_at):
     )
 
 
-async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
+async def monitor_temperature(sensor, led, buzzer, buzzer_alert, configuration):
+    last_measurement = monotonic()
     while True:
+        try:
+            configuration = await get_active_configuration()
+        except Exception as error:
+            print("Configuration error; using the last active profile:", error)
+
         try:
             temperature = await asyncio.to_thread(
                 read_temperature, sensor
             )
 
             if temperature is None:
-                await asyncio.sleep(1)
-                continue
+                if monotonic() - last_measurement < 90:
+                    await asyncio.sleep(1)
+                    continue
+                raise RuntimeError("SCD41 has not supplied a new measurement for 90 seconds")
 
             quality = "valid"
+            last_measurement = monotonic()
 
         except Exception as error:
             print("Sensor error:", error)
             temperature = None
             quality = "sensor_error"
 
-        observed_at = datetime.now(timezone.utc).isoformat(
-            timespec="seconds"
-        )
+        observed_at = await observation_time()
+        if observed_at is None:
+            print("Clock is not synchronised; saving this attempt without an observation time")
 
         if quality == "sensor_error":
             buzzer_alert.clear()
@@ -108,7 +117,7 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
             await sensor_error_flash(led)
 
         else:
-            state = get_temperature_state(temperature)
+            state = get_temperature_state(temperature, configuration)
             update_led(led, state)
 
             if state == "Alert":
@@ -120,7 +129,9 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
             print(f"State: {state}")
 
         try:
-            await save_reading(temperature, quality, observed_at)
+            await save_reading(
+                temperature, quality, observed_at, configuration
+            )
         except Exception as error:
             print("Database error: reading was not saved:", error)
 
@@ -128,32 +139,38 @@ async def monitor_temperature(sensor, led, buzzer, buzzer_alert):
 
 
 async def main():
-    with LED(18) as led, PWMOutputDevice(
-        17, frequency=500, initial_value=0
-    ) as buzzer:
-        i2c = board.I2C()
-        sensor = adafruit_scd4x.SCD4X(i2c)
-        sensor.start_periodic_measurement()
-
-        async with engine.begin() as connection:
-            await connection.run_sync(Base.metadata.create_all)
-
-        buzzer_alert = asyncio.Event()
-
-        try:
-            async with asyncio.TaskGroup() as tasks:
-                tasks.create_task(
-                    buzzer_worker(buzzer, buzzer_alert)
-                )
-                tasks.create_task(
-                    monitor_temperature(
-                        sensor, led, buzzer, buzzer_alert
+    i2c = sensor = None
+    measurement_started = False
+    try:
+        await initialise_database()
+        configuration = await ensure_active_configuration()
+        with LED(18) as led, PWMOutputDevice(
+            17, frequency=500, initial_value=0
+        ) as buzzer:
+            i2c = board.I2C()
+            sensor = adafruit_scd4x.SCD4X(i2c)
+            sensor.start_periodic_measurement()
+            measurement_started = True
+            buzzer_alert = asyncio.Event()
+            try:
+                async with asyncio.TaskGroup() as tasks:
+                    tasks.create_task(buzzer_worker(buzzer, buzzer_alert))
+                    tasks.create_task(
+                        monitor_temperature(sensor, led, buzzer, buzzer_alert, configuration)
                     )
-                )
+            finally:
+                buzzer.off()
+                led.off()
+    finally:
+        try:
+            if measurement_started:
+                sensor.stop_periodic_measurement()
         finally:
-            buzzer.off()
-            led.off()
-            await engine.dispose()
+            try:
+                if i2c is not None:
+                    i2c.deinit()
+            finally:
+                await engine.dispose()
 
 
 if __name__ == "__main__":

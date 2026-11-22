@@ -5,11 +5,17 @@ import paho.mqtt.client as mqtt
 import ssl
 from queue import SimpleQueue, Empty
 from sqlalchemy import select, update
+from sqlalchemy.exc import SQLAlchemyError
 from threading import Event
 from time import monotonic
 from uuid import UUID
 
-from database import AsyncSessionLocal, engine
+from configuration import (
+    configuration_from_payload,
+    ensure_active_configuration,
+    save_active_configuration,
+)
+from database import AsyncSessionLocal, engine, initialise_database
 from models import Reading
 
 BOX_ID = "TS-01"
@@ -19,6 +25,7 @@ MQTT_USERNAME = "device-TS-01"
 
 READINGS_TOPIC = f"tempsafe/boxes/{BOX_ID}/readings"
 ACKS_TOPIC = f"tempsafe/boxes/{BOX_ID}/acks"
+CONFIGURATION_TOPIC = f"tempsafe/boxes/{BOX_ID}/configuration"
 
 subscription_ready = Event()
 
@@ -31,19 +38,22 @@ def on_connect(client, userdata, flags, reason_code, properties):
         return
 
     print("Connected to MQTT broker")
-    result, _ = client.subscribe(ACKS_TOPIC, qos=1)
+    result, _ = client.subscribe([
+        (ACKS_TOPIC, 1),
+        (CONFIGURATION_TOPIC, 1),
+    ])
 
     if result != mqtt.MQTT_ERR_SUCCESS:
-        print("Could not request acknowledgement subscription")
+        print("Could not request MQTT subscriptions")
 
 
 def on_subscribe(client, userdata, mid, reason_codes, properties):
     if not reason_codes or any(code.is_failure for code in reason_codes):
-        print("Acknowledgement subscription rejected")
+        print("MQTT subscription rejected")
         return
 
     subscription_ready.set()
-    print("Ready to receive acknowledgements")
+    print("Ready to receive acknowledgements and configuration")
 
 
 def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
@@ -52,13 +62,24 @@ def on_disconnect(client, userdata, disconnect_flags, reason_code, properties):
 
 
 acknowledgements = SimpleQueue()
+configuration_updates = SimpleQueue()
+pending_configuration = None
 
 
 def on_message(client, userdata, message):
-    if message.topic != ACKS_TOPIC or message.retain:
+    if len(message.payload) > 4096:
         return
 
-    if len(message.payload) > 4096:
+    if message.topic == CONFIGURATION_TOPIC:
+        try:
+            configuration_updates.put(
+                configuration_from_payload(message.payload)
+            )
+        except ValueError:
+            print("Invalid configuration ignored")
+        return
+
+    if message.topic != ACKS_TOPIC or message.retain:
         return
 
     try:
@@ -82,12 +103,32 @@ def on_message(client, userdata, message):
     acknowledgements.put(sample_id)
 
 
+async def apply_pending_configuration_updates():
+    """Keep the newest configuration pending until its local transaction succeeds."""
+    global pending_configuration
+    while True:
+        try:
+            pending_configuration = configuration_updates.get_nowait()
+        except Empty:
+            break
+    if pending_configuration is None:
+        return
+    try:
+        await save_active_configuration(pending_configuration)
+    except Exception as error:
+        print("Configuration was not saved; will retry:", error)
+        return
+    print("Active configuration updated:", pending_configuration.profile_id)
+    pending_configuration = None
+
+
 def make_payload(reading):
     return json.dumps({
         "schema_version": 1,
         "sample_id": reading.sample_id,
         "box_id": reading.box_id,
         "sequence_no": reading.sequence_no,
+        "sensor_location": reading.sensor_location,
         "profile_id": reading.profile_id,
         "observed_at": (
             reading.observed_at if reading.clock_reliable else None
@@ -174,6 +215,8 @@ async def send_and_wait(client, sample_id, payload):
     deadline = monotonic() + 15
 
     while subscription_ready.is_set():
+        # Apply limits even while waiting for a delayed sample acknowledgement.
+        await apply_pending_configuration_updates()
         remaining = deadline - monotonic()
         if remaining <= 0:
             break
@@ -193,6 +236,9 @@ async def send_and_wait(client, sample_id, payload):
 
 
 async def main():
+    await initialise_database()
+    await ensure_active_configuration()
+
     client = create_client()
     retry_delay = 2
 
@@ -201,19 +247,24 @@ async def main():
 
     try:
         while True:
+            await apply_pending_configuration_updates()
+
             if not subscription_ready.is_set():
                 await asyncio.sleep(1)
                 continue
 
-            pending = await get_pending_reading()
+            try:
+                pending = await get_pending_reading()
+                if pending is None:
+                    await asyncio.sleep(1)
+                    continue
+                sample_id, payload = pending
+                sent = await send_and_wait(client, sample_id, payload)
+            except (SQLAlchemyError, ValueError, TypeError, OSError) as error:
+                print("Queue delivery error; records remain pending:", error)
+                sent = False
 
-            if pending is None:
-                await asyncio.sleep(1)
-                continue
-
-            sample_id, payload = pending
-
-            if await send_and_wait(client, sample_id, payload):
+            if sent:
                 retry_delay = 2
             else:
                 await asyncio.sleep(retry_delay)
