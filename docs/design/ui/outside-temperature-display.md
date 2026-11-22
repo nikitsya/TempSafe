@@ -19,8 +19,10 @@ That gives three rules for the design:
 1. Never use the status colours (green, amber, red) for the outside reading. It is shown in **blue**, the colour of
    information on this website.
 2. Never show it as **Warning** or **Alert**, and never add it to the notification history.
-3. The blue card is a **forecast**, as the lecturer asked on 22 November and as Hanna proposed after her experiment:
-   it says when the inside may reach Warning. The time comes from the inside readings, is rounded down and says
+3. The blue card appears as soon as the outside has reached Warning from and is rising (Hanna, 22 November), so it
+   also shows in a demo where only the outside AM2302 is heated. When the inside rise is confirmed, the card becomes a
+   **forecast**, as the lecturer asked on 22 November and as Hanna proposed after her experiment: it says when the
+   inside may reach Warning. The time comes from the inside readings, is rounded down and says
    *about*, because it is based on one bench experiment. The card is short (title and one line), because the inside
    and outside values are already in the tiles below it. It is a hint, not a new status: FR-05 has only Normal,
    Warning and Alert, so a small line in the card says that the time is an estimate from the last 2 minutes.
@@ -32,8 +34,8 @@ outside data none of it appears, so the website looks exactly as before until th
 
 | Place                        | What is shown                                                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| Dashboard · tile             | **Outside the box** `25.5°C` and `↑ Rising, +2.9°C in 2 min`, `↓ Falling …` or `Steady`. An outside fault shows **Sensor fault · No outside temperature**; old data shows the value in grey and `Last reading 20:46` |
-| Dashboard · forecast card  | **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. |
+| Dashboard · tile             | **Outside the box** `25.5°C`, only the temperature (Hanna, 22 Nov: fewer numbers). An outside fault shows **Sensor fault · No outside temperature**; old data shows the value in grey and `Last reading 20:46` |
+| Dashboard · blue card      | **Outside has reached 24°C and is rising** · The inside may warm up soon. Check where the box is kept. When the inside rise is confirmed: **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. |
 | Last hour and History graphs | A thin **dashed blue line**, *Outside the box* in the legend. It breaks at gaps over 90 s and at outside faults          |
 | Readings table               | Column **Outside °C**: the outside reading closest in time (within 45 s), `Sensor fault`, or `—`                        |
 | CSV download                 | Columns **Inside temperature (°C)** and **Outside temperature (°C)**                                                     |
@@ -44,23 +46,28 @@ the grey **No data** band shows, whatever the outside sensor says.
 
 ![Dashboard with the outside tile, forecast card and dashed line](../../assets/design/outside-temperature/dashboard.png)
 
+![Dashboard demo: only the outside sensor heated, blue card without time](../../assets/design/outside-temperature/outside-warm-card.png)
+
 ![History graph with the outside line](../../assets/design/outside-temperature/history.png)
 
 ![Dashboard on a phone](../../assets/design/outside-temperature/phone.png)
 
-## When the forecast card shows
+## When the blue card shows
 
-All of these must be true, with the limits of the active profile (Hanna's proposed follow-up plus the lecturer's
-request):
+The card is shown when all of these are true, with the limits of the active profile (Hanna, 22 November):
 
-- the newest outside reading is valid, less than 90 s old, has reached **Warning from** (24°C now) and rose by at
-  least 0.3°C over the last 2 minutes;
-- the newest inside reading is valid, fresh and still **below Warning from**;
-- the inside rise is **confirmed**: a straight line through the inside readings of the last 2 minutes (at least 4
-  readings, no gap, no sensor error, reliable time) rises by at least **0.2°C per minute**;
+- the newest outside reading is valid, less than 90 s old and has reached **Warning from** (24°C now);
+- it is **rising**: at least 0.3°C over the last 2 minutes;
 - no Alert banner is showing.
 
-If the rise is not confirmed, the card is not shown.
+It does not wait for the inside to rise. Then it says **Outside has reached 24°C and is rising** and *The inside may
+warm up soon. Check where the box is kept.* If the inside is already at Warning, only *Check where the box is kept.*
+
+The card shows **the time** instead when the inside rise is also confirmed (lecturer's request):
+
+- the newest inside reading is valid, fresh and still **below Warning from**;
+- a straight line through the inside readings of the last 2 minutes (at least 4 readings, no gap, no sensor error,
+  reliable time) rises by at least **0.2°C per minute**.
 
 **The time** is calculated from the inside readings only:
 

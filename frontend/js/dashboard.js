@@ -351,23 +351,32 @@ function insideRate() {
     return points.reduce((a, p) => a + (p.t - mt) * (p.v - mv), 0) / den;
 }
 
-// The forecast card is shown only when all of these are true (Hanna's proposal + lecturer):
-// - the outside reading is fresh, has reached "Warning from" of the active profile and is rising;
-// - the inside reading is fresh, valid and still below "Warning from";
-// - the inside rise is confirmed: at least 0.2°C per minute over the last 2 minutes (4+ readings).
-// The time comes from the INSIDE readings only: (Warning from − inside now) ÷ inside rate.
-function warningForecast(profile) {
+// The blue card (Hanna, 22 Nov): shown as soon as the OUTSIDE reading is fresh, has reached
+// "Warning from" of the active profile and is rising (at least
+// +0.3°C in 2 minutes). It does not wait for the inside to rise, so it also shows when
+// only the outside AM2302 is heated in a demo. null when the card is not needed.
+function outsideWarm(profile) {
     const trend = outsideTrend();
-    const inside = recentReadings[0];
     const warning = profile ? Number(profile.warningC) : NaN;
     if (!trend || trend.stale || trend.now === null || trend.change === null || !Number.isFinite(warning)) return null;
+    if (!(trend.now >= warning && trend.change >= 0.3)) return null;
+    const inside = recentReadings[0];
+    const insideWarm = !!inside && inside.quality === 'valid' && Number(inside.temperature_c) >= warning;
+    return {outside: trend.now, warning, insideWarm, forecast: warningForecast(warning)};
+}
+
+// The time in the card (lecturer, 22 Nov) is added only when the inside rise is confirmed:
+// the inside reading is fresh, valid and still below "Warning from", and rising by at least
+// 0.2°C per minute over the last 2 minutes (4+ readings).
+// The time comes from the INSIDE readings only: (Warning from − inside now) ÷ inside rate.
+function warningForecast(warning) {
+    const inside = recentReadings[0];
     if (!inside || inside.quality !== 'valid' || readingGap(inside, {observed_at: new Date().toISOString()})) return null;
     const insideC = Number(inside.temperature_c);
-    if (!(trend.now >= warning && trend.change >= 0.3 && insideC < warning)) return null;
+    if (!(insideC < warning)) return null;
     const rate = insideRate();
     if (rate === null || rate < FORECAST_MIN_RATE) return null;
-    const minutes = ((warning - insideC) / rate) * FORECAST_MARGIN;
-    return {outside: trend.now, inside: insideC, warning, rate, minutes};
+    return {inside: insideC, rate, minutes: ((warning - insideC) / rate) * FORECAST_MARGIN};
 }
 
 // "less than a minute", "about 1 minute", "about 3 minutes" (rounded down, never later than measured).
@@ -380,19 +389,24 @@ function forecastText(minutes) {
 function renderOutsideBanner(profile) {
     const box = document.getElementById('outside-banner');
     if (!box) return;
-    const forecast = alertBanner ? null : warningForecast(profile);
-    if (!forecast) {
+    const warm = alertBanner ? null : outsideWarm(profile);
+    if (!warm) {
         box.innerHTML = '';
         return;
     }
-    const when = forecastText(forecast.minutes);
+    const limit = Number.isInteger(warm.warning) ? String(warm.warning) : warm.warning.toFixed(1);
+    // With a confirmed inside rise the card says when; before that it says why.
+    const text = warm.forecast
+        ? `<h2 id="outside-banner-title">Warning ${forecastText(warm.forecast.minutes)}</h2>
+                <p>Inside is warming fast. Check where the box is kept.</p>
+                <p class="forecast-note">Estimate from the last 2 minutes.</p>`
+        : `<h2 id="outside-banner-title">Outside has reached ${limit}°C and is rising</h2>
+                <p>${warm.insideWarm ? '' : 'The inside may warm up soon. '}Check where the box is kept.</p>`;
     box.innerHTML = `
         <section aria-labelledby="outside-banner-title" class="info-banner" role="status">
             <span aria-hidden="true" class="info-banner-icon">i</span>
             <div>
-                <h2 id="outside-banner-title">Warning ${when}</h2>
-                <p>Inside is warming fast. Check where the box is kept.</p>
-                <p class="forecast-note">Estimate from the last 2 minutes.</p>
+                ${text}
             </div>
         </section>`;
 }
@@ -410,11 +424,8 @@ function outsideTile() {
         return tile('Outside the box', `<span class="value-old">${value}</span>`,
             `Last reading ${formatClock(trend.latest.observed_at)}`, 'tile-outside');
     }
-    // No reading from 2 minutes ago yet (sensor just started): say nothing rather than "Steady".
-    let sub = trend.change === null ? '' : 'Steady';
-    if (trend.change !== null && trend.change >= 0.3) sub = `<span aria-hidden="true">↑</span> Rising, +${trend.change.toFixed(1)}°C in 2 min`;
-    if (trend.change !== null && trend.change <= -0.3) sub = `<span aria-hidden="true">↓</span> Falling, ${trend.change.toFixed(1)}°C in 2 min`;
-    return tile('Outside the box', value, sub, 'tile-outside');
+    // Only the temperature (Hanna, 22 Nov: too many numbers). Rising or not is used by the blue card.
+    return tile('Outside the box', value, '', 'tile-outside');
 }
 
 // Small "Last hour" chart: line coloured by status, dashed limit lines, a few time marks.
