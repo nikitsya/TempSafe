@@ -270,6 +270,13 @@ const NOTIFY_HELP = {
     unsupported: 'This browser does not support notifications.'
 };
 
+// Why notifications are useful, shown before the browser asks (task #71840, web-push-permission-flow.md).
+const NOTIFY_WHY = {
+    off: 'Get a message from this browser when the box goes into Alert or back in range, even on another tab. ' +
+        'Your browser will ask for permission when you turn this on.',
+    on: 'This browser shows a message when the box goes into Alert or back in range.'
+};
+
 function renderNotifications() {
     const box = document.getElementById('notify-box');
     if (!box) return;
@@ -280,12 +287,13 @@ function renderNotifications() {
         <div class="switch-row">
             <span class="switch-label" id="notify-label">Notifications</span>
             <button aria-checked="${on}" aria-labelledby="notify-label" class="switch" id="notify-switch"
-                    role="switch" type="button" ${disabled ? 'disabled aria-describedby="notify-help"' : ''}>
+                    role="switch" type="button" ${disabled ? 'disabled aria-describedby="notify-help"' : 'aria-describedby="notify-why"'}>
                 <span aria-hidden="true" class="switch-text">${on ? 'On' : 'Off'}</span>
                 <span aria-hidden="true" class="switch-thumb"></span>
             </button>
         </div>
-        ${disabled ? `<p class="muted switch-help" id="notify-help">${NOTIFY_HELP[state]}</p>` : ''}`;
+        ${disabled ? `<p class="muted switch-help" id="notify-help">${NOTIFY_HELP[state]}</p>`
+            : `<p class="muted switch-help" id="notify-why">${on ? NOTIFY_WHY.on : NOTIFY_WHY.off}</p>`}`;
 
     const toggle = document.getElementById('notify-switch');
     toggle.addEventListener('click', async () => {

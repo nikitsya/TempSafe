@@ -60,7 +60,7 @@
     --alert-bg: #fdecea;
     --grey: #536074;
     --grey-bg: #eef1f5;
-    --fault: #7c2d12;
+    --fault: #6b3fa0;   /* violet: clearly not the red of a temperature Alert (test 18 Nov, T2-10) */
 
     /* Shape */
     --radius-card: 14px;
@@ -1050,11 +1050,18 @@ input:focus-visible {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: none;
     width: 24px;
     height: 24px;
     border-radius: 50%;
     color: #fff;
-    font-size: 13px;
+}
+
+/* Status icons are drawn as small SVGs, so they sit exactly in the centre (test 18 Nov, T1-13). */
+.state-pill svg {
+    display: block;
+    width: 14px;
+    height: 14px;
 }
 
 .state-table tr.state-hot th, .state-table tr.state-hot td {
@@ -1097,8 +1104,8 @@ input:focus-visible {
 }
 
 .state-table tr.state-fault th, .state-table tr.state-fault td {
-    background: #fbf5f2;
-    border-color: #ebd3c7;
+    background: #f8f4fc;
+    border-color: #e1d5f0;
 }
 
 .state-fault .state-pill {
@@ -1164,8 +1171,8 @@ input:focus-visible {
     }
 
     tr.state-fault {
-        border-color: #ebd3c7;
-        background: #fbf5f2;
+        border-color: #e1d5f0;
+        background: #f8f4fc;
     }
 
     tr.state-offline {
@@ -1212,8 +1219,19 @@ input:focus-visible {
 .graph svg {
     display: block;
     width: 100%;
-    min-width: 560px;
     height: auto;
+}
+
+/* Phone: the graph fits the screen; touch moves the marker instead of scrolling. */
+@media (max-width: 600px) {
+    .graph {
+        overflow-x: visible;
+        padding: 14px 10px 10px;
+    }
+
+    .graph svg {
+        touch-action: pan-y;
+    }
 }
 
 .graph-head {
@@ -1315,7 +1333,7 @@ input:focus-visible {
 }
 
 .band-fault {
-    fill: var(--alert);
+    fill: var(--fault);
     fill-opacity: 0.16;
 }
 
@@ -1366,6 +1384,12 @@ input:focus-visible {
     border-top: 2px dashed var(--alert);
 }
 
+.legend-warning-line {
+    display: inline-block;
+    width: 22px;
+    border-top: 2px dotted var(--warning-line);
+}
+
 .legend-band {
     display: inline-block;
     width: 16px;
@@ -1374,7 +1398,7 @@ input:focus-visible {
 }
 
 .legend-fault {
-    background: rgba(180, 35, 24, 0.25);
+    background: rgba(107, 63, 160, 0.25);
 }
 
 .legend-nodata {
@@ -1666,4 +1690,99 @@ input[aria-invalid="true"] {
 /* Last hour chart legend (same colours as the History graph) */
 .mini-legend {
     margin-top: 8px;
+}
+
+/* Small line in the blue forecast card: the time is an estimate */
+.info-banner .forecast-note {
+    margin: 4px 0 0;
+    font-size: 0.875rem;
+    color: var(--muted, #5b6472);
+}
+
+/* Readings table: Sensor fault tag in its own colour */
+.tag.fault {
+    background: #f1eafa;
+    color: var(--fault);
+}
+
+/* Today's range on the Dashboard: Min and Max as two labelled values */
+.range-pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+
+.range-pair small:first-child {
+    margin-right: 4px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ---------- Outside the box (AM2302, comparison only) ---------- */
+/* Blue is the colour of information here: never green, amber or red, so it is not read as a status. */
+.info-banner {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    border: 1px solid #b9cdea;
+    border-left: 6px solid var(--accent);
+    border-radius: 12px;
+    background: #eef4fc;
+}
+
+.info-banner h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    color: var(--navy);
+}
+
+.info-banner p {
+    margin: 0;
+    color: var(--ink);
+}
+
+.info-banner-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.graph-outside {
+    fill: none;
+    stroke: #3b82c4;
+    stroke-width: 2.5;
+    stroke-dasharray: 7 5;
+}
+
+.legend-outside {
+    display: inline-block;
+    width: 22px;
+    border-top: 2.5px dashed #3b82c4;
+}
+
+.tile-outside .tile-sub {
+    color: var(--accent-dark);
+}
+
+.outside-fault {
+    color: var(--fault);
+    font-weight: 600;
+}
+
+@media (min-width: 1000px) {
+    .tiles.tiles-5 {
+        grid-template-columns: 1.4fr repeat(4, 1fr);
+    }
 }

@@ -107,3 +107,37 @@ function readableDuration(minutes) {
     const restDays = days % 30;
     return restDays ? `${plural(months, 'month')} ${plural(restDays, 'day')}` : plural(months, 'month');
 }
+
+
+// Legend items for the limit lines, with their values (test 18 Nov, T1-03):
+// dotted amber = where Warning starts, dashed red = Maximum (and Minimum when shown).
+function limitLegend(limits, showLower) {
+    const fmt = (v) => `${Number(v).toFixed(0) == v ? Number(v).toFixed(0) : Number(v).toFixed(1)}°C`;
+    let html = '';
+    if (limits && Number.isFinite(Number(limits.warningC))) {
+        html += `<li><span class="legend-warning-line" aria-hidden="true"></span>Warning from ${fmt(limits.warningC)}</li>`;
+    }
+    if (limits && Number.isFinite(Number(limits.upperC))) {
+        html += `<li><span class="legend-upper" aria-hidden="true"></span>Maximum ${fmt(limits.upperC)}</li>`;
+    }
+    if (showLower && limits && Number.isFinite(Number(limits.lowerC))) {
+        html += `<li><span class="legend-upper" aria-hidden="true"></span>Minimum ${fmt(limits.lowerC)}</li>`;
+    }
+    return html || '<li><span class="legend-upper" aria-hidden="true"></span>Limit</li>';
+}
+
+
+// True when two readings of ONE sensor are not continuous (newest-first lists use (older, newer)).
+// Inside and outside samples share the box-wide sequence counter, so a jump in sequence_no is
+// normal and is NOT a gap (dual-sensor handover, 21 Nov). Only time decides: more than 90 s,
+// an unknown time or a time going backwards breaks the line.
+const READING_GAP_MS = 90 * 1000;
+
+function readingGap(earlier, later) {
+    if (!earlier || !later) return false;
+    const a = earlier.clock_reliable === false ? NaN : new Date(earlier.observed_at).getTime();
+    const b = later.clock_reliable === false ? NaN : new Date(later.observed_at).getTime();
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return true;
+    const ms = b - a;
+    return ms < 0 || ms > READING_GAP_MS;
+}
