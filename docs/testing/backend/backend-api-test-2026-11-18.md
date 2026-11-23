@@ -65,6 +65,7 @@ questions for the team, not crashes or data loss.
 
 I saved new limits through the API (Minimum 2, Warning from 20, Maximum 22). Then the device sent 21.0 °C with the
 profile ID that is written in `device/temperature_readings.py`. The reading was stored with the **old** profile (24 /
+
 25) and shown as **Normal**. With the new limits it would be **Warning**.
 
 This matches the note in `database/migrations/003_add_box_configuration.sql`: *a configuration selects the desired

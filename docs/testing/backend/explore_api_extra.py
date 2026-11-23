@@ -36,7 +36,7 @@ async def main():
                 await conn.execute(text(
                     "INSERT INTO temperature_samples (sample_id, box_id, sequence_no, profile_id, observed_at, clock_reliable, received_at, temperature_c, quality) "
                     "VALUES (:sid, 'TS-01', :seq, :p, :obs, 1, :rec, 21.5, 'valid')"),
-                                   [{**r, "p": PROFILE} for r in rows])
+                    [{**r, "p": PROFILE} for r in rows])
             day = now.date().isoformat()
             t0 = time.perf_counter();
             before = None;
