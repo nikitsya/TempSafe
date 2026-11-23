@@ -46,8 +46,8 @@ Below it are four tiles:
   (`16 Nov 2026 · 1 day 23 h ago`).
 
 Then a **Last hour** chart (line coloured by status, dashed limit lines, time marks every 15 minutes, grey band for no
-data, violet band for sensor fault, legend) and three framed buttons: **Day graph**, **All readings** (the readings table) and
-**Alerts and issues**.
+data, violet band for sensor fault, legend) and three framed buttons: **Day graph**, **All readings** (the readings
+table) and **Alerts and issues**.
 
 ## History
 
@@ -63,7 +63,8 @@ All readings of the period are loaded, with no limit, so the graph, Readings and
   Normal, amber Warning, red Alert); the colour changes exactly where the line crosses a limit. The dotted amber
   line is where Warning starts and the dashed red line is the Maximum (and Minimum when shown). Violet band = sensor
   fault, grey band = no data or offline. The legend explains them with the values: Normal, Warning, Alert,
-  `Warning from 24°C`, `Maximum 25°C`, Sensor fault, No data. On a phone the whole day fits the screen width. Under the graph:
+  `Warning from 24°C`, `Maximum 25°C`, Sensor fault, No data. On a phone the whole day fits the screen width. Under the
+  graph:
   hours `8` to `18` for Today or a date (the window grows if there are readings earlier or later), and marks such as
   `15:35` for 1 hour.
 - **Readings**: table with Date (`14 Nov 2026`), Time (`16:41:16`), °C and Status.
@@ -88,7 +89,8 @@ All readings of the period are loaded, with no limit, so the graph, Readings and
   (`16 Nov, 23:50 – 00:10`). An ongoing issue shows `since {time}` and **Now**. With no issues the page
   shows **✓ No issues**.
 
-Durations: `at least …` means a sensor error or missing readings ended the row. Long durations show hours or days (up to 24
+Durations: `at least …` means a sensor error or missing readings ended the row. Long durations show hours or days (up to
+24
 h: `3 h 20 min`; then `1 day 16 h`, `8 days`, `1 month 3 days`). Pop-ups, the Dashboard and Alerts use the same format.
 A period that crosses midnight shows a date range (`4 – 6 Nov 2026`). If the
 box clock was not set, the time is when the server received the reading. On phones each row becomes a card with
@@ -103,29 +105,30 @@ same text. Each start and end is announced once.
 
 ## Settings
 
-| Situation          | Heading / text                                                                      | Notes                                                                                     |
-|--------------------|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| Situation          | Heading / text                                                                      | Notes                                                                                                                                                                                                                                                                                                                                 |
+|--------------------|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Notifications      | Notifications [On/Off switch]                                                       | Off: *Get a message from this browser when the box goes into Alert or back in range, even on another tab. Your browser will ask for permission when you turn this on.* On: *This browser shows a message when the box goes into Alert or back in range.* Blocked or unsupported: the switch is off and explains how to allow the site |
-| Limits form        | Temperature limits: **Minimum**, **Warning from**, **Maximum**                      | No hints; current values are filled in                                                    |
-| Rules              | Alert at or below Minimum or above Maximum; Warning from Warning from up to Maximum | FR-05                                                                                     |
-| Confirm            | Change the limits?                                                                  | Now / New, with **Confirm** and **Cancel**                                                |
-| Saved              | Saved                                                                               | The website uses these limits for new readings once the box updates.                      |
-| Wrong order        | Must be higher than the minimum. / Must be higher than warning from.                | Shown under the field                                                                     |
-| No limits selected | The form is filled in with the limits recorded with the latest reading              | If there are none: **No limits set yet.** and an empty form                               |
+| Limits form        | Temperature limits: **Minimum**, **Warning from**, **Maximum**                      | No hints; current values are filled in                                                                                                                                                                                                                                                                                                |
+| Rules              | Alert at or below Minimum or above Maximum; Warning from Warning from up to Maximum | FR-05                                                                                                                                                                                                                                                                                                                                 |
+| Confirm            | Change the limits?                                                                  | Now / New, with **Confirm** and **Cancel**                                                                                                                                                                                                                                                                                            |
+| Saved              | Saved                                                                               | The website uses these limits for new readings once the box updates.                                                                                                                                                                                                                                                                  |
+| Wrong order        | Must be higher than the minimum. / Must be higher than warning from.                | Shown under the field                                                                                                                                                                                                                                                                                                                 |
+| No limits selected | The form is filled in with the limits recorded with the latest reading              | If there are none: **No limits set yet.** and an empty form                                                                                                                                                                                                                                                                           |
 
 ## Outside the box (outside sensor)
 
 Shown only when the box sends outside readings. It is information, never a status, and is shown in blue.
 
-| Place                 | Text                                                                                                               |
-|-----------------------|--------------------------------------------------------------------------------------------------------------------|
-| Dashboard tile        | **Outside the box** · `25.5°C` (only the temperature) |
-| Tile, outside fault   | **Sensor fault** · No outside temperature                                                                          |
-| Tile, old data        | Value in grey · `Last reading 20:46`                                                                               |
-| Blue card (outside warm) | **Outside has reached 24°C and is rising** · The inside may warm up soon. Check where the box is kept. (inside already at Warning: Check where the box is kept.) |
-| Forecast card         | **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. (`in about 1 minute`, `in less than a minute`) |
-| Graph legend          | Outside the box (dashed blue line)                                                                                 |
-| Readings column       | **Outside °C** (`25.5`, `Sensor fault` or `—`)                                                                     |
-| CSV columns           | `Inside temperature (°C)`, `Outside temperature (°C)`                                                              |
+| Place                    | Text                                                                                                                                                                     |
+|--------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Dashboard tile           | **Outside the box** · `25.5°C` (only the temperature)                                                                                                                    |
+| Tile, outside fault      | **Sensor fault** · No outside temperature                                                                                                                                |
+| Tile, old data           | Value in grey · `Last reading 20:46`                                                                                                                                     |
+| Blue card (outside warm) | **Outside has reached 24°C and is rising** · The inside may warm up soon. Check where the box is kept. (inside already at Warning: Check where the box is kept.)         |
+| Forecast card            | **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. (`in about 1 minute`, `in less than a minute`) |
+| Graph legend             | Outside the box (dashed blue line)                                                                                                                                       |
+| Readings column          | **Outside °C** (`25.5`, `Sensor fault` or `—`)                                                                                                                           |
+| CSV columns              | `Inside temperature (°C)`, `Outside temperature (°C)`                                                                                                                    |
 
-See [outside-temperature-display.md](outside-temperature-display.md) for when the blue card shows and how the time is calculated.
+See [outside-temperature-display.md](outside-temperature-display.md) for when the blue card shows and how the time is
+calculated.

@@ -60,7 +60,7 @@
     --alert-bg: #fdecea;
     --grey: #536074;
     --grey-bg: #eef1f5;
-    --fault: #6b3fa0;   /* violet: clearly not the red of a temperature Alert (test 18 Nov, T2-10) */
+    --fault: #6b3fa0; /* violet: clearly not the red of a temperature Alert (test 18 Nov, T2-10) */
 
     /* Shape */
     --radius-card: 14px;

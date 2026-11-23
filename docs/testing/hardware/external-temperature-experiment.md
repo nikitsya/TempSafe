@@ -59,16 +59,17 @@ Statuses: `valid`, `not_ready`, or `sensor_error`.
 
 ## Results — preliminary heating run
 
-CSV evidence: [external_temperature_experiment_20261120T175011Z.csv](external_temperature_experiment_20261120T175011Z.csv)
+CSV
+evidence: [external_temperature_experiment_20261120T175011Z.csv](external_temperature_experiment_20261120T175011Z.csv)
 
 The run recorded 324 paired valid readings from 17:50:16 to 18:19:07 UTC.
 No cooling stage was recorded.
 
-| Measure | Inside (SCD41) | Outside (AM2302) |
-|---------|----------------|------------------|
-| First reading | 20.29 °C | 19.00 °C |
-| Final reading | 31.30 °C | 32.40 °C |
-| Change during run | +11.01 °C | +13.40 °C |
+| Measure           | Inside (SCD41) | Outside (AM2302) |
+|-------------------|----------------|------------------|
+| First reading     | 20.29 °C       | 19.00 °C         |
+| Final reading     | 31.30 °C       | 32.40 °C         |
+| Change during run | +11.01 °C      | +13.40 °C        |
 
 The outside sensor first reached 23 °C at 17:57:14 UTC. The inside sensor
 first reached 23 °C at 17:59:44 UTC, approximately 2.5 minutes later.

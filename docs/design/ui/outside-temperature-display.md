@@ -22,8 +22,8 @@ That gives three rules for the design:
 3. The blue card appears as soon as the outside has reached Warning from and is rising (Hanna, 22 November), so it
    also shows in a demo where only the outside AM2302 is heated. When the inside rise is confirmed, the card becomes a
    **forecast**, as the lecturer asked on 22 November and as Hanna proposed after her experiment: it says when the
-   inside may reach Warning. The time comes from the inside readings, is rounded down and says
-   *about*, because it is based on one bench experiment. The card is short (title and one line), because the inside
+   inside may reach Warning. The time comes from the inside readings, is rounded down and says *about*, because it is
+   based on one bench experiment. The card is short (title and one line), because the inside
    and outside values are already in the tiles below it. It is a hint, not a new status: FR-05 has only Normal,
    Warning and Alert, so a small line in the card says that the time is an estimate from the last 2 minutes.
 
@@ -32,14 +32,14 @@ That gives three rules for the design:
 No new page is needed. The outside reading sits next to the inside reading wherever temperatures are shown. Without
 outside data none of it appears, so the website looks exactly as before until the outside sensor is switched on.
 
-| Place                        | What is shown                                                                                                            |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| Dashboard · tile             | **Outside the box** `25.5°C`, only the temperature (Hanna, 22 Nov: fewer numbers). An outside fault shows **Sensor fault · No outside temperature**; old data shows the value in grey and `Last reading 20:46` |
-| Dashboard · blue card      | **Outside has reached 24°C and is rising** · The inside may warm up soon. Check where the box is kept. When the inside rise is confirmed: **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. |
-| Last hour and History graphs | A thin **dashed blue line**, *Outside the box* in the legend. It breaks at gaps over 90 s and at outside faults          |
-| Readings table               | Column **Outside °C**: the outside reading closest in time (within 45 s), `Sensor fault`, or `—`                        |
-| CSV download                 | Columns **Inside temperature (°C)** and **Outside temperature (°C)**                                                     |
-| Alerts page                  | Nothing; alerts are about the medicines inside the box                                                                   |
+| Place                        | What is shown                                                                                                                                                                                                                                                       |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Dashboard · tile             | **Outside the box** `25.5°C`, only the temperature (Hanna, 22 Nov: fewer numbers). An outside fault shows **Sensor fault · No outside temperature**; old data shows the value in grey and `Last reading 20:46`                                                      |
+| Dashboard · blue card        | **Outside has reached 24°C and is rising** · The inside may warm up soon. Check where the box is kept. When the inside rise is confirmed: **Warning in about 2 minutes** · Inside is warming fast. Check where the box is kept. · Estimate from the last 2 minutes. |
+| Last hour and History graphs | A thin **dashed blue line**, *Outside the box* in the legend. It breaks at gaps over 90 s and at outside faults                                                                                                                                                     |
+| Readings table               | Column **Outside °C**: the outside reading closest in time (within 45 s), `Sensor fault`, or `—`                                                                                                                                                                    |
+| CSV download                 | Columns **Inside temperature (°C)** and **Outside temperature (°C)**                                                                                                                                                                                                |
+| Alerts page                  | Nothing; alerts are about the medicines inside the box                                                                                                                                                                                                              |
 
 Outside data never fills in for missing inside data. When the inside sensor has a gap, the inside line breaks and
 the grey **No data** band shows, whatever the outside sensor says.
@@ -79,15 +79,15 @@ It is shown rounded down: `in about 3 minutes`, `in about 1 minute`, `in less th
 margin from Hanna's run: heating speeds up, so a straight line is a little late. Checked on her CSV, played back
 through the website:
 
-| Inside  | Outside | Card says          | Inside really reached 24°C after |
-|---------|---------|--------------------|----------------------------------|
-| 21.3°C  | 23.4°C  | no card (outside below 24°C) | 3.8 min                  |
-| 21.8°C  | 24.5°C  | about 3 minutes    | 3.0 min                          |
-| 22.0°C  | 25.0°C  | about 2 minutes    | 2.6 min                          |
-| 22.3°C  | 25.5°C  | about 2 minutes    | 2.3 min                          |
-| 22.6°C  | 26.0°C  | about 1 minute     | 1.8 min                          |
-| 23.0°C  | 26.6°C  | about 1 minute     | 1.3 min                          |
-| 23.4°C  | 27.2°C  | less than a minute | 0.8 min                          |
+| Inside | Outside | Card says                    | Inside really reached 24°C after |
+|--------|---------|------------------------------|----------------------------------|
+| 21.3°C | 23.4°C  | no card (outside below 24°C) | 3.8 min                          |
+| 21.8°C | 24.5°C  | about 3 minutes              | 3.0 min                          |
+| 22.0°C | 25.0°C  | about 2 minutes              | 2.6 min                          |
+| 22.3°C | 25.5°C  | about 2 minutes              | 2.3 min                          |
+| 22.6°C | 26.0°C  | about 1 minute               | 1.8 min                          |
+| 23.0°C | 26.6°C  | about 1 minute               | 1.3 min                          |
+| 23.4°C | 27.2°C  | less than a minute           | 0.8 min                          |
 
 During heating the outside air was on average about **1.9°C warmer** than inside the box (up to 4°C), which is why the
 outside reaches 24°C while the inside is still around 22°C. That difference gives the warning time.
@@ -113,7 +113,7 @@ Following the frontend handover:
 
 | Principle                   | How it is met                                                                                |
 |-----------------------------|----------------------------------------------------------------------------------------------|
-| P3 Simple and Intuitive Use | Same pages and places as now; plain wording ("Warning in about 2 minutes") |
+| P3 Simple and Intuitive Use | Same pages and places as now; plain wording ("Warning in about 2 minutes")                   |
 | P4 Perceptible Information  | Value, arrow and words for the trend, not colour alone; dashed line and legend on the graphs |
 | P5 Tolerance for Error      | Information only; it cannot raise or clear an Alert, so a wrong outside reading is harmless  |
 | P6 Low Physical Effort      | No extra page or action; the card goes away by itself                                        |

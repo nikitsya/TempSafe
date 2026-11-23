@@ -29,8 +29,9 @@ async def seed():
     pw = PasswordHasher().hash("alice-password-1")
     async with engine.begin() as c:
         await c.execute(text("INSERT IGNORE INTO boxes (box_id, name) VALUES ('TS-02', 'Other box')"))
-        await c.execute(text("INSERT IGNORE INTO app_users (auth_subject, password_hash) VALUES ('alice', :h), ('bob', :h)"),
-                        {"h": pw})
+        await c.execute(
+            text("INSERT IGNORE INTO app_users (auth_subject, password_hash) VALUES ('alice', :h), ('bob', :h)"),
+            {"h": pw})
         await c.execute(text("INSERT IGNORE INTO box_access (user_id, box_id) "
                              "SELECT user_id, 'TS-01' FROM app_users WHERE auth_subject = 'alice'"))
         await c.execute(text("INSERT IGNORE INTO box_configuration (box_id, profile_id) VALUES ('TS-01', :p)"),
@@ -60,9 +61,11 @@ async def main():
 
             # ---------- Authentication ----------
             r = await anon.get("/api/boxes/TS-01/readings")
-            record("B-01", r.status_code == 401, "History without signing in is refused", f"GET history → {r.status_code}")
+            record("B-01", r.status_code == 401, "History without signing in is refused",
+                   f"GET history → {r.status_code}")
             r = await anon.get("/api/readings")
-            record("B-02", r.status_code == 401, "Reading list without signing in is refused", f"GET /api/readings → {r.status_code}")
+            record("B-02", r.status_code == 401, "Reading list without signing in is refused",
+                   f"GET /api/readings → {r.status_code}")
             r = await anon.post("/api/login", json={"username": "alice", "password": "wrong"})
             record("B-03", r.status_code == 401, "Wrong password is refused", f"{r.status_code} {r.json()}")
             r = await anon.post("/api/login", json={"username": "nobody", "password": "x"})
@@ -70,22 +73,27 @@ async def main():
                    "Unknown user gets the same message as a wrong password", f"{r.status_code} {r.json()}")
             r = await alice.post("/api/login", json={"username": "alice", "password": "alice-password-1"})
             cookie = r.headers.get("set-cookie", "")
-            record("B-05", r.status_code == 204 and "HttpOnly" in cookie and "Secure" in cookie and "SameSite=strict" in cookie,
-                   "Sign-in cookie is HttpOnly, Secure and SameSite=Strict", cookie.split(";", 1)[1].strip() if cookie else r.status_code)
+            record("B-05",
+                   r.status_code == 204 and "HttpOnly" in cookie and "Secure" in cookie and "SameSite=strict" in cookie,
+                   "Sign-in cookie is HttpOnly, Secure and SameSite=Strict",
+                   cookie.split(";", 1)[1].strip() if cookie else r.status_code)
             await bob.post("/api/login", json={"username": "bob", "password": "alice-password-1"})
             r = await alice.get("/api/me")
-            record("B-06", r.status_code == 200 and r.json()["box_ids"] == ["TS-01"], "Account shows the assigned box", r.json())
+            record("B-06", r.status_code == 200 and r.json()["box_ids"] == ["TS-01"], "Account shows the assigned box",
+                   r.json())
 
             # ---------- Access to boxes ----------
             r = await bob.get("/api/boxes/TS-01/readings")
-            record("B-07", r.status_code == 404, "A user without the box cannot read its history", f"bob → {r.status_code} {r.json()}")
+            record("B-07", r.status_code == 404, "A user without the box cannot read its history",
+                   f"bob → {r.status_code} {r.json()}")
             r = await alice.get("/api/boxes/TS-02/readings")
             record("B-08", r.status_code == 404, "A box that is not assigned looks the same as an unknown box",
                    f"alice TS-02 → {r.status_code} {r.json()}; unknown → {(await alice.get('/api/boxes/XX/readings')).status_code}")
             r = await alice.get("/api/boxes/TS-01'%20OR%20'1'='1/readings")
             record("B-09", r.status_code == 404, "SQL text in the box ID returns nothing", f"→ {r.status_code}")
             r = await bob.put("/api/boxes/TS-01/configuration", json={"lower_c": 1, "warning_c": 2, "upper_c": 3})
-            record("B-10", r.status_code == 404, "A user without the box cannot change its limits", f"bob PUT → {r.status_code}")
+            record("B-10", r.status_code == 404, "A user without the box cannot change its limits",
+                   f"bob PUT → {r.status_code}")
 
             # ---------- Device upload ----------
             r = await dev.post("/api/readings", json=reading(1, 20.0))
@@ -93,11 +101,13 @@ async def main():
             r = await dev.post("/api/readings", json=reading(1, 20.0), headers={"X-Device-Key": "x" * 40})
             record("B-12", r.status_code == 401, "Upload with a wrong key is refused", f"→ {r.status_code}")
             r = await dev.post("/api/readings", json=reading(1, 20.0, box="TS-02"), headers=device)
-            record("B-13", r.status_code == 403, "The device cannot upload for another box", f"→ {r.status_code} {r.json()}")
+            record("B-13", r.status_code == 403, "The device cannot upload for another box",
+                   f"→ {r.status_code} {r.json()}")
             bad = [
                 ("80.01°C", reading(2, 80.01)), ("-40.01°C", reading(2, -40.01)),
                 ("3 decimals", reading(2, 21.123)), ("extra field", reading(2, 21.0, extra_field=1)),
-                ("valid without temperature", reading(2, None)), ("sensor error with temperature", reading(2, 21.0, quality="sensor_error")),
+                ("valid without temperature", reading(2, None)),
+                ("sensor error with temperature", reading(2, 21.0, quality="sensor_error")),
                 ("sequence as text", reading("2", 21.0)), ("negative sequence", reading(-1, 21.0)),
                 ("observed_at without time zone", {**reading(2, 21.0), "observed_at": "2026-11-18T10:00:00"}),
             ]
@@ -105,14 +115,16 @@ async def main():
             for name, body in bad:
                 r = await dev.post("/api/readings", json=body, headers=device)
                 codes.append(f"{name}: {r.status_code}")
-            record("B-14", all(c.endswith("422") for c in codes), "Invalid uploads are rejected with 422", "; ".join(codes))
+            record("B-14", all(c.endswith("422") for c in codes), "Invalid uploads are rejected with 422",
+                   "; ".join(codes))
 
             # Future observation time (device clock wrong).
             future = reading(2, 21.0)
             future["observed_at"] = (datetime.now(UTC) + timedelta(days=2)).isoformat()
             r = await dev.post("/api/readings", json=future, headers=device)
             record("B-15", r.status_code == 422 if r.status_code != 200 else None,
-                   "An observation time two days in the future", f"→ {r.status_code} (accepted)" if r.status_code == 200 else f"→ {r.status_code}")
+                   "An observation time two days in the future",
+                   f"→ {r.status_code} (accepted)" if r.status_code == 200 else f"→ {r.status_code}")
             future_id = future["sample_id"]
 
             # ---------- Classification at the limits (FR-05: L=0, W=24, U=25) ----------
@@ -128,19 +140,23 @@ async def main():
             by_seq = {x["sequence_no"]: x["temperature_state"] for x in r.json()}
             for i, (temp, want) in enumerate(cases):
                 got.append(f"{temp}→{by_seq.get(10 + i)}" + ("" if by_seq.get(10 + i) == want else f" (want {want})"))
-            record("B-16", all("want" not in g for g in got), "Status at the exact limits follows FR-05", ", ".join(got))
+            record("B-16", all("want" not in g for g in got), "Status at the exact limits follows FR-05",
+                   ", ".join(got))
 
             # ---------- Retries and conflicts (FR-10) ----------
             body = reading(30, 22.0)
             a = await dev.post("/api/readings", json=body, headers=device)
             b = await dev.post("/api/readings", json=body, headers=device)
             record("B-17", a.status_code == b.status_code == 200 and a.json()["received_at"] == b.json()["received_at"],
-                   "An identical retry creates one reading and keeps its receipt time", f"{a.status_code}/{b.status_code}")
+                   "An identical retry creates one reading and keeps its receipt time",
+                   f"{a.status_code}/{b.status_code}")
             changed = {**body, "temperature_c": 23.0}
             r = await dev.post("/api/readings", json=changed, headers=device)
-            record("B-18", r.status_code == 409, "Same ID with a different temperature is a conflict", f"→ {r.status_code} {r.json()}")
+            record("B-18", r.status_code == 409, "Same ID with a different temperature is a conflict",
+                   f"→ {r.status_code} {r.json()}")
             r = await dev.post("/api/readings", json=reading(30, 22.0), headers=device)
-            record("B-19", r.status_code == 409, "A new ID with an existing sequence number is a conflict", f"→ {r.status_code} {r.json()}")
+            record("B-19", r.status_code == 409, "A new ID with an existing sequence number is a conflict",
+                   f"→ {r.status_code} {r.json()}")
 
             # Delayed upload: an old reading arrives after a newer one.
             await dev.post("/api/readings", json=reading(41, 21.0, minutes_ago=1), headers=device)
@@ -161,11 +177,15 @@ async def main():
             for body, name in invalid:
                 r = await alice.put("/api/boxes/TS-01/configuration", json=body)
                 codes.append(f"{name}: {r.status_code}")
-            record("B-21", all(c.endswith("422") for c in codes), "Limits in the wrong order are refused", "; ".join(codes))
-            r1 = await alice.put("/api/boxes/TS-01/configuration", json={"lower_c": 2, "warning_c": 20, "upper_c": 22, "source_note": "Exploratory test"})
-            r2 = await alice.put("/api/boxes/TS-01/configuration", json={"lower_c": 2, "warning_c": 20, "upper_c": 22, "source_note": "Exploratory test"})
+            record("B-21", all(c.endswith("422") for c in codes), "Limits in the wrong order are refused",
+                   "; ".join(codes))
+            r1 = await alice.put("/api/boxes/TS-01/configuration",
+                                 json={"lower_c": 2, "warning_c": 20, "upper_c": 22, "source_note": "Exploratory test"})
+            r2 = await alice.put("/api/boxes/TS-01/configuration",
+                                 json={"lower_c": 2, "warning_c": 20, "upper_c": 22, "source_note": "Exploratory test"})
             record("B-22", r1.status_code == 200 and r1.json()["profile_id"] == r2.json()["profile_id"],
-                   "Saving the same limits twice does not create a second profile", f"{r1.json()['profile_id'][:8]} / {r2.json()['profile_id'][:8]}")
+                   "Saving the same limits twice does not create a second profile",
+                   f"{r1.json()['profile_id'][:8]} / {r2.json()['profile_id'][:8]}")
             new_profile = r1.json()["profile_id"]
 
             # The device keeps sending the old profile ID: which limits apply?
@@ -177,16 +197,19 @@ async def main():
                    f"limits saved 2/20/22; reading 21.0°C stored with profile {x['profile']['profile_id'][:8]} "
                    f"(warning {x['profile']['warning_c']}, upper {x['profile']['upper_c']}) → {x['temperature_state']}; "
                    f"with the new limits it would be Warning")
-            r = await dev.post("/api/readings", json=reading(51, 21.0, profile=new_profile, minutes_ago=0.3), headers=device)
+            r = await dev.post("/api/readings", json=reading(51, 21.0, profile=new_profile, minutes_ago=0.3),
+                               headers=device)
             record("B-24", r.status_code == 200, "A reading sent with the new profile ID is accepted",
                    f"→ {r.status_code}, state {(await alice.get('/api/boxes/TS-01/readings/latest')).json()['temperature_state']}")
 
             # ---------- History filter ----------
             r = await alice.get("/api/boxes/TS-01/readings?start_date=2026-11-18&end_date=2026-11-17")
-            record("B-25", r.status_code == 422, "Start date after end date is refused", f"→ {r.status_code} {r.json()}")
+            record("B-25", r.status_code == 422, "Start date after end date is refused",
+                   f"→ {r.status_code} {r.json()}")
             r = await alice.get("/api/boxes/TS-01/readings?start_date=2026-11-18")
             record("B-26", r.status_code == 422, "Only one date is refused", f"→ {r.status_code}")
-            codes = [f"limit={v}: {(await alice.get(f'/api/boxes/TS-01/readings?limit={v}')).status_code}" for v in (0, 101, -1, 'abc')]
+            codes = [f"limit={v}: {(await alice.get(f'/api/boxes/TS-01/readings?limit={v}')).status_code}" for v in
+                     (0, 101, -1, 'abc')]
             record("B-27", all(c.endswith("422") for c in codes), "Bad limit values are refused", "; ".join(codes))
             # Unreliable clock: does it appear in a date filter?
             await dev.post("/api/readings", json=reading(60, 21.5, observed=False), headers=device)
@@ -198,7 +221,8 @@ async def main():
                    f"sequence 60 in latest list: {60 in [x['sequence_no'] for x in r_all.json()]}; in Today filter: {60 in seqs}")
             r = await alice.get(f"/api/boxes/TS-01/readings?limit=100&start_date={today}&end_date={today}")
             record("B-29", future_id not in [x["sample_id"] for x in r.json()] and
-                   any(x["sample_id"] == future_id for x in (await alice.get("/api/boxes/TS-01/readings?limit=100")).json()),
+                   any(x["sample_id"] == future_id for x in
+                       (await alice.get("/api/boxes/TS-01/readings?limit=100")).json()),
                    "A reading with a future time stays out of Today but is in the plain list",
                    "future reading (+2 days) appears only without a date filter")
 

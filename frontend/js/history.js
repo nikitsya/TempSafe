@@ -835,7 +835,8 @@ function saveRange(range) {
     if (range.key !== 'date' && range.key !== 'today' && range.key !== 'hour') return;
     try {
         sessionStorage.setItem(RANGE_KEY, JSON.stringify(range));
-    } catch (error) { /* storage off: each page starts at Today */ }
+    } catch (error) { /* storage off: each page starts at Today */
+    }
 }
 
 (function readSavedRange() {
@@ -845,7 +846,8 @@ function saveRange(range) {
         if (saved && saved.key === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(saved.date)) {
             currentRange = {key: 'date', date: saved.date};
         }
-    } catch (error) { /* keep Today */ }
+    } catch (error) { /* keep Today */
+    }
 })();
 
 // Opened with View from an alert: ?from=…&to=… (milliseconds) shows that time.

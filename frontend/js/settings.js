@@ -293,7 +293,7 @@ function renderNotifications() {
             </button>
         </div>
         ${disabled ? `<p class="muted switch-help" id="notify-help">${NOTIFY_HELP[state]}</p>`
-            : `<p class="muted switch-help" id="notify-why">${on ? NOTIFY_WHY.on : NOTIFY_WHY.off}</p>`}`;
+        : `<p class="muted switch-help" id="notify-why">${on ? NOTIFY_WHY.on : NOTIFY_WHY.off}</p>`}`;
 
     const toggle = document.getElementById('notify-switch');
     toggle.addEventListener('click', async () => {

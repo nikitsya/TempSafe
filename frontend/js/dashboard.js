@@ -222,7 +222,12 @@ function noAccessState() {
 // then a "Last hour" chart. The red alert banner stays on top.
 // "16 Nov 2026" in Irish time.
 function dayLabel(date) {
-    return date.toLocaleDateString('en-IE', {day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/Dublin'});
+    return date.toLocaleDateString('en-IE', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'Europe/Dublin'
+    });
 }
 
 function todayLabel() {
@@ -281,7 +286,7 @@ function todayTiles(reading) {
     }
     const range = low !== null
         ? `<span class="range-pair"><span><small>Min</small> ${num(low)}<small>°C</small></span>` +
-          `<span><small>Max</small> ${num(high)}<small>°C</small></span></span>` : '—';
+        `<span><small>Max</small> ${num(high)}<small>°C</small></span></span>` : '—';
     const alerts = todayStats ? String(todayStats.alerts) : '—';
     const alertSub = todayStats && todayStats.lastAlert ? `last at ${formatClock(todayStats.lastAlert)}` : 'none today';
     // Not today: show the date as well, so "19:18" is not read as today or yesterday (T1-04).
