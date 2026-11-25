@@ -1,32 +1,42 @@
 # Raspberry Pi device scripts
 
-These scripts run on Raspberry Pi 5 connected to the SCD41 sensor and
-single-colour LED and passive buzzer. They are separate from the FastAPI backend.
+These scripts run on Raspberry Pi 5 with an SCD41 inside sensor, an AM2302
+outside sensor, a single-colour LED and a passive buzzer. They are separate
+from the FastAPI backend.
 
 ## Files
 
 | File                      | Purpose                                                                                                                        | Run directly?                    |
 |---------------------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
 | `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.         | Yes                              |
+| `external_temperature_readings.py` | Reads the outside AM2302 and saves readings or sensor errors to the same SQLite queue. | Yes |
 | `database.py`             | Configures the SQLite connection and SQLAlchemy sessions.                                                                      | No; imported by the other files. |
-| `models.py`               | Defines the `readings` table for SQLAlchemy.                                                                                   | No; imported by the main script. |
+| `models.py`               | Defines the readings and device configuration tables.                                                                         | No; imported by other files. |
+| `configuration.py`        | Validates and stores the active temperature profile.                                                                          | No; imported by other files. |
+| `observation_clock.py`    | Checks clock synchronisation before recording an observation time.                                                             | No; imported by the sensor scripts. |
+| `device_check.py`         | Inspects the queue and saved configuration; can back up and upgrade an existing queue.                                         | Yes |
 | `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds.  | Yes                              |
 | `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                      | Yes                              |
 | `mqtt_publisher.py`       | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements. | Yes                              |
 
-Keep `temperature_readings.py`, `database.py` and `models.py` in the same
-directory when copying them to the Raspberry Pi.
+Keep the production files `temperature_readings.py`, `external_temperature_readings.py`,
+`mqtt_publisher.py`, `database.py`, `models.py`, `configuration.py`,
+`observation_clock.py` and `device_check.py` in the same directory when copying
+them to the Raspberry Pi.
 
 ## Before running
 
 - Use the Raspberry Pi Python environment configured for the hardware tests.
 - Enable I2C and connect the SCD41 to the Pi's I2C pins.
+- Connect the AM2302 data line to BCM GPIO4 (physical pin 7), with a pull-up
+  resistor to 3.3 V. See the [wiring record](../docs/hardware/prototype-wiring.md).
 - The tested LED connection uses BCM GPIO18 (physical pin 12), a 220 ohm
   series resistor and GND (physical pin 14).
 - The tested passive buzzer uses BCM GPIO17 (physical pin 11), two 220 ohm
   resistors in series (440 ohms total) and a shared ground connection.
 - Required Python packages are `gpiozero`, `adafruit-blinka` (provides
-  `board`), `adafruit-circuitpython-scd4x`, SQLAlchemy 2.x, aiosqlite and paho-mqtt.
+  `board`), `adafruit-circuitpython-scd4x`, `adafruit-circuitpython-dht`,
+  SQLAlchemy 2.x, aiosqlite and paho-mqtt. Python 3.11 or newer is required.
   The hardware libraries also require the appropriate Raspberry Pi system
   configuration; installing Python packages on Windows does not provide
   access to the Pi's GPIO or I2C hardware.
@@ -52,10 +62,15 @@ For MQTT support:
 python -m pip install "paho-mqtt>=2,<3"
 ```
 
-Run only one hardware script at a time.
-The MQTT publisher runs separately and may run at the same time as temperature_readings.py.
-Stop a running script with `Ctrl+C`
-before starting another.
+For the outside sensor:
+
+```bash
+python -m pip install adafruit-circuitpython-dht
+```
+
+Run the inside logger, outside logger and MQTT publisher in separate terminals.
+Do not run a second copy of a logger or a standalone test that uses the same
+hardware at the same time. Stop a running script with `Ctrl+C`.
 
 ## Main temperature logger
 
@@ -68,20 +83,21 @@ Existing records are retained. It waits for sensor data and pauses for
 30 seconds after each reading or handled sensor read error; this is not
 an exact fixed-rate scheduler.
 
-| State             | Current code condition                                   | LED                                           |
+| State             | Condition using the active profile                       | LED                                           |
 |-------------------|----------------------------------------------------------|-----------------------------------------------|
-| Normal            | Above 0 and below 24 degrees C                           | Off                                           |
-| Warning           | 24 through 25 degrees C, inclusive                       | Steadily lit                                  |
-| Alert             | At or below 0, or above 25 degrees C                     | Steadily lit                                  |
+| Normal            | Above lower and below warning                            | Off                                           |
+| Warning           | At or above warning and at or below upper                | Steadily lit                                  |
+| Alert             | At or below lower, or above upper                        | Steadily lit                                  |
 | Sensor read error | An exception occurs while checking or reading the sensor | Two short flashes, followed by the loop pause |
 
-These are the prototype's configured thresholds, not a determination that
-medicines are suitable for use.
+The initial default profile uses 0, 24 and 25 degrees C for lower, warning and
+upper respectively. The backend can update the active profile via MQTT; the
+last accepted profile is saved locally and used without a network connection.
+These thresholds do not determine whether medicines are suitable for use.
 
 On Alert, an asynchronous task drives the passive buzzer at 500 Hz with
 50% PWM duty cycle: one second of sound followed by two seconds of silence.
-Normal, Warning and handled sensor read errors disable repetition; a tone
-already in progress can finish its remaining fraction of a second.
+Normal, Warning and handled sensor read errors disable the buzzer.
 Temperature changes are acted on when the next reading is processed.
 The buzzer runs locally without a network dependency. `Ctrl+C` during the
 measurement loop stops the task and switches off and releases both outputs.
@@ -112,19 +128,26 @@ The publisher:
 
 The local SQLite database therefore acts as an offline queue between the sensor process and MQTT transmission.
 
-## Running the logger and publisher together
+The publisher also subscribes to `tempsafe/boxes/TS-01/configuration`.
+It validates the box ID, profile ID and ordered finite limits before saving the
+profile in the local `device_configuration` table. Invalid messages are ignored.
+`Active configuration updated: ...` confirms a profile was saved locally. The
+inside logger reads the saved profile for subsequent measurements and LED/buzzer
+decisions; the outside logger also uses its profile ID for new samples. During
+an outage the last saved profile remains available. See the
+[MQTT configuration contract](../docs/operations/mqtt.md#device-threshold-configuration-contract).
 
-Open two SSH terminals.
+Both sensors write separate rows to `readings`, identified by `sensor_location`
+(`inside` or `outside`) and sharing the sequence counter. Only inside readings
+control the LED and buzzer. Unconfirmed records remain in the queue until the
+server confirms storage.
 
-In the first terminal, start temperature collection:
+## Running both loggers and the publisher
 
-```bash
-cd /home/user/scd41
-source .venv/bin/activate
-python temperature_readings.py
-```
+Open three SSH terminals. Start the publisher first so it can receive the active
+configuration. Each terminal needs its own activated environment.
 
-In the second terminal, activate the same environment and provide the MQTT password:
+In the first terminal, provide the MQTT password and start the publisher:
 
 ```bash
 cd /home/user/scd41
@@ -133,6 +156,22 @@ read -s -p "MQTT password: " MQTT_PASSWORD
 echo
 export MQTT_PASSWORD
 python mqtt_publisher.py
+```
+
+In the second terminal, start the inside logger:
+
+```bash
+cd /home/user/scd41
+source .venv/bin/activate
+python temperature_readings.py
+```
+
+In the third terminal, start the outside logger:
+
+```bash
+cd /home/user/scd41
+source .venv/bin/activate
+python external_temperature_readings.py
 ```
 
 The MQTT password is entered without being displayed on the screen. It is not stored in the source code and is available
@@ -146,16 +185,28 @@ Server confirmed storage: ...
 
 means that the backend has confirmed that the reading was stored.
 
-Stop either process with Ctrl+C in its corresponding terminal.
+Stop each process with Ctrl+C in its corresponding terminal.
+
+To inspect an existing queue and its saved profile in another Pi terminal:
+
+```bash
+cd /home/user/scd41
+source .venv/bin/activate
+python device_check.py
+```
+
+The output includes per-sensor counts, pending readings and `Saved configuration`.
+For an older queue, stop all device processes before using
+`python device_check.py --upgrade`; this creates a backup before migration.
 
 ## Current limitations
 
 - Sensor initialisation failures occur before the loop and are not recorded
   by its error handler.
-- Timestamps use the Pi's system clock in UTC. `clock_reliable` is currently
-  set to 1 without an independent clock synchronisation check.
-- `BOX_ID` and `PROFILE_ID` are configured in the script and must match the
-  intended backend records before integration.
+- Observation times use the Pi's UTC clock only when `timedatectl` reports it
+  synchronised; otherwise the attempt is saved without an observation time.
+- The device box ID and initial default profile must match the intended backend
+  records. Later valid profiles can be received through MQTT.
 - MQTT publishing is implemented, but automatic startup after Raspberry Pi reboot is not yet configured.
 - Manual buzzer silencing is not implemented, so FR-15 is only partially
   implemented. Stopping the whole script is not a substitute for a silence control.
@@ -189,5 +240,4 @@ and releases it when the test finishes.
 - [LED tests](../docs/testing/hardware/led-patterns.md)
 - [Temperature-triggered buzzer test](../docs/testing/hardware/buzzer-alert.md)
 
-The sensor error test used a temporary software exception. Normal readings
-were verified after removing that exception and restarting the script.
+The SCD41 test record includes a simulated error and a physical disconnection check.
