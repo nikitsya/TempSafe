@@ -8,3 +8,6 @@ GRANT SELECT, UPDATE (name) ON temsafe.boxes TO 'tempsafe_runtime'@'%';
 GRANT SELECT, INSERT ON temsafe.temperature_samples TO 'tempsafe_runtime'@'%';
 GRANT SELECT, INSERT ON temsafe.threshold_profiles TO 'tempsafe_runtime'@'%';
 GRANT SELECT, INSERT, UPDATE (profile_id, applied_profile_id) ON temsafe.box_configuration TO 'tempsafe_runtime'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE ON temsafe.push_subscriptions TO 'tempsafe_runtime'@'%';
+GRANT SELECT, INSERT, UPDATE ON temsafe.push_box_state TO 'tempsafe_runtime'@'%';
+GRANT SELECT, INSERT, UPDATE ON temsafe.push_deliveries TO 'tempsafe_runtime'@'%';

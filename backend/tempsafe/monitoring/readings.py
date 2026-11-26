@@ -7,6 +7,8 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tempsafe.db.models import Box, TemperatureSample, ThresholdProfile
+from tempsafe.monitoring.freshness import classify_freshness
+from tempsafe.monitoring.push import record_transition
 from tempsafe.schemas import ReadingCreate
 
 
@@ -58,7 +60,13 @@ async def save_reading(db: AsyncSession, reading: ReadingCreate) -> TemperatureS
             raise ValueError("Observation time is outside the MySQL DATETIME range")
         values["observed_at"] = observed_at
 
-    result = await db.execute(select(Box).where(Box.box_id == reading.box_id))
+    received_at = datetime.now(UTC).replace(tzinfo=None)
+    track_state = (reading.sensor_location == "inside" and reading.quality == "valid"
+                   and classify_freshness(values["observed_at"], reading.clock_reliable, received_at) == "fresh")
+    box_query = select(Box).where(Box.box_id == reading.box_id)
+    if track_state:
+        box_query = box_query.with_for_update()
+    result = await db.execute(box_query)
     if result.scalars().first() is None:
         raise ReadingReferenceNotFound("Box not found")
 
@@ -66,7 +74,8 @@ async def save_reading(db: AsyncSession, reading: ReadingCreate) -> TemperatureS
         ThresholdProfile.profile_id == values["profile_id"],
         ThresholdProfile.box_id == reading.box_id,
     ))
-    if result.scalars().first() is None:
+    profile = result.scalars().first()
+    if profile is None:
         raise ReadingReferenceNotFound("Temperature profile not found for this box")
 
     existing = await _find_existing(db, values)
@@ -74,10 +83,13 @@ async def save_reading(db: AsyncSession, reading: ReadingCreate) -> TemperatureS
         return _matching_retry(existing, values)
 
     # Receipt time belongs to the server, not the device, and stays unchanged on retries.
-    sample = TemperatureSample(**values, received_at=datetime.now(UTC).replace(tzinfo=None))
+    sample = TemperatureSample(**values, received_at=received_at)
 
     try:
         db.add(sample)
+        if track_state:
+            await db.flush()
+            await record_transition(db, sample, profile)
         await db.commit()
     except IntegrityError as error:
         await db.rollback()
