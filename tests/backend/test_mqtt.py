@@ -123,8 +123,11 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
         mqtt.client.subscribe = Mock()
         for _ in range(2):
             mqtt.client.on_connect(0, 0, {})
-        assert mqtt.client.subscribe.call_count == 2
-        subscription = mqtt.client.subscribe.call_args.args[0]
+        assert mqtt.client.subscribe.call_count == 4
+        first, applied, again, applied_again = [call.args[0] for call in mqtt.client.subscribe.call_args_list]
+        assert first.topic == again.topic
+        assert applied.topic == applied_again.topic == "tempsafe/boxes/TS-01/configuration/applied"
+        subscription = first
         assert subscription.topic == "tempsafe/boxes/TS-01/readings"
         assert subscription.retain_as_published
         client = mqtt.client

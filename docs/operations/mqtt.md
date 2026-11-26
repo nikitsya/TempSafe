@@ -46,7 +46,7 @@ It predates the FastMQTT deployment and does not verify the current ingestion se
   TLS, device credentials and topic ACLs remain mandatory. See [network rules](deployment.md#network-access).
 
 The broker ACL is the identity boundary: the subscriber cannot see the original publisher's username.
-Only the assigned device account must have write permission for its readings topic.
+Grant write access to each readings topic only to the device account assigned to that box.
 The subscriber additionally checks that the payload's box ID matches that topic.
 
 ## Message contract
@@ -74,7 +74,7 @@ After a database commit, or an identical retry of a stored record, the subscribe
 ```
 
 The device must subscribe before publishing and keep its SQLite record pending until it receives
-this acknowledgement for that sample ID. MQTT PUBACK only confirms broker receipt, not database storage.
+this acknowledgement for that sample ID. The MQTT `PUBACK` packet confirms that the broker received the message.
 If the application acknowledgement is missing, retry with bounded backoff and the unchanged payload,
 including observation time, sample ID, profile ID and sequence number. Reconnect and resubscribe after
 network loss, and retry pending records after either device or subscriber restarts.
@@ -88,8 +88,7 @@ generating replacement identifiers. Retained messages are not supported for read
 ## Device threshold configuration contract
 
 After the configuration API commits a selected profile, the backend requests publication to
-`tempsafe/boxes/{box_id}/configuration`. The payload matches the device implementation in
-[`feature/device-configuration-sync`](https://github.com/nikitsya/TempSafe/tree/feature/device-configuration-sync):
+`tempsafe/boxes/{box_id}/configuration`. The Pi validates this version 1 payload:
 
 ```json
 {
@@ -117,29 +116,31 @@ with concurrent settings changes. A missing box or selection produces no configu
 
 `PUT /api/boxes/{box_id}/configuration` confirms database storage, not device adoption. An MQTT
 failure does not roll back that commit. With MQTT disabled, the worker does not run. The API can
-manage other boxes, but this instance publishes only for its configured box. There is no separate
-device configuration acknowledgement; use the new sample's `profile_id` and the device's saved
-profile and outputs during integration checks. The readings and storage acknowledgement contract
-is unchanged.
+manage other boxes, but this instance publishes only for its configured box. After committing the profile in SQLite, the Pi publishes a QoS 1, non-retained
+confirmation to `tempsafe/boxes/{box_id}/configuration/applied`. The JSON contains
+`schema_version: 1`, `box_id` and `profile_id`. The backend records a matching
+confirmation in `box_configuration.applied_profile_id`. NULL means no selection
+has been confirmed. Duplicate confirmations are idempotent. A late confirmation
+for a superseded selection cannot overwrite the latest confirmed selection.
+The periodic configuration publication and retained delivery on reconnect allow
+the device to repeat its confirmation after a failed write or a lost message.
 
 ### Configuration rollout
 
-1. Review the compatible device changes and backend changes together. The separate device package
-   stores the active profile locally for inside alarms and new samples from both sensors.
-   Its integration belongs to the hardware owner; those files are not in this backend change.
-2. Back up the broker's active ACL file, locate its existing user entries and add read access to
-   the configuration topic for `device-TS-01` and write access for `backend-ingest`. See
-   [`deploy/mosquitto.acl.example`](../../deploy/mosquitto.acl.example) for the complete topic rules.
-   Merge the additions into the active ACL rather than replacing unrelated accounts or rules.
-   Reload Mosquitto and verify both permissions. Do this before starting the new Pi publisher:
-   its combined acknowledgement/configuration subscription must succeed before it sends readings.
-3. Deploy the reviewed backend revision using the existing application update procedure. No
-   configuration-specific migration is required when `box_configuration` already exists; dual-sensor
-   ingestion additionally requires migration 007. Enable MQTT and retain
-   the existing single-worker setup and TLS configuration.
+1. Back up the database. Apply [migration 008](../../database/migrations/008_add_applied_profile.sql)
+   once to an existing schema. The fresh baseline includes the column.
+   Run the updated [runtime grants](../../database/operations/runtime-grants.sql)
+   as the database administrator so FastAPI can update the confirmation.
+2. Merge the [per-box ACL rules](../../deploy/mosquitto.acl.example) into the
+   broker's existing user entries and reload Mosquitto. Only the assigned device
+   may publish confirmations for its box. The backend subscribes to that topic.
+3. Deploy the matching backend and restart its single worker with MQTT enabled.
 4. Deploy the compatible Pi subscriber and logger together. Change the limits through Settings
    and verify the retained JSON, the saved Pi profile, LED/buzzer behaviour and new readings with
-   the selected `profile_id`. Old readings must retain their original profiles.
+   the selected `profile_id`. Compare the requested and confirmed IDs with
+   `SELECT profile_id, applied_profile_id FROM box_configuration WHERE box_id='TS-01'`.
+   Capture an older buffered sample's ID and profile before reconnecting, then
+   check the same pair in backend history. Restore the previous limits after the drill.
 5. With the Pi disconnected, change the limits again. Reconnect and verify it receives the latest
    configuration. Restart the Pi and check its saved limits. In an isolated environment, also test
    a broker outage during an API save, backend restart and two rapid settings changes; the final
@@ -210,16 +211,17 @@ sudo systemctl disable --now tempsafe-mqtt.service
 
 If systemd reports that the old unit does not exist, continue. Do not run both consumers.
 Edit `/etc/systemd/system/tempsafe.service.d/mqtt.conf` with `sudoedit` to match the following
-override. On a new host, create the `tempsafe.service.d` directory first:
+override. On a new host, create the `tempsafe.service.d` directory first. The empty
+`ExecStart=` clears the inherited command so the next line can set the replacement.
 
-```ini
+```text
 [Service]
-EnvironmentFile = /etc/tempsafe/mqtt.env
-Environment = MQTT_ENABLED=true
-ExecStart =
-ExecStart = /home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn tempsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
-Restart = on-failure
-RestartSec = 5
+EnvironmentFile=/etc/tempsafe/mqtt.env
+Environment=MQTT_ENABLED=true
+ExecStart=
+ExecStart=/home/ubuntu/Smart-Box/.venv/bin/python -m uvicorn tempsafe.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=5
 ```
 
 Keep the existing working directory and database environment settings. Use exactly one Uvicorn worker

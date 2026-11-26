@@ -97,3 +97,33 @@ async def test_publisher_reads_the_selected_profile_from_mysql(configured_api):
             "schema_version": 1, "box_id": box_id, "profile_id": response.json()["profile_id"],
             "lower_c": "0.00", "warning_c": "24.00", "upper_c": upper,
         }
+
+
+async def test_only_current_device_confirmation_changes_applied_profile(configured_api, monkeypatch):
+    from tempsafe import mqtt
+
+    client, db, box_id = configured_api
+    monkeypatch.setenv("MQTT_BOX_ID", box_id)
+    monkeypatch.setenv("MQTT_ENABLED", "true")
+    monkeypatch.setenv("TEMPSAFE_LOCAL_MQTT", "1")
+    monkeypatch.setattr(mqtt, "AsyncSessionLocal", async_sessionmaker(
+        bind=await db.connection(), join_transaction_mode="create_savepoint",
+    ))
+    broker = mqtt.create_mqtt()
+    topic = f"tempsafe/boxes/{box_id}/configuration/applied"
+    path = f"/api/boxes/{box_id}/configuration"
+    first = (await client.put(path, json=SETTINGS)).json()["profile_id"]
+
+    async def report(profile_id, retained=False, **changes):
+        payload = {"schema_version": 1, "box_id": box_id, "profile_id": profile_id} | changes
+        await broker.client.on_message(topic, json.dumps(payload).encode(), 1, {"retain": retained})
+        return await db.scalar(select(BoxConfiguration.applied_profile_id).where(BoxConfiguration.box_id == box_id))
+
+    assert await report(first, retained=True) is None
+    assert await report(first, box_id="other-box") is None
+    assert await report(first, schema_version=True) is None
+    assert await report(first) == first
+    second = (await client.put(path, json=SETTINGS | {"upper_c": "26"})).json()["profile_id"]
+    assert await report(first) == first
+    assert await report(second) == second
+    assert await report(first) == second

@@ -7,4 +7,4 @@ GRANT SELECT, INSERT, DELETE ON temsafe.user_sessions TO 'tempsafe_runtime'@'%';
 GRANT SELECT, UPDATE (name) ON temsafe.boxes TO 'tempsafe_runtime'@'%';
 GRANT SELECT, INSERT ON temsafe.temperature_samples TO 'tempsafe_runtime'@'%';
 GRANT SELECT, INSERT ON temsafe.threshold_profiles TO 'tempsafe_runtime'@'%';
-GRANT SELECT, INSERT, UPDATE (profile_id) ON temsafe.box_configuration TO 'tempsafe_runtime'@'%';
+GRANT SELECT, INSERT, UPDATE (profile_id, applied_profile_id) ON temsafe.box_configuration TO 'tempsafe_runtime'@'%';

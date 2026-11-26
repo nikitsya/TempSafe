@@ -125,7 +125,12 @@ class BoxConfiguration(Base):
             ["profile_id", "box_id"],
             ["threshold_profiles.profile_id", "threshold_profiles.box_id"],
         ),
+        ForeignKeyConstraint(
+            ["applied_profile_id", "box_id"],
+            ["threshold_profiles.profile_id", "threshold_profiles.box_id"],
+        ),
     )
 
+    applied_profile_id: Mapped[str | None] = mapped_column(CHAR(36))
     box_id: Mapped[str] = mapped_column(ForeignKey("boxes.box_id"), primary_key=True)
     profile_id: Mapped[str] = mapped_column(CHAR(36))

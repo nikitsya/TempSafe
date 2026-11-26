@@ -49,3 +49,7 @@ python -m pytest tests/backend/test_save_reading.py -v
 
 A successful run has no failures or errors. If a test fails, inspect the error and
 check the database connection, table setup and selected Python environment.
+
+Run the backend confirmation tests with `python -m pytest tests/backend`.
+For physical Pi reconnect, restart and output checks, follow the
+[configuration rollout](../../docs/operations/mqtt.md#configuration-rollout).

@@ -4,8 +4,7 @@ A signed-in user can set temperature limits for their assigned box. When MQTT is
 enabled, the backend publishes the selected profile for `MQTT_BOX_ID` using the
 [device configuration contract](../operations/mqtt.md#device-threshold-configuration-contract).
 Saving this configuration does not prove that the device has received or adopted it.
-The Pi needs the compatible configuration subscriber; the device scripts on this
-branch still use local constants.
+The Pi publisher saves validated limits in SQLite and reports the applied profile after commit.
 
 ## Access and setup
 
@@ -68,7 +67,7 @@ API while reading and queuing publication, so concurrent settings changes cannot
 queue an older profile after a newer one. Run one backend worker as documented.
 
 The selected profile in `box_configuration` is the durable source for retries;
-there is no new migration. Publication repeats on connection and every 30 seconds,
+the device confirmation column is added separately by migration 008. Publication repeats on connection and every 30 seconds,
 including after a failed attempt or lost broker retained state. Each attempt has
 a 10-second timeout. A failed MQTT attempt does not undo saved settings. With
 `MQTT_ENABLED=false`, settings are saved without publication; enabling MQTT later
@@ -78,8 +77,9 @@ this backend instance, even if the API manages other boxes.
 Old profiles are never updated or deleted by these endpoints. Each sample retains
 its recorded profile, so latest-reading classification remains historical even
 when the user selects different limits. Delayed uploads using an older valid
-profile remain accepted. There is no device acknowledgement or configuration audit
-of individual operators in this feature.
+profile remain accepted. The device confirmation is stored separately in `box_configuration.applied_profile_id`.
+It starts as NULL and retains the last confirmed selection while a new one is pending.
+An operator can compare both columns after the Pi receives the updated limits.
 
 ## Verification
 

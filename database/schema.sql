@@ -95,6 +95,9 @@ CREATE TABLE box_configuration
 (
     box_id     VARCHAR(64) CHARACTER SET ascii COLLATE ascii_bin PRIMARY KEY,
     profile_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    applied_profile_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
+    CONSTRAINT fk_configuration_applied FOREIGN KEY (applied_profile_id, box_id)
+        REFERENCES threshold_profiles (profile_id, box_id),
     CONSTRAINT fk_configuration_box FOREIGN KEY (box_id) REFERENCES boxes (box_id),
     CONSTRAINT fk_configuration_profile_box FOREIGN KEY (profile_id, box_id)
         REFERENCES threshold_profiles (profile_id, box_id)

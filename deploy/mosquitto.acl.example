@@ -5,7 +5,10 @@ topic write tempsafe/boxes/TS-01/readings
 topic read tempsafe/boxes/TS-01/acks
 topic read tempsafe/boxes/TS-01/configuration
 
+topic write tempsafe/boxes/TS-01/configuration/applied
+
 user backend-ingest
 topic read tempsafe/boxes/TS-01/readings
 topic write tempsafe/boxes/TS-01/acks
 topic write tempsafe/boxes/TS-01/configuration
+topic read tempsafe/boxes/TS-01/configuration/applied

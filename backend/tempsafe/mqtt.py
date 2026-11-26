@@ -8,8 +8,13 @@ import re
 import ssl
 
 from fastapi_mqtt import FastMQTT, MQTTConfig
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, StrictInt
+from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError
 
+from tempsafe.db.models import BoxConfiguration
 from tempsafe.db.session import AsyncSessionLocal
 from tempsafe.monitoring.readings import save_reading
 from tempsafe.schemas import ReadingCreate
@@ -17,6 +22,13 @@ from tempsafe.settings import project_setting
 
 LOGGER = logging.getLogger(__name__)
 MAX_PAYLOAD_BYTES = 4096
+
+
+class AppliedConfiguration(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    schema_version: StrictInt
+    box_id: str
+    profile_id: UUID
 
 
 class ReadingConsumer:
@@ -100,6 +112,28 @@ def create_mqtt():
                     LOGGER.warning("MQTT disconnected before acknowledgement; device must retry")
                     return
                 client.publish(consumer.acks_topic, acknowledgement, qos=1, retain=False)
+
+    applied_topic = f"tempsafe/boxes/{consumer.box_id}/configuration/applied"
+
+    @mqtt.subscribe(applied_topic, qos=1, retain_as_published=True)
+    async def confirm_profile(client, topic, payload, qos, properties):
+        if topic != applied_topic or (properties or {}).get("retain") or len(payload) > MAX_PAYLOAD_BYTES:
+            return
+        try:
+            report = AppliedConfiguration.model_validate_json(payload)
+            if report.schema_version != 1 or report.box_id != consumer.box_id:
+                return
+            profile_id = str(report.profile_id)
+            async with AsyncSessionLocal.begin() as db:
+                # A delayed confirmation cannot override a newer selection.
+                await db.execute(update(BoxConfiguration).where(
+                    BoxConfiguration.box_id == consumer.box_id,
+                    BoxConfiguration.profile_id == profile_id,
+                ).values(applied_profile_id=profile_id))
+        except ValueError:
+            LOGGER.warning("Rejected invalid MQTT configuration confirmation")
+        except SQLAlchemyError:
+            LOGGER.error("Could not record confirmation; periodic configuration delivery will retry")
 
     @mqtt.on_subscribe()
     def subscribed(client, mid, granted_qos, properties):
