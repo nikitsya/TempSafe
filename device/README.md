@@ -132,6 +132,11 @@ The publisher also subscribes to `tempsafe/boxes/TS-01/configuration`.
 It validates the box ID, profile ID and ordered finite limits before saving the
 profile in the local `device_configuration` table. Invalid messages are ignored.
 `Active configuration updated: ...` confirms a profile was saved locally. The
+publisher then sends the saved profile ID to
+`tempsafe/boxes/TS-01/configuration/applied` with QoS 1. If the MQTT client
+cannot queue that message, the device retries; queueing alone does not confirm
+that the backend received it. Deployment requires backend support and permission
+to publish to this topic. The
 inside logger reads the saved profile for subsequent measurements and LED/buzzer
 decisions; the outside logger also uses its profile ID for new samples. During
 an outage the last saved profile remains available. See the

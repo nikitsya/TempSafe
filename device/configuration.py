@@ -54,6 +54,8 @@ def configuration_from_payload(payload):
         if values.get("box_id") != BOX_ID:
             raise ValueError("Configuration is for a different box")
 
+        if not isinstance(values.get("profile_id"), str):
+            raise ValueError("Invalid profile ID")
         profile_id = str(UUID(values["profile_id"]))
         limits = []
         for name in ("lower_c", "warning_c", "upper_c"):

@@ -103,8 +103,8 @@ def on_message(client, userdata, message):
     acknowledgements.put(sample_id)
 
 
-async def apply_pending_configuration_updates():
-    """Keep the newest configuration pending until its local transaction succeeds."""
+async def apply_pending_configuration_updates(client):
+    """Save the newest configuration and queue its confirmation for delivery."""
     global pending_configuration
     while True:
         try:
@@ -119,7 +119,13 @@ async def apply_pending_configuration_updates():
         print("Configuration was not saved; will retry:", error)
         return
     print("Active configuration updated:", pending_configuration.profile_id)
-    pending_configuration = None
+    result = client.publish(
+        f"{CONFIGURATION_TOPIC}/applied",
+        json.dumps({"schema_version": 1, "box_id": BOX_ID, "profile_id": pending_configuration.profile_id}),
+        qos=1, retain=False,
+    )
+    if result.rc == mqtt.MQTT_ERR_SUCCESS:
+        pending_configuration = None
 
 
 def make_payload(reading):
@@ -216,7 +222,7 @@ async def send_and_wait(client, sample_id, payload):
 
     while subscription_ready.is_set():
         # Apply limits even while waiting for a delayed sample acknowledgement.
-        await apply_pending_configuration_updates()
+        await apply_pending_configuration_updates(client)
         remaining = deadline - monotonic()
         if remaining <= 0:
             break
@@ -247,7 +253,7 @@ async def main():
 
     try:
         while True:
-            await apply_pending_configuration_updates()
+            await apply_pending_configuration_updates(client)
 
             if not subscription_ready.is_set():
                 await asyncio.sleep(1)
