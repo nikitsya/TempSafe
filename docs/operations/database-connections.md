@@ -171,3 +171,6 @@ Use an authorised SSH session to confirm:
    systemd timer checks are recorded above.
 
 This documentation change does not change server settings or introduce a backup job.
+
+The [25 November recovery drill](database-recovery.md) records the subsequent
+production runtime-account change, encrypted off-server backup and verified restore.
