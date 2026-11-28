@@ -54,7 +54,15 @@ class Subscription(BaseModel):
     keys: BrowserKeys
 
 
-@router.get("/public-key")
+class PushPublicKeyResponse(BaseModel):
+    application_server_key: str = Field(alias="applicationServerKey")
+
+
+class PushSubscriptionResponse(BaseModel):
+    id: str
+
+
+@router.get("/public-key", response_model=PushPublicKeyResponse)
 def public_key(session: CurrentSession):
     key = os.getenv("WEB_PUSH_PUBLIC_KEY")
     if not key or not os.getenv("WEB_PUSH_PRIVATE_KEY") or not os.getenv("WEB_PUSH_SUBJECT"):
@@ -62,7 +70,7 @@ def public_key(session: CurrentSession):
     return {"applicationServerKey": key}
 
 
-@router.post("/subscriptions")
+@router.post("/subscriptions", response_model=PushSubscriptionResponse)
 async def register(subscription: Subscription, session: CurrentSession, db: Database):
     public_key(session)
     if not allowed_endpoint(subscription.endpoint):

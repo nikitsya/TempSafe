@@ -50,11 +50,25 @@ async def setup_push(client, db, monkeypatch):
     return login, user, other, body, reading
 
 
+@pytest.mark.parametrize(("path", "method", "field"), [
+    ("/api/push/public-key", "get", "applicationServerKey"),
+    ("/api/push/subscriptions", "post", "id"),
+])
+async def test_push_response_schema(client, path, method, field):
+    spec = (await client.get("/openapi.json")).json()
+    response = spec["paths"][path][method]["responses"]["200"]
+    schema_ref = response["content"]["application/json"]["schema"]["$ref"]
+    schema = spec["components"]["schemas"][schema_ref.rsplit("/", 1)[-1]]
+    assert schema["required"] == [field]
+    assert schema["properties"][field]["type"] == "string"
+
+
 async def test_manage_subscriptions(setup_push, client, db):
     login, user, other, body, _ = setup_push
     path = "/api/push/subscriptions"
     assert (await client.post(path, json=body)).status_code == 401
     await login(user)
+    assert (await client.get("/api/push/public-key")).json() == {"applicationServerKey": "test"}
     assert (await client.post(path, json=body | {"endpoint": "https://other.example/id"})).status_code == 422
     result = await client.post(path, json=body)
     assert result.status_code == 200
