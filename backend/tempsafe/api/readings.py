@@ -1,6 +1,6 @@
 """Routes for storing and retrieving temperature readings."""
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
@@ -14,11 +14,13 @@ from tempsafe.schemas import ReadingCreate, ReadingResponse, SensorLocation
 
 router = APIRouter(tags=["Readings"])
 
-
-@router.post("/readings", response_model=ReadingResponse, responses={
+POST_READING_RESPONSES: dict[int | str, dict[str, Any]] = {
     404: {"description": "Box or temperature profile not found"},
     409: {"description": "Sample identifiers conflict with an existing reading"},
-})
+}
+
+
+@router.post("/readings", response_model=ReadingResponse, responses=POST_READING_RESPONSES)
 async def post_reading(
         reading: ReadingCreate,
         device_box: Annotated[str, Depends(require_device)],
