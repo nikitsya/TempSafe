@@ -2,6 +2,8 @@
 
 Feature status was checked against `master` on **8 November 2026**. Of the 15 features, 4 are complete, 9 are in
 progress and 2 are planned. Priorities are unchanged; FR-13 remains the only recorded priority change.
+The later [dual-sensor rollout](../operations/dual-sensor-rollout.md) added outside temperature
+comparison after this review. The matrix below records the priorities on 8 November.
 See the [functional requirements](functional-requirements.md) for the acceptance criteria.
 
 ## Feature priority matrix

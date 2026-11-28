@@ -1,6 +1,14 @@
 # TempSafe database connections
 
-## Verification status
+## Hosted connection
+
+The [25 November recovery drill](database-recovery.md) verified that FastAPI
+connects to the hosted `temsafe` schema as `tempsafe_runtime`. Systemd reads its
+credentials from `/etc/tempsafe/runtime-database.env`. Schema migrations use a
+separate administrative account. The same drill records the encrypted off-server
+backup and its successful restore into an isolated instance.
+
+## November connection checks
 
 The repository configuration was checked on 4 November 2026 against
 [compose.yaml](../../compose.yaml), [session.py](../../backend/tempsafe/db/session.py)
@@ -25,17 +33,16 @@ Some subsequent SSH connections still timed out, so the verification is partial.
 The 5 November [FastAPI account check](../testing/database/database-access-evidence.md#checking-fastapi-separately)
 subsequently verified the effective database account and schema. On 8 November, the service,
 container, loopback mapping, session and configuration tables were rechecked.
-The hosted database also contains a `temperature_history` table outside the current eight-table
-baseline; its purpose was not established and no table was removed. Current AWS rule sources
-and off-server backup configuration remain unverified. Secrets were not displayed.
+The 8 November inspection also found a `temperature_history` table outside the
+eight-table baseline used at the time. Its purpose was not established.
 
 ## Figure 1. Application connection
 
 ```mermaid
 flowchart LR
     Browser[Web browser] -->|HTTPS: TCP 443| Nginx[Nginx on EC2]
-    Nginx -->|HTTP: 127 . 0 . 0 . 1:8000| API[FastAPI on EC2]
-    API -->|MySQL: 127 . 0 . 0 . 1:3307| Port[Docker host port]
+    Nginx -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
+    API -->|MySQL: 127.0.0.1:3307| Port[Docker host port]
     Port -->|Container TCP 3306| DB[(MySQL: temsafe)]
     DB --- Volume[Persistent mysql_data volume]
 ```
@@ -48,13 +55,13 @@ The backend uses SQLAlchemy's asynchronous sessions with `aiomysql`. It reads th
 `.env` without overwriting existing process environment variables. Therefore,
 systemd environment overrides must also be checked when verifying production.
 
-| Setting        | Repository configuration             |
+| Setting        | Local defaults with host-run FastAPI |
 |----------------|--------------------------------------|
 | Database host  | `127.0.0.1`                          |
 | Host port      | `3307`                               |
 | Container port | `3306`                               |
-| Database       | `temsafe`                            |
-| Database user  | `temsafe`                            |
+| Database       | `tempsafe`                           |
+| Database user  | `tempsafe`                           |
 | Password       | `MYSQL_PASSWORD`, stored outside Git |
 
 In this project, a **private database endpoint** means the host's loopback
@@ -68,9 +75,9 @@ protects browser traffic, while SSH protects the remote administration tunnel.
 
 ```mermaid
 flowchart LR
-    IDE[PyCharm on Mac] -->|127 . 0 . 0 . 1:13307| Tunnel[Local SSH tunnel]
+    IDE[PyCharm on Mac] -->|127.0.0.1:13307| Tunnel[Local SSH tunnel]
     Tunnel -->|Encrypted SSH: EC2 TCP 22| SSH[SSH server on EC2]
-    SSH -->|127 . 0 . 0 . 1:3307| DB[(MySQL via Docker)]
+    SSH -->|127.0.0.1:3307| DB[(MySQL via Docker)]
 ```
 
 Start the tunnel in a Mac terminal and keep it open:
@@ -93,14 +100,12 @@ Configure the PyCharm MySQL data source:
 | Host           | `127.0.0.1`                                 |
 | Port           | `13307`                                     |
 | Database       | `temsafe`                                   |
-| User           | `temsafe`                                   |
-| Password       | The **server's** `MYSQL_PASSWORD`           |
+| User           | Your authorised database administration account |
+| Password       | The password for that administration account    |
 | IDE SSH tunnel | Disabled when using the manual tunnel above |
 
 The two occurrences of `127.0.0.1` refer to different machines: PyCharm connects
-to the Mac's local port; SSH forwards it to the EC2 server's local port. The server
-and local development databases can have different passwords despite using the
-same database and user names. Closing the tunnel disconnects PyCharm but does not
+to the Mac's local port; SSH forwards it to the EC2 server's local port. Use the hosted database name and credentials for this tunnel. Closing the tunnel disconnects PyCharm but does not
 stop the website or database.
 
 ## Network access and troubleshooting
@@ -129,10 +134,8 @@ Compose derives the volume name from the project name. The local default
 until its data has been migrated. The volume survives container recreation.
 Recovery from loss of the EC2 disk requires a separate backup.
 
-During this AWS inspection, the `temsafe` account had `ALL PRIVILEGES` on
-`temsafe.*`. It was not a narrowly restricted runtime account. Separating a
-schema-management account from a runtime account is follow-up work; do not describe
-least-privilege database access as fully implemented without checking its grants.
+On 4 November, FastAPI used the `temsafe` account with `ALL PRIVILEGES` on
+`temsafe.*`. The service switched to the restricted runtime account on 25 November.
 
 Backup checks on 4 November 2026 found:
 
@@ -147,30 +150,19 @@ Backup checks on 4 November 2026 found:
 Those 4 November checks found no evidence of an operational application database backup on
 the host. Manual SQL backups were subsequently created before both deployments on 7 November
 under `/home/ubuntu/tempsafe-deploy-backups/`; see the
-[backup record](deployment.md#deployment-backups). They remain on the same server. They do not rule out custom jobs
-elsewhere or external AWS Backup/EBS
-snapshots, which were not inspected. Off-server copies, retention and successful
-restore tests remain **unverified**. A backup proposal in the design document is
-not evidence of a running backup job.
+[backup record](deployment.md#deployment-backups). The 25 November drill verified
+a manual off-server copy. A recurring schedule, retention policy and external
+AWS backups have yet to be verified.
 
 On 5 November 2026 the [PyCharm access record](../testing/database/database-access-evidence.md) documented a read of
-hosted samples, the
-SSH
-forwarding command and the grants returned by the TempSafe AWS console.
+hosted samples, the SSH forwarding command and the grants returned by the TempSafe AWS console.
 
 The [FastAPI account check](../testing/database/database-access-evidence.md#checking-fastapi-separately) also confirmed
-the authenticated
-MySQL account and schema using the active service environment.
+the authenticated MySQL account and schema using the active service environment.
 
 ## Remaining server checks
 
 Use an authorised SSH session to confirm:
 
 1. Current AWS inbound rule sources. A listener check does not verify security groups.
-2. External backup services, off-server storage and a restore test. Host cron and
-   systemd timer checks are recorded above.
-
-This documentation change does not change server settings or introduce a backup job.
-
-The [25 November recovery drill](database-recovery.md) records the subsequent
-production runtime-account change, encrypted off-server backup and verified restore.
+2. Any recurring backup schedule, retention settings and external AWS backup services.

@@ -1,8 +1,7 @@
 # TempSafe database
 
-We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates eight tables for
-boxes, users, access permissions, temperature profiles, measurements, reviews, the selected box configuration and user
-sessions.
+We use **MySQL 8.4 or later**. [`schema.sql`](schema.sql) creates eleven tables for
+boxes, accounts, readings, threshold profiles, configuration and Web Push delivery.
 Choose either setup below.
 
 ## Table relationships
@@ -32,7 +31,7 @@ With the default project name, Docker Desktop shows the container as
 `tempsafe-mysql-1` and stores its data in `tempsafe_mysql_data`.
 
 On the first start, this creates the `tempsafe` database, the `tempsafe` database
-user and all eight tables. Connect using host `127.0.0.1`, port `3307` (unless changed
+user and all eleven tables. Connect using host `127.0.0.1`, port `3307` (unless changed
 in `.env`), user `tempsafe` and your `MYSQL_PASSWORD`.
 
 To stop it, use `docker compose stop mysql`. Your data stays in the Docker volume.
@@ -72,17 +71,21 @@ our Docker setup. Keep `.env` out of Git.
 
 ## Apply migrations
 
-For either setup, select `tempsafe` in your SQL client after the tables exist.
-Run these files manually in order, then commit if auto-commit is off:
+### Seed the prototype box and profile
+
+For a database created with the base Compose file or the manual setup, select
+`tempsafe` in your SQL client. Run the two seed files in order and commit if
+auto-commit is off. The full local Compose setup runs them automatically on
+the first start of a fresh volume.
 
 | File                                                                                              | Result                                                                                                  |
 |---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
 | [001_add_prototype_box.sql](migrations/001_add_prototype_box.sql)                                 | Adds `TS-01`, named `Prototype box TS-01`.                                                              |
 | [002_add_prototype_temperature_profile.sql](migrations/002_add_prototype_temperature_profile.sql) | Adds its demo profile: lower threshold `0.00°C`, warning threshold `24.00°C` and upper limit `25.00°C`. |
 
-The profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548`. These migrations preserve
-existing records when run again; do not re-run `schema.sql`. They do not add users
-or measurements. Future threshold changes require a new profile ID to preserve
+The demo profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548`. Rerunning these
+seed files preserves existing records. On a fresh installation, the first settings
+save selects a desired profile. Accounts and measurements are added separately. Future threshold changes require a new profile ID to preserve
 historical settings.
 
 See the [API contract](../docs/api/api-contract.md#temperature-classification)
@@ -90,9 +93,8 @@ for temperature classification rules.
 
 ## Threshold configuration migration
 
-For an existing database, apply
-[003_add_box_configuration.sql](migrations/003_add_box_configuration.sql) once after
-backing up. Fresh databases created with the updated schema already have this table;
+If an existing database lacks `box_configuration`, back it up and apply
+[003_add_box_configuration.sql](migrations/003_add_box_configuration.sql) once. Fresh databases created with the updated schema already have this table;
 do not run migration 003 again. See the
 [operator API guide](../docs/api/threshold-configuration.md) for selection and access rules.
 
@@ -121,6 +123,19 @@ from the current baseline already include these changes: do not run 007 again.
 The unique `(box_id, sequence_no)` key remains shared by both sensors.
 See the [dual-sensor rollout](../docs/operations/dual-sensor-rollout.md).
 
+## Device confirmation and Web Push migrations
+
+On an existing installation, take a backup and inspect the schema before deploying
+the corresponding backend. If `box_configuration.applied_profile_id` is absent,
+apply [migration 008](migrations/008_add_applied_profile.sql). Existing selections
+start with no device confirmation.
+
+[Migration 009](migrations/009_add_web_push.sql) creates `push_subscriptions`,
+`push_box_state` and `push_deliveries`. Apply it if all three tables are absent.
+If only some exist, compare them with the baseline before resuming the upgrade.
+Both changes are already present in a fresh baseline. For the hosted schema,
+apply the updated [runtime grants](operations/runtime-grants.sql) after the schema upgrade.
+
 ## Verify the setup
 
 Select `tempsafe` and run:
@@ -129,8 +144,9 @@ Select `tempsafe` and run:
 SHOW TABLES;
 ```
 
-Expected tables: `app_users`, `box_access`, `boxes`, `sample_reviews`,
-`temperature_samples`, `threshold_profiles`, `box_configuration` and `user_sessions`.
+A fresh database contains `app_users`, `box_access`, `box_configuration`, `boxes`,
+`push_box_state`, `push_deliveries`, `push_subscriptions`, `sample_reviews`,
+`temperature_samples`, `threshold_profiles` and `user_sessions`.
 
 Follow the [backend test instructions](../tests/backend/README.md) to check database
 access and API behaviour. For the schema rationale, see the

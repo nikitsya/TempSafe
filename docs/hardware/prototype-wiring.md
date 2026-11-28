@@ -18,9 +18,10 @@ and ground. A 10 kΩ pull-up resistor connects DATA to 3.3 V; the sensor's third
 pin is unconnected. The diagram uses a Raspberry Pi 4 graphic to represent the
 40-pin header; the tested device is a Raspberry Pi 5.
 
-An initial check read both sensors in the terminal. The external sensor is not yet
-integrated into the normal logger, SQLite queue or MQTT publisher. See the
-[experiment plan and initial check](../testing/hardware/external-temperature-experiment.md).
+The [bench experiment](../testing/hardware/external-temperature-experiment.md)
+recorded both sensors. The [outside logger](../../device/external_temperature_readings.py)
+now writes comparison readings to the shared SQLite queue for MQTT upload.
+A fresh physical reading and its hosted storage acknowledgement remain to be matched.
 
 ## Sensor connections
 

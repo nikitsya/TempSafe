@@ -24,6 +24,8 @@ once after backing up MySQL, only if `user_sessions` is missing. Fresh installat
 Apply any other outstanding migrations in the [database guide](../../database/README.md).
 Install the project dependencies. From the project root, run the following with the
 project virtual environment active. Enter a new username and a password when prompted.
+Use a database account authorised to provision users and box assignments.
+The hosted FastAPI runtime account only has read access to those tables.
 The example grants access to the existing prototype box. Both inserts commit together.
 Use a new identifier of at most 191 characters and a password of at most 1,024 characters,
 matching the login endpoint limits. This creates an account; it does not reset an existing password.
@@ -273,7 +275,7 @@ acknowledgement action is not part of these read endpoints.
 
 | Endpoint                        | Response                                                                                                      |
 |---------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `GET /api/readings?limit=20`    | Samples across boxes, newest receipt time first; default limit 20, allowed 1–100. Empty result: `[]`.         |
+| `GET /api/readings?limit=20`    | Samples for the chosen sensor across assigned boxes, newest receipt first. Default limit 20, allowed 1–100. Empty result: `[]`.         |
 | `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`. |
 | `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
 
@@ -284,3 +286,18 @@ on the local development server. The hosted Nginx configuration blocks public do
 
 A signed-in user can read and change the desired limits for an assigned box
 through the [threshold configuration API](threshold-configuration.md).
+
+## Web Push subscriptions
+
+All three routes require a signed-in session. The backend checks box assignments
+when it queues and sends notifications.
+
+| Route | Successful response |
+|-------|---------------------|
+| `GET /api/push/public-key` | `200` with `applicationServerKey` for the browser. |
+| `POST /api/push/subscriptions` | `200` with the subscription `id`. Registering the same endpoint for the same user refreshes its keys. |
+| `DELETE /api/push/subscriptions/{endpoint_id}` | `204`. Removes a matching subscription owned by the signed-in user. |
+
+The key and registration routes return `503` when Web Push is disabled. Registration
+returns `409` if another account owns the endpoint. See the [Web Push guide](../operations/web-push.md)
+for the subscription format, delivery checks and outstanding browser integration.

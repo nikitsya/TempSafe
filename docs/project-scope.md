@@ -9,8 +9,7 @@ The current prototype is tested on a bench without medicines; ambulance use is a
 The project focuses on reducing unnecessary manual temperature checks by providing automatic monitoring, local LED
 feedback, planned phone notifications and a record of temperature observations. Estimated excursion
 summaries (FR-13) are Must Have; audible buzzer feedback remains Should Have.
-This document defines the target scope; see the [implementation review](requirements/moscow-prioritisation.md)
-for completed and outstanding work.
+The [8 November priority review](requirements/moscow-prioritisation.md) records the earlier baseline.
 
 ## Application platform
 
@@ -22,6 +21,8 @@ A separate native mobile application is a Could Have follow-up, subject to a tea
 ## Included in the Project
 
 - Continuous temperature monitoring inside the Controlled Drug Box using an SCD-41 sensor.
+- Outside temperature comparison using an AM2302 sensor. Inside readings determine box alarms.
+  See the [dual-sensor rollout](operations/dual-sensor-rollout.md).
 - Use of a Raspberry Pi to collect, process and store temperature readings.
 - Monitoring temperature over time through timestamped readings and accessible history. Estimated excursion timing and
   maximum-temperature summaries are Must Have (FR-13).
@@ -30,8 +31,8 @@ A separate native mobile application is a Could Have follow-up, subject to a tea
 - A single-colour LED lights for Warning or Alert and uses a distinct blink pattern for sensor failure. Normal leaves it
   off; an unlit LED does not prove acceptable temperature or working power.
 - The application shows Normal, Warning and Alert using green, amber and red, together with text and symbols.
-- Phone notifications for Warning and Alert with connectivity and permission. Web Push is the proposed delivery channel;
-  browser support and delivery still need testing.
+- Phone notifications for Warning and Alert with connectivity and permission. The backend implements Web Push.
+  Service worker integration and closed-tab delivery testing remain outstanding.
 - Buzzer feedback on Alert is Should Have, rather than a guaranteed baseline component.
 - A responsive web application with a FastAPI backend for viewing current status, alerts and temperature history.
 - Automatic logging of sample attempts, including errors, quality and original observation times.
@@ -42,8 +43,7 @@ A separate native mobile application is a Could Have follow-up, subject to a tea
 
 - Automatic cooling or temperature regulation of the Controlled Drug Box.
 - Direct integration with National Ambulance Service systems or ePCR.
-- GPS/location tracking, bag-opening detection, weight measurement, humidity reporting and a second external temperature
-  sensor.
+- GPS/location tracking, bag-opening detection, weight measurement and humidity reporting.
 - Tracking medication administration to individual patients.
 - Replacing official controlled-drug records or clinical documentation.
 - Automatically deciding whether a medication is clinically safe to use after a temperature excursion.

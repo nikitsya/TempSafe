@@ -1,7 +1,8 @@
 # Web Push for box temperature changes
 
-Apply migration 009 to an existing database, or initialise a new database from
-the baseline. Apply the updated runtime grants. Set these variables in the
+Follow the [schema upgrade instructions](../../database/README.md#device-confirmation-and-web-push-migrations)
+for an existing database. A fresh baseline includes the three push tables. Apply
+the updated [hosted runtime grants](../../database/operations/runtime-grants.sql). Set these variables in the
 backend service environment before restarting it:
 
 - `WEB_PUSH_PRIVATE_KEY` — protected path to a VAPID P-256 private PEM key.
@@ -13,7 +14,9 @@ backend service environment before restarting it:
 
 ## Browser integration
 
-Use the signed-in session for these routes:
+The current frontend polls while a signed-in page is open. Closed-tab delivery
+still requires a service worker and browser subscription registration. Use the
+signed-in session to implement the following flow.
 
 1. Fetch `GET /api/push/public-key` and pass the decoded `applicationServerKey`
    to the service worker registration's push manager when enabling notifications.

@@ -1,7 +1,8 @@
 # TempSafe
 
 TempSafe is an IoT project for monitoring temperature inside a prototype medication box. It combines a
-Raspberry Pi and SCD-41 sensor, local LED feedback and a web interface for viewing readings and temperature history.
+Raspberry Pi, an SCD41 inside sensor, an AM2302 outside sensor for comparison, local LED and buzzer feedback,
+and a web interface for viewing readings and temperature history.
 The prototype is for bench testing without real medicines; it does not determine whether medicines are suitable for use.
 
 ## Team
@@ -29,8 +30,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
 - **Threshold settings:** signed-in users can review and change the desired limits for an
   assigned box through the API. Saving creates or selects a versioned demo profile. When MQTT
   is enabled, the backend publishes the selected profile as retained configuration and retries
-  delivery. Broker permissions and the compatible Pi configuration subscriber must be deployed;
-  device adoption remains unconfirmed. See the [configuration API guide](docs/api/threshold-configuration.md).
+  delivery. The Pi subscriber saves the limits locally. Reporting the applied profile back to the
+  backend and verifying it on the physical Pi remain outstanding. See the [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion
@@ -41,7 +42,10 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   readings and sensor errors to local SQLite. Integration tests are recorded; manual buzzer silencing remains planned.
 - **Frontend:** signed-in users with access to `TS-01` can view its dashboard, temperature graph,
   excursion estimates and accessible history table. The dashboard polls every five seconds. History
-  loads up to 100 readings when opened or reloaded.
+  loads the selected period in pages of up to 100 readings per sensor.
+- **Web Push:** the backend supports browser subscriptions and queues fresh inside Warning and Alert
+  transitions for assigned users. The current frontend uses open-tab notifications. See the
+  [browser integration guide](docs/operations/web-push.md#browser-integration).
 - **UI example:** four editable Figma screens with synthetic readings for
   TS-01. [Mobile example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-2&scaling=scale-down) · [Desktop example](https://www.figma.com/proto/oBjRRHndbwEUHqdxDQrrIj/TempSafe-layouts?page-id=0%3A1&node-id=0-50&scaling=scale-down).
 
@@ -143,7 +147,7 @@ and profile. Then follow the [backend guide](backend/tempsafe/README.md) to star
 ## Project documentation
 
 See the [consistency review](docs/reviews/project-consistency-review.md) for the
-8 November audit, verified checks and outstanding implementation gaps. Assessment
+checks and implementation gaps recorded on 8 November. Assessment
 documents retain dated content.
 
 | Topic                          | Documents                                                                                                                                                                                                                                                                                               |

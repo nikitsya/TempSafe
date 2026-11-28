@@ -120,7 +120,7 @@ Following the frontend handover:
 
 ## Still open
 
-- The outside sensor is not running on the box yet: the device package from the rollout document has to be
-  installed on the Pi first.
+- Verify a fresh outside reading from the deployed Pi in the hosted dashboard. The
+  [device guide](../../../device/README.md#outside-temperature-logger) documents the logger.
 - The thresholds (0.3°C outside, 0.2°C per minute inside) and the 0.85 margin come from one experiment and should be
   checked with more runs and the real box.

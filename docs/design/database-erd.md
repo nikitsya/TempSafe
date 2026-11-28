@@ -1,6 +1,6 @@
 # TempSafe database ERD
 
-Figure 1 shows the eight MySQL tables defined in [schema.sql](../../database/schema.sql).
+Figure 1 shows the eleven MySQL tables defined in [schema.sql](../../database/schema.sql).
 It describes stored data and constraints, not whether every related application feature
 has been implemented.
 
@@ -10,6 +10,11 @@ has been implemented.
 erDiagram
     boxes ||--o| box_configuration: selects
     threshold_profiles ||--o| box_configuration: selected_by
+    threshold_profiles |o--o| box_configuration: confirmed_for
+    app_users ||--o{ push_subscriptions: registers
+    boxes ||--o| push_box_state: tracks
+    temperature_samples ||--o{ push_deliveries: triggers
+    push_subscriptions ||--o{ push_deliveries: receives
     app_users ||--o{ box_access: has
     app_users ||--o{ user_sessions: has
     boxes ||--o{ box_access: permits
@@ -21,7 +26,8 @@ erDiagram
 
     box_configuration {
         VARCHAR box_id PK, FK
-        CHAR profile_id FK "Composite FK with box_id"
+        CHAR profile_id FK "Requested profile for this box"
+        CHAR applied_profile_id FK "Last confirmed profile for this box, nullable"
     }
     app_users {
         BIGINT user_id PK "Unsigned; auto-increment"
@@ -63,6 +69,31 @@ erDiagram
         DECIMAL temperature_c "5,2; nullable"
         ENUM quality "valid or sensor_error"
     }
+    push_subscriptions {
+        CHAR endpoint_id PK
+        BIGINT user_id FK
+        TEXT endpoint
+        VARCHAR p256dh
+        VARCHAR auth_secret
+        BOOLEAN enabled
+    }
+    push_box_state {
+        VARCHAR box_id PK, FK
+        BIGINT sequence_no
+        DATETIME observed_at
+        ENUM state
+        CHAR episode_id
+    }
+    push_deliveries {
+        BIGINT id PK
+        CHAR sample_id FK
+        CHAR endpoint_id FK
+        ENUM state
+        ENUM status
+        INT attempts
+        DATETIME next_attempt
+        INT http_status "Nullable"
+    }
     sample_reviews {
         CHAR sample_id PK, FK "At most one review per sample"
         BIGINT reviewed_by FK "References app_users.user_id"
@@ -92,6 +123,10 @@ listed below rather than marking their individual columns as independently uniqu
   comparison temperatures and do not affect box alarms.
 - `sample_reviews` stores at most one acknowledgement per sample, linked to one
   reviewing user. It is not a complete audit history of multiple reviews.
+- `push_subscriptions` associates each browser endpoint with one account.
+  `push_box_state` tracks the latest notification state and episode for each box.
+  A unique `(sample_id, endpoint_id)` pair in `push_deliveries` prevents duplicate
+  jobs for the same sample and subscription.
 
 ## Composite constraints and historical accuracy
 
@@ -121,14 +156,12 @@ This diagram describes the server's **MySQL** database. On the Raspberry Pi,
 the existing **SQLite** table is named `readings`, not `temperature_samples`.
 Both store `sensor_location`; no separate outside readings table is needed.
 SQLite also keeps `uploaded`, which changes only after a matching MQTT storage
-acknowledgement. The proposed device package also adds `device_configuration` for the last
-adopted profile.
+acknowledgement. The Pi stores the last adopted profile in `device_configuration`.
 
 [Migration 007](../../database/migrations/007_add_sensor_location.sql) adds the
-server column and indexes. The separately supplied device initialiser upgrades
-the existing SQLite queue; the hardware owner integrates those changes. Both assign `inside` to legacy samples and
-preserve identifiers, sequence
-numbers and temperatures. Follow the [rollout order](../operations/dual-sensor-rollout.md)
+server column and indexes. The [device initialiser](../../device/database.py)
+upgrades the existing SQLite queue. Both upgrades assign `inside` to legacy
+samples and preserve identifiers, sequence numbers and temperatures. Follow the [rollout order](../operations/dual-sensor-rollout.md)
 before starting the updated Pi publisher.
 
 ## Desired box configuration
@@ -137,5 +170,6 @@ before starting the updated Pi publisher.
 `(profile_id, box_id)` references the unique pair on `threshold_profiles`, preventing
 a selection from crossing box boundaries. A profile can be selected by at most its
 own box. New selections do not change the profiles attached to earlier samples.
-This is desired backend configuration, not confirmation that the device has adopted it.
+The nullable `applied_profile_id` has its own composite foreign key with `box_id`.
+It records the last matching confirmation the backend received from the device.
 See the [configuration API guide](../api/threshold-configuration.md).

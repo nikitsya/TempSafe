@@ -14,6 +14,7 @@ See the [wiring record](prototype-wiring.md) for the current connections.
 | Raspberry Pi 5              | Tested controller: reads temperature, controls the LED and passive buzzer, and saves readings to SQLite. MQTT publishing with storage acknowledgements is implemented.                                                     | Raspberry Pi 5                                      | Already owned  |
 | Adafruit SCD-41             | Already owned. I²C sensor with integrated temperature and humidity measurement; only temperature is used. Humidity and CO₂ reporting are outside this release.                                                             | https://www.adafruit.com/product/5190               | Already owned  |
 | Single-colour LED           | Provides immediate visual feedback without requiring the Advanced Paramedic to open the web application. Lights for Warning or Alert; off for Normal; distinct blinking for sensor failure. No RGB capability is required. | Lecturer parts list / The Pi Hut                    | TBD            |
+| AM2302 (DHT22) and 10 kΩ pull-up | Measures outside temperature on BCM GPIO4 for comparison with the inside sensor. | [Two-sensor wiring](prototype-wiring.md#experimental-external-sensor) | Unrecorded |
 | Passive buzzer              | Should Have: tested on Alert at 500 Hz, one second on/two seconds off. Manual silence is not implemented; model and ratings remain unrecorded.                                                                             | Lecturer parts list / The Pi Hut                    | TBD            |
 | LED resistor (tested 220 Ω) | Limits LED current in the tested GPIO18 assembly.                                                                                                                                                                          | Lecturer parts list / The Pi Hut                    | TBD            |
 | Full-size breadboard        | Used to build and test the circuit without soldering.                                                                                                                                                                      | https://thepihut.com/products/full-sized-breadboard | £5.00          |
@@ -40,6 +41,7 @@ and permission; they are separate from the local hardware feedback.
 
 ## Behaviour and scope
 
-The LED and buzzer are output devices; the SCD-41 is the sensor. See the
+The SCD41 measures inside temperature and the AM2302 measures outside temperature.
+Only the inside temperature controls the LED and buzzer. See the
 [device guide](../../device/README.md#main-temperature-logger) for implemented feedback and the
 [project scope](../project-scope.md) for included and excluded features.

@@ -4,9 +4,10 @@ On 13 November 2026 the team chose to monitor the age and quality of temperature
 would add a second message schedule, configuration and timeout to maintain. The paramedic needs to know when the box
 last measured the temperature and whether that measurement succeeded.
 
-The Pi normally records a sample about every 30 seconds. A sensor read exception produces a timestamped sensor error
-with an empty temperature. Both kinds of record enter the same SQLite queue for delivery through MQTT. If the sensor
-keeps reporting that data is not ready, the logger retries and may produce no record.
+The Pi normally records a sample about every 30 seconds. A sensor read exception produces a sensor error with an empty temperature.
+The logger records a UTC observation time when the Pi confirms clock synchronisation. Both kinds of record enter the same SQLite queue for delivery through MQTT. If the sensor
+keeps reporting that data is not ready, the inside logger polls again. After 90 seconds
+without a new measurement it queues a sensor error.
 
 The dashboard uses the original observation time. A reliable timestamp up to 90 seconds old is fresh. An older timestamp
 is stale, and an unreliable timestamp gives unknown freshness. A sensor error remains visible. Before any samples

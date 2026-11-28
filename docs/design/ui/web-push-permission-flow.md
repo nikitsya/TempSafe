@@ -3,8 +3,8 @@
 Author: Maryna Hordiienko (frontend and Web Push integration)
 
 [ui-design.md](ui-design.md) states that TempSafe plans Web Push with a service worker and explicit permission. This
-document shows the target flow. The service worker, push subscription endpoint and delivery
-worker are not implemented. The browser asks for permission only after the user chooses to turn alerts on, never
+document shows the target browser flow. The [subscription API and delivery worker](../../operations/web-push.md)
+are implemented. The frontend still needs service worker registration and background push handling. The browser asks for permission only after the user chooses to turn alerts on, never
 on first page load.
 
 ## Flow
@@ -28,8 +28,8 @@ sequenceDiagram
             P->>SW: Register service worker
             P->>B: Subscribe with VAPID public key
             B-->>P: Subscription endpoint and keys
-            P->>S: POST /api/push-subscriptions (signed-in session)
-            S-->>P: Saved for the user's assigned box
+            P->>S: POST /api/push/subscriptions (signed-in session)
+            S-->>P: Subscription saved for the signed-in user
             P-->>U: Phone alerts: On
         end
     end
@@ -54,7 +54,7 @@ sequenceDiagram
 - A notification is created only when the current state changes to Warning or Alert. Unchanged repeated states are
   suppressed.
 - Delayed historical uploads do not trigger current warnings.
-- Failed deliveries are retried and marked; duplicates are prevented.
+- Temporary delivery failures are retried within the freshness window. The queue allows one job per sample and subscription.
 - Target: receipt within 60 seconds of an online Warning/Alert transition. This is measured on supported phones, not
   guaranteed.
 - Notification text contains no account details and links to the signed-in dashboard.

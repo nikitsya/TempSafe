@@ -279,8 +279,9 @@ For each deployment:
 3. Review the target's dependencies and migrations. Existing installations need
    migrations 003 and 004 where their tables are absent, and migration 007 before
    deploying dual-sensor ingestion if `sensor_location` is absent.
-   See the [database guide](../../database/README.md#apply-migrations). Do not run
-   the baseline schema over an existing database.
+   Check migrations 008 and 009 for applied-profile confirmations and Web Push,
+   then update the runtime grants to match the upgraded schema. See the
+   [database guide](../../database/README.md#device-confirmation-and-web-push-migrations).
 4. Deploy the selected code and install changed dependencies with
    `.venv/bin/python -m pip install -e .`. Preserve `.env`, MQTT credentials and
    the Compose project name `temsafe`, which selects the existing database volume.
@@ -301,9 +302,10 @@ The two updates on 7 November created restricted backup directories on the serve
 
 Each contains a database SQL dump and the previous revision. The first also contains
 copies of the service definition and MQTT environment file. These are manual backups
-on the same server, not evidence of scheduled or off-server backups. Restore testing
-and off-server copies remain unverified. Keep the dumps and configuration copies
-private; they contain account data or credentials.
+on the same server. On 25 November, an encrypted off-server backup was restored
+and checked in isolation. See the [recovery drill](database-recovery.md) for the
+recorded counts, access checks and recovery time. A recurring backup schedule
+remains unverified. Keep dumps and configuration copies private.
 
 ## Stored data checks
 

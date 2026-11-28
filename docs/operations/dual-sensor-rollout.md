@@ -1,10 +1,8 @@
 # Dual-sensor backend rollout and team handover
 
-This change prepares MySQL, the backend API, MQTT ingestion and their tests.
-Frontend and hardware implementation belong to their respective owners. The
-proposed device files are supplied separately as `TempSafe-device-dual-sensor.zip`;
-they are not part of this repository diff. No hosted database or Pi is upgraded
-by editing these files.
+The [device scripts](../../device/README.md) and [frontend](../../frontend/README.md)
+now include dual-sensor support. The 21 November handover used a separate device
+archive. The verification record below identifies which version was tested.
 
 ## Storage and compatibility
 
@@ -32,12 +30,10 @@ sensor; box temperature freshness is based only on valid inside samples.
 2. Deploy the reviewed backend. Confirm an old payload without location still
    stores as `inside`, and an explicit outside payload can be retrieved through
    `?sensor_location=outside`. Keep the existing TLS and topic permissions.
-3. Complete the frontend handover below before enabling outside collection.
-   The current UI interprets sequence jumps as missing data; interleaved sensor
-   rows would otherwise split graphs and temperature alert periods incorrectly.
-4. The device owner integrates the separate package, backs up the actual SQLite
-   queue and updates compatible files together. Verify old pending inside rows
-   before starting outside collection. Match fresh samples from both sensors to
+3. Before enabling outside collection, verify that the deployed frontend keeps
+   the two sensors separate and accepts interleaved sequence numbers.
+4. Back up the Pi's SQLite queue and deploy the matching device scripts together.
+   Verify old pending inside rows before starting outside collection. Match fresh samples from both sensors to
    server records and matching `stored` acknowledgements.
 5. Check reconnects, retries and process restarts on the Pi. Confirm the sequence
    counter and saved profile continue and an identical retry is stored only once.
@@ -49,37 +45,32 @@ backend while an updated publisher is sending mixed-sensor data.
 
 ## Device handover
 
-The separate archive contains complete proposed versions of `database.py`,
+The 21 November archive contained complete proposed versions of `database.py`,
 `models.py`, `configuration.py`, both temperature loggers and `mqtt_publisher.py`,
 plus the device README, a patch relative to master `cbc60a5`, eight device tests
-and their test dependencies. It contains no database or credentials.
+and their test dependencies.
 
-The package incorporates the configuration subscriber from
-`feature/device-configuration-sync`, adds a SQLite migration preserving the queue,
-and provides an independent AM2302 logger on GPIO4 following the device experiment.
-The hardware owner should compare it with their active branch, confirm wiring and
-integrate it. Only inside measurements should drive the LED/buzzer; both sensors
-record the adopted profile ID. The package README contains backup, installation,
-startup and physical verification instructions. These device files are deliberately
-not included in the backend commit.
+The repository now contains the configuration subscriber, SQLite queue upgrade
+and independent AM2302 logger on GPIO4. Both loggers record the adopted
+profile ID. Only inside measurements drive the LED and buzzer. Follow the
+[device guide](../../device/README.md) to run the loggers and publisher.
 
 ## Frontend handover
 
-The [API contract](../api/api-contract.md#dashboard-api-contract) is ready for the
-frontend owner. Required integration work:
+Use the [API contract](../api/api-contract.md#dashboard-api-contract) to verify the client after deployment.
 
 - Request inside and outside data separately with `sensor_location`. Existing
   requests default to inside; paging must retain the selected sensor.
 - Keep box status, temperature alerts and notifications based on inside data.
   Outside values are for comparison and have no box-limit classification.
-- Replace checks that treat `sequence_no` jumps as missing measurements in
+- Check continuity for each sensor in
   `dashboard.js`, `history.js` and `notifications.js`. For one sensor, use reliable
   observation times: a gap over 90 seconds or unknown/backwards time breaks
   continuity. Sequence numbers remain the identifiers and pagination cursor.
 - Display outside faults, missing data and stale measurements separately. Do not
   substitute outside readings when inside measurements are missing.
-- If adding a sensor selector or CSV export, identify the selected sensor and
-  prevent a late response for a previous selection replacing the current data.
+- Verify that CSV exports identify the sensor and that choosing another period
+  prevents a late response from replacing the current data.
 
 Example: inside samples numbered 100 and 102, measured 30 seconds apart, are
 continuous when number 101 belongs to the outside sensor. They must not create

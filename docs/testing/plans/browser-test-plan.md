@@ -1,8 +1,9 @@
 # Automated browser test plan (UI)
 
-This plan adds automated browser tests to the manual UX tests in `initial-test-plan.md` (UX-01 to UX-06). Automated UI
-tests use Playwright. They run against the HTML prototype now (`prototype/ui`) and will run against the FastAPI web
-application during implementation. The test code is in `prototype/ui/tests/ui.spec.js`.
+The October Playwright suite supplemented the [manual UX tests](initial-test-plan.md)
+(UX-01 to UX-06). It ran against the former HTML prototype in `prototype/ui`.
+The repository replaced that prototype with [Figma examples](../../../ui-example/README.md)
+in commit `f631af5`. The results below describe the prototype run.
 
 | ID    | Test                                                                | Expected result                                           | Criteria |
 |-------|---------------------------------------------------------------------|-----------------------------------------------------------|----------|
@@ -25,7 +26,10 @@ Not yet automated (to be checked and recorded with UX-01, UX-02 and UX-04 in `in
 `role="status"`/`role="alert"` (AC-01, AC-06), visible focus outline (AC-04), contrast (AC-02) and touch target size
 (AC-08).
 
-## Running the tests
+## Original prototype commands
+
+These commands apply to a checkout containing the October prototype, such as
+revision `4b1f1fc`. The current FastAPI frontend lives in `frontend/`.
 
 ```bash
 cd prototype/ui

@@ -1,6 +1,6 @@
 # TempSafe: Database Technology Research
 
-**Scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
+**Original research scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
 paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
 
 The device records temperature inside a portable medication box. MySQL is the deployed central database; SQLite provides
@@ -8,8 +8,9 @@ the durable upload queue on the Raspberry Pi. Recording, MQTT upload and storage
 are implemented. The 24-hour outage/restart test and a fresh trace through the deployed FastMQTT
 subscriber remain outstanding; see the [device guide](../../device/README.md).
 
-The baseline uses one internal sensor. An external temperature sensor is a possible future research extension and
-is not included in this schema.
+The sizing assumptions below were made for one internal sensor. The current
+[schema](../design/database-erd.md) stores inside and outside samples in the same
+table. See the [volume estimates](temperature-sample-volume.md) for both configurations.
 
 ## 1. System technologies and languages
 
@@ -35,7 +36,7 @@ is not included in this schema.
 | User access            | User ID and permitted box IDs                                             | On provisioning/change                                      | Enforce authorisation                               |
 | Review acknowledgement | Sample ID, reviewer, reviewed-at                                          | Optional Should Have workflow                               | Record review without altering measurements         |
 
-The device needs at least 24 hours of local queue capacity (2,880 sample attempts).
+The device needs at least 24 hours of local queue capacity (2,880 attempts per sensor at the nominal interval).
 
 ## 3. Database categories
 
@@ -80,7 +81,7 @@ The device needs at least 24 hours of local queue capacity (2,880 sample attempt
 and a Python/FastAPI backend.**
 
 MySQL fits structured relationships between boxes, users, access permissions and threshold profiles, as well as
-time-filtered reporting. The proposed rate of one sample every 30 seconds produces **2,880 samples per box per day**.
+time-filtered reporting. The proposed rate of one sample every 30 seconds produces **2,880 samples per sensor per day**.
 This workload does not by itself require a specialised time-series database. PostgreSQL would also be a sound choice;
 MySQL is retained for continuity with the team's existing proposal, not because alternatives cannot perform the task.
 
@@ -95,8 +96,9 @@ initialisation commands, integrity checks and application responsibilities. The 
 is the source of truth; the queries below illustrate the planned backend integration.
 
 `auth_subject` stores the case-sensitive local login identifier and `password_hash` its Argon2id hash.
-`user_sessions` stores hashed session tokens and expiry times. Notification subscription/outbox
-and maintenance tables remain future work. MQTT currently uses broker usernames and passwords
+`user_sessions` stores hashed session tokens and expiry times. The current schema also includes
+`push_subscriptions`, `push_box_state` and `push_deliveries` for Web Push.
+The proposed maintenance tables remain future work. MQTT currently uses broker usernames and passwords
 over server-authenticated TLS, not device client certificates.
 
 ### Latest sample for an authorised user
@@ -175,15 +177,15 @@ ORDER BY s.sequence_no DESC;
 
 Persist the sample ID, box ID, sequence, profile version, observation time/clock flag, value/quality and delivery status
 in one local transaction before uploading. Store the next sequence safely. Remove or mark delivered only after server
-acknowledgement. A test at 30-second sampling must reconcile at least 2,880 sample attempts over 24 hours and survive a
+acknowledgement. A test at 30-second sampling must reconcile the sample attempts from each active sensor over 24 hours and survive a
 normal restart. Report storage errors/full queues; no silent overwriting of pending data. Profile configuration is
 retained locally so offline warnings still work.
 
 ## 8. Processing, security and privacy
 
-This section records design targets. Current gaps include scheduled jobs,
-rate limiting, reduced runtime database grants and verified off-server backup recovery.
-See the [deployment record](../operations/deployment.md) for observed controls.
+This section records design targets. The [25 November recovery drill](../operations/database-recovery.md)
+verified restricted runtime grants and recovery from an encrypted off-server copy.
+Scheduled backups and retention remain separate operational checks.
 
 ### Processing placement
 

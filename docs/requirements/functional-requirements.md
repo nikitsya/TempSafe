@@ -13,7 +13,7 @@ These requirements describe the target system; implementation status is tracked 
 |--------------|--------------------------------------------------------------------------------------------------------------------------------------------|
 | Users        | Paramedic or staff member authorised to monitor the single shared prototype box; exact operational responsibility to be validated          |
 | Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                             |
-| Systems      | One temperature sensor, Raspberry Pi, local SQLite queue, authenticated MQTT/TLS broker, HTTPS web API, MySQL database and web application |
+| Systems      | Inside SCD41, outside AM2302, Raspberry Pi, local SQLite queue, authenticated MQTT/TLS broker, HTTPS web API, MySQL database and web application |
 | Environments | A fixed Controlled Drug Box installed inside an ambulance; initial prototype testing takes place on a bench without medicines.             |
 
 ## 2. Functional requirements
@@ -148,6 +148,6 @@ clearing the warning.
 - Keyboard-accessible controls, readable labels, Celsius units and accessible table alternative to charts.
 - Clear observation and receipt times; no colour-only warnings.
 - No patient records, prescribing, drug-dose accounting or automated medicine-disposal decisions.
-- One internal temperature sensor only; humidity, weight, external-temperature and opening measurements are outside this
-  release.
+- The inside sensor determines box alarms. The outside sensor provides comparison data.
+  Humidity, weight and box-opening measurements are outside the project scope.
 - The physical LED is a single-colour output device; application status colours do not require an RGB LED.

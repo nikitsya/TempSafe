@@ -45,6 +45,8 @@ python -m pytest tests/backend/test_save_reading.py -v
 | `test_latest_reading.py`         | Latest readings, recorded profiles, UTC/freshness, box history and sequence order.                      |
 | `test_save_reading.py`           | Input validation, storage, retries, conflicts and POST responses.                                       |
 | `test_mqtt.py`                   | MQTT validation, topic checks and acknowledgement after storage (mock storage).                         |
+| `test_push.py`                   | Browser subscriptions, box assignments, state transitions, delivery retries, expiry and worker configuration. |
+| `test_settings.py`               | Environment defaults, legacy setting names, overrides and permitted push-provider hosts.                |
 | `test_temperature.py`            | Temperature thresholds and sensor errors.                                                               |
 
 A successful run has no failures or errors. If a test fails, inspect the error and
