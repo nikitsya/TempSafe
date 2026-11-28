@@ -2,25 +2,24 @@
 
 import base64
 import hashlib
-import os
 import re
 from urllib.parse import urlsplit
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 
 from tempsafe.api.auth import CurrentSession, Database
+from tempsafe.settings import WebPushSettings
 
 router = APIRouter(prefix="/push", tags=["Web Push"])
 
 
-def allowed_endpoint(endpoint: str) -> bool:
-    hosts = os.getenv("WEB_PUSH_HOSTS", "fcm.googleapis.com,updates.push.services.mozilla.com,web.push.apple.com")
+def allowed_endpoint(endpoint: str, hosts: frozenset[str]) -> bool:
     try:
         url = urlsplit(endpoint)
-        return (url.scheme == "https" and url.netloc.lower() in hosts.lower().split(",")
+        return (url.scheme == "https" and url.netloc.lower() in hosts
                 and url.hostname == url.netloc.lower() and bool(url.path.strip("/"))
                 and not url.fragment and endpoint.isascii()
                 and not any(c.isspace() or ord(c) < 32 or c == chr(127) for c in endpoint)
@@ -62,18 +61,22 @@ class PushSubscriptionResponse(BaseModel):
     id: str
 
 
-@router.get("/public-key", response_model=PushPublicKeyResponse)
-def public_key(session: CurrentSession):
-    key = os.getenv("WEB_PUSH_PUBLIC_KEY")
-    if not key or not os.getenv("WEB_PUSH_PRIVATE_KEY") or not os.getenv("WEB_PUSH_SUBJECT"):
+def require_push_settings(request: Request) -> WebPushSettings:
+    settings = request.app.state.web_push_settings
+    if not settings.enabled:
         raise HTTPException(503, "Web Push is unavailable")
-    return {"applicationServerKey": key}
+    return settings
+
+
+@router.get("/public-key", response_model=PushPublicKeyResponse)
+def public_key(request: Request, session: CurrentSession):
+    return {"applicationServerKey": require_push_settings(request).public_key}
 
 
 @router.post("/subscriptions", response_model=PushSubscriptionResponse)
-async def register(subscription: Subscription, session: CurrentSession, db: Database):
-    public_key(session)
-    if not allowed_endpoint(subscription.endpoint):
+async def register(subscription: Subscription, request: Request, session: CurrentSession, db: Database):
+    settings = require_push_settings(request)
+    if not allowed_endpoint(subscription.endpoint, settings.allowed_hosts):
         raise HTTPException(422, "Unsupported push service")
     endpoint_id = hashlib.sha256(subscription.endpoint.encode()).hexdigest()
     params = dict(id=endpoint_id, user=session.user_id, endpoint=subscription.endpoint,

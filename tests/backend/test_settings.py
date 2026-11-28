@@ -1,8 +1,8 @@
-"""Check compatibility and precedence for renamed environment settings."""
+"""Check backend settings, defaults and compatibility with older deployments."""
 
 import pytest
 
-from tempsafe.settings import project_setting
+from tempsafe.settings import WebPushSettings, project_setting
 
 
 @pytest.mark.parametrize("suffix", ["DEVICE_KEY", "DEVICE_BOX_ID", "CONFIG_ADMIN_TOKEN", "LOCAL_MQTT"])
@@ -23,3 +23,14 @@ def test_missing_setting_uses_default(monkeypatch):
     monkeypatch.delenv("TEMSAFE_LOCAL_MQTT", raising=False)
     monkeypatch.delenv("TEMPSAFE_LOCAL_MQTT", raising=False)
     assert project_setting("TEMPSAFE_LOCAL_MQTT", "0") == "0"
+
+
+def test_web_push_hosts_can_be_replaced_or_disabled(monkeypatch):
+    monkeypatch.delenv("WEB_PUSH_HOSTS", raising=False)
+    assert WebPushSettings.from_env().allowed_hosts == {
+        "fcm.googleapis.com", "updates.push.services.mozilla.com", "web.push.apple.com",
+    }
+    monkeypatch.setenv("WEB_PUSH_HOSTS", "One.Example,two.example")
+    assert WebPushSettings.from_env().allowed_hosts == {"one.example", "two.example"}
+    monkeypatch.setenv("WEB_PUSH_HOSTS", "")
+    assert not WebPushSettings.from_env().allowed_hosts

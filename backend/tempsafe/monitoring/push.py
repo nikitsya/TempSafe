@@ -3,8 +3,8 @@
 import asyncio
 import json
 import logging
-import os
 from datetime import UTC, datetime, timedelta
+from functools import partial
 
 import requests
 from pywebpush import WebPushException, webpush
@@ -14,6 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from tempsafe.api.push import allowed_endpoint
 from tempsafe.db.session import AsyncSessionLocal
 from tempsafe.monitoring.temperature import classify_temperature
+from tempsafe.settings import WebPushSettings
 
 LOGGER = logging.getLogger(__name__)
 
@@ -43,20 +44,20 @@ class PushSession(requests.Session):
         return super().request(*args, **kwargs)
 
 
-def send(job, ttl):
+def send(job, ttl, settings: WebPushSettings):
     with PushSession() as http:
         response = webpush(
             subscription_info={"endpoint": job.endpoint, "keys": {"p256dh": job.p256dh, "auth": job.auth_secret}},
             data=json.dumps({"box_id": job.box_id, "state": job.state, "temperature_c": str(job.temperature_c),
                              "observed_at": job.observed_at.isoformat() + "Z", "sample_id": job.sample_id}),
-            vapid_private_key=os.environ["WEB_PUSH_PRIVATE_KEY"],
-            vapid_claims={"sub": os.environ["WEB_PUSH_SUBJECT"]}, ttl=ttl, timeout=5, requests_session=http,
+            vapid_private_key=settings.private_key,
+            vapid_claims={"sub": settings.subject}, ttl=ttl, timeout=5, requests_session=http,
             headers={"Urgency": "high"},
         )
         return response.status_code
 
 
-async def deliver_one(db, sender=send):
+async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
     # Hold the job until the provider responds. Concurrent workers skip claimed jobs.
     item = await db.scalar(text("""SELECT id FROM push_deliveries
         WHERE status='pending' AND next_attempt<=UTC_TIMESTAMP(6)
@@ -77,7 +78,7 @@ async def deliver_one(db, sender=send):
     delay = 0
     if not job.enabled or job.user_id is None or job.episode_id != job.sample_id or ttl <= 0:
         status = "cancelled"
-    elif not allowed_endpoint(job.endpoint):
+    elif not allowed_endpoint(job.endpoint, allowed_hosts):
         status = "failed"
     else:
         attempts += 1
@@ -106,11 +107,12 @@ async def deliver_one(db, sender=send):
     return True
 
 
-async def run_worker():
+async def run_worker(settings: WebPushSettings):
+    sender = partial(send, settings=settings)
     while True:
         try:
             async with AsyncSessionLocal.begin() as db:
-                if await deliver_one(db):
+                if await deliver_one(db, sender, settings.allowed_hosts):
                     continue
         except SQLAlchemyError:
             LOGGER.error("Web Push queue unavailable")

@@ -19,6 +19,7 @@ from tempsafe.monitoring.configuration import ConfigurationPublisher
 from tempsafe.monitoring.push import run_worker
 from tempsafe.mqtt import create_mqtt
 from tempsafe.pages import router as pages_router
+from tempsafe.settings import WebPushSettings
 
 
 @asynccontextmanager
@@ -28,6 +29,8 @@ async def lifespan(_app: FastAPI):
     push_task = None
     configuration_task = None
     _app.state.configuration_publisher = None
+    push_settings = WebPushSettings.from_env()
+    _app.state.web_push_settings = push_settings
     try:
         mqtt = create_mqtt()
         if mqtt is not None:
@@ -35,8 +38,8 @@ async def lifespan(_app: FastAPI):
             _app.state.configuration_publisher = publisher
             await asyncio.wait_for(mqtt.mqtt_startup(), timeout=15)
             configuration_task = asyncio.create_task(publisher.run(), name="mqtt-configuration")
-        if all(os.getenv(k) for k in ("WEB_PUSH_PUBLIC_KEY", "WEB_PUSH_PRIVATE_KEY", "WEB_PUSH_SUBJECT")):
-            push_task = asyncio.create_task(run_worker(), name="web-push")
+        if push_settings.enabled:
+            push_task = asyncio.create_task(run_worker(push_settings), name="web-push")
         yield
     finally:
         _app.state.configuration_publisher = None
