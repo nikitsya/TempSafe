@@ -15,7 +15,7 @@ Complete the [backend setup](../../README.md#backend-development) and
 `.env`. MySQL must be running for the full suite.
 
 Use an isolated development database, never the hosted database. Database tests create
-temporary records and remove them through rollback or explicit cleanup. Set `MQTT_ENABLED=false`
+temporary records and remove them through rollback or explicit clean-up. Set `MQTT_ENABLED=false`
 for this suite; MQTT tests mock storage and do not require the production broker.
 
 ## Run the tests
