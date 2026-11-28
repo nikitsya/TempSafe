@@ -27,7 +27,7 @@ class ConfigurationPublisher:
         self._requested = asyncio.Event()
 
         @mqtt.on_connect()
-        def connected(client, flags, reason_code, properties):
+        def connected(_client, _flags, reason_code, _properties):
             if reason_code == 0:
                 self.request_publish(box_id)
 

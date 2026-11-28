@@ -42,8 +42,8 @@ class ReadingConsumer:
         self.session_factory = session_factory
         self.save = save
 
-    async def store(self, topic, payload, retained=False):
-        """Acknowledge a validated reading once storage succeeds."""
+    async def store(self, topic, payload, retained=False) -> str | None:
+        """Return the acknowledgement after storage succeeds, or None on rejection or failure."""
         try:
             if topic != self.readings_topic or retained:
                 raise ValueError("Unexpected topic or retained reading")
@@ -58,10 +58,10 @@ class ReadingConsumer:
         except ValueError:
             # Do not log payloads, credentials or database parameters.
             LOGGER.warning("Rejected invalid or conflicting MQTT reading")
-            return
+            return None
         except SQLAlchemyError:
             LOGGER.error("Database operation failed; device must retry without changing the sample")
-            return
+            return None
 
         return json.dumps({
             "schema_version": 1,
@@ -103,7 +103,7 @@ def create_mqtt():
     processing = asyncio.Lock()
 
     @mqtt.subscribe(consumer.readings_topic, qos=1, retain_as_published=True)
-    async def receive(client, topic, payload, qos, properties):
+    async def receive(client, topic, payload, _qos, properties):
         async with processing:
             acknowledgement = await consumer.store(topic, payload, bool((properties or {}).get("retain", False)))
             if acknowledgement is not None:
@@ -115,7 +115,7 @@ def create_mqtt():
     applied_topic = f"tempsafe/boxes/{consumer.box_id}/configuration/applied"
 
     @mqtt.subscribe(applied_topic, qos=1, retain_as_published=True)
-    async def confirm_profile(client, topic, payload, qos, properties):
+    async def confirm_profile(_client, topic, payload, _qos, properties):
         if topic != applied_topic or (properties or {}).get("retain") or len(payload) > MAX_PAYLOAD_BYTES:
             return
         try:
@@ -135,7 +135,7 @@ def create_mqtt():
             LOGGER.error("Could not record confirmation; periodic configuration delivery will retry")
 
     @mqtt.on_subscribe()
-    def subscribed(client, mid, granted_qos, properties):
+    def subscribed(_client, _mid, granted_qos, _properties):
         if not granted_qos or any(code >= 128 for code in granted_qos):
             LOGGER.error("MQTT subscription refused; check broker ACLs")
         else:

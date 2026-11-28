@@ -3,13 +3,17 @@
 import asyncio
 import json
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from functools import partial
+from typing import cast
 
 import requests
 from pywebpush import WebPushException, webpush
 from sqlalchemy import text
+from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from tempsafe.api.push import allowed_endpoint
 from tempsafe.db.session import AsyncSessionLocal
@@ -52,20 +56,23 @@ class PushSession(requests.Session):
         return super().request(*args, **kwargs)
 
 
-def send(job, ttl, settings: WebPushSettings):
+def send(job, ttl: int, settings: WebPushSettings) -> int:
+    claims: dict[str, str | int] = {"sub": settings.subject}
+    headers: dict[str, str | int | float] = {"Urgency": "high"}
     with PushSession() as http:
         response = webpush(
             subscription_info={"endpoint": job.endpoint, "keys": {"p256dh": job.p256dh, "auth": job.auth_secret}},
             data=json.dumps({"box_id": job.box_id, "state": job.state, "temperature_c": str(job.temperature_c),
                              "observed_at": job.observed_at.isoformat() + "Z", "sample_id": job.sample_id}),
             vapid_private_key=settings.private_key,
-            vapid_claims={"sub": settings.subject}, ttl=ttl, timeout=5, requests_session=http,
-            headers={"Urgency": "high"},
+            vapid_claims=claims, ttl=ttl, timeout=5, requests_session=http, headers=headers,
         )
-        return response.status_code
+        # pywebpush returns a string only when curl mode is enabled.
+        return cast(requests.Response, response).status_code
 
 
-async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
+async def deliver_one(db: AsyncSession, sender: Callable[[RowMapping, int], int],
+                      allowed_hosts: frozenset[str]) -> bool:
     # Hold the job until the provider responds. Concurrent workers skip claimed jobs.
     item = await db.scalar(text("""SELECT id
                                    FROM push_deliveries
@@ -94,8 +101,9 @@ async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
                                              LEFT JOIN box_access a ON a.box_id = t.box_id AND a.user_id = s.user_id
                                     WHERE d.id = :id"""), {"id": item})).mappings().one()
     now = datetime.now(UTC).replace(tzinfo=None)
-    ttl = int((job.observed_at + timedelta(seconds=90) - now).total_seconds())
-    code = None
+    observed_at: datetime = job["observed_at"]
+    ttl = int((observed_at + timedelta(seconds=90) - now).total_seconds())
+    code: int | None = None
     attempts = job.attempts
     delay = 0
     if not job.enabled or job.user_id is None or job.episode_id != job.sample_id or ttl <= 0:
@@ -107,7 +115,7 @@ async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
         try:
             code = await asyncio.to_thread(sender, job, ttl)
         except WebPushException as error:
-            code = error.response.status_code if error.response is not None else None
+            code = error.status_code
         except (requests.RequestException, OSError, ValueError):
             pass
         if code is not None and 200 <= code < 300:

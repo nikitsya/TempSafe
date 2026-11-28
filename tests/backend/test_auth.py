@@ -2,6 +2,7 @@
 
 import secrets
 from datetime import timedelta
+from decimal import Decimal
 from uuid import uuid4
 
 import pytest
@@ -83,8 +84,8 @@ async def test_readings_are_limited_to_assigned_boxes(account):
     sample_ids = []
     for box in (box_id, other_id):
         profile_id = str(uuid4())
-        db.add(ThresholdProfile(profile_id=profile_id, box_id=box, lower_c=0, warning_c=24,
-                                upper_c=25, source_note="Test", is_demo=True))
+        db.add(ThresholdProfile(profile_id=profile_id, box_id=box, lower_c=Decimal("0"), warning_c=Decimal("24"),
+                                upper_c=Decimal("25"), source_note="Test", is_demo=True))
         await db.flush()
         sample_id = str(uuid4())
         db.add(TemperatureSample(sample_id=sample_id, box_id=box, sequence_no=1,

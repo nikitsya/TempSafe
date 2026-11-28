@@ -1,5 +1,6 @@
 """Store validated readings and recognise retries without overwriting samples."""
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 
 from sqlalchemy import and_, or_, select
@@ -33,7 +34,7 @@ async def _find_existing(db: AsyncSession, values: dict):
     return result.scalars().all()
 
 
-def _matching_retry(existing: list[TemperatureSample], values: dict):
+def _matching_retry(existing: Sequence[TemperatureSample], values: dict):
     """Accept only an identical payload, including its original sample ID."""
     if len(existing) == 1 and all(
             getattr(existing[0], field) == value for field, value in values.items()
@@ -94,7 +95,7 @@ async def save_reading(db: AsyncSession, reading: ReadingCreate) -> TemperatureS
     except IntegrityError as error:
         await db.rollback()
         # Another worker may have inserted the same identifiers after our lookup.
-        if error.orig.args[:1] == (1062,):
+        if error.orig is not None and error.orig.args[:1] == (1062,):
             existing = await _find_existing(db, values)
             if existing:
                 return _matching_retry(existing, values)
