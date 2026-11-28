@@ -18,7 +18,8 @@ application, the temperature has returned to Normal, but the completed excursion
 The values and times below are synthetic demonstration data for the Figma prototype and user testing. All displayed
 times refer to the same day and use local time.
 
-This scenario illustrates the Must Have excursion summary (FR-13). The current dashboard alert banner opens Alerts, and History shows estimated periods.
+This scenario illustrates the Must Have excursion summary (FR-13). The current dashboard alert banner opens Alerts, and
+History shows estimated periods.
 Opening a completed event from a closed-tab phone notification is part of the target
 journey. See the [Web Push integration guide](../operations/web-push.md#browser-integration).
 

@@ -1,22 +1,22 @@
 # Raspberry Pi device scripts
 
-These scripts run on Raspberry Pi 5 with an inside SCD41, an outside AM2302
-(DHT22), a single-colour LED and a passive buzzer. They are separate from the FastAPI backend.
+These scripts run on Raspberry Pi 5 with an inside SCD41, an outside AM2302 (DHT22), a single-colour LED and a passive
+buzzer. They are separate from the FastAPI backend.
 
 ## Files
 
-| File                      | Purpose                                                                                                                        | Run directly?                    |
-|---------------------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
-| `temperature_readings.py` | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.         | Yes                              |
-| `database.py`             | Configures the SQLite connection and SQLAlchemy sessions.                                                                      | No; imported by the other files. |
-| `models.py`               | Defines the `readings` queue and `device_configuration` tables.                                                                                   | No; imported by the main script. |
-| `scd41_basic_readings.py` | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds.  | Yes                              |
-| `led_test.py`             | Standalone LED pattern test; does not read temperature or use a database.                                                      | Yes                              |
-| `mqtt_publisher.py`       | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements. | Yes                              |
-| `external_temperature_readings.py` | Records outside temperature in the shared queue. | Yes |
-| `configuration.py` | Validates threshold messages and stores the active profile in SQLite. | Imported |
-| `observation_clock.py` | Checks system clock synchronisation before timestamping a reading. | Imported |
-| `device_check.py` | Inspects an existing queue. The optional `--upgrade` backs it up and migrates it. | Yes |
+| File                               | Purpose                                                                                                                        | Run directly?                    |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|----------------------------------|
+| `temperature_readings.py`          | Reads temperature, controls the LED and buzzer, and saves readings or sensor read errors to SQLite through SQLAlchemy.         | Yes                              |
+| `database.py`                      | Configures the SQLite connection and SQLAlchemy sessions.                                                                      | No; imported by the other files. |
+| `models.py`                        | Defines the `readings` queue and `device_configuration` tables.                                                                | No; imported by the main script. |
+| `scd41_basic_readings.py`          | Original standalone sensor test: prints temperature and writes timestamped readings to CSV, approximately every five seconds.  | Yes                              |
+| `led_test.py`                      | Standalone LED pattern test; does not read temperature or use a database.                                                      | Yes                              |
+| `mqtt_publisher.py`                | Sends pending readings from the local SQLite queue to the backend through MQTT over TLS and waits for server acknowledgements. | Yes                              |
+| `external_temperature_readings.py` | Records outside temperature in the shared queue.                                                                               | Yes                              |
+| `configuration.py`                 | Validates threshold messages and stores the active profile in SQLite.                                                          | Imported                         |
+| `observation_clock.py`             | Checks system clock synchronisation before timestamping a reading.                                                             | Imported                         |
+| `device_check.py`                  | Inspects an existing queue. The optional `--upgrade` backs it up and migrates it.                                              | Yes                              |
 
 Copy the device scripts together so both loggers and the publisher import the
 same modules and open the same queue. For an existing Pi, stop those processes
@@ -76,9 +76,9 @@ an exact fixed-rate scheduler.
 
 | State             | Current code condition                                   | LED                                           |
 |-------------------|----------------------------------------------------------|-----------------------------------------------|
-| Normal            | Above the lower limit and below the warning threshold                           | Off                                           |
-| Warning           | From the warning threshold through the upper limit                       | Steadily lit                                  |
-| Alert             | At or below the lower limit, or above the upper limit                     | Steadily lit                                  |
+| Normal            | Above the lower limit and below the warning threshold    | Off                                           |
+| Warning           | From the warning threshold through the upper limit       | Steadily lit                                  |
+| Alert             | At or below the lower limit, or above the upper limit    | Steadily lit                                  |
 | Sensor read error | An exception occurs while checking or reading the sensor | Two short flashes, followed by the loop pause |
 
 On first start the prototype uses 0°C, 24°C and 25°C. Each logger reads the

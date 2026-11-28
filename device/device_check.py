@@ -64,21 +64,21 @@ def report(path):
             print("Schema: legacy; stop all device processes and run --upgrade")
             return
         for location, count, waiting in connection.execute(
-            "SELECT sensor_location, COUNT(*), SUM(uploaded = 0) "
-            "FROM readings GROUP BY sensor_location"
+                "SELECT sensor_location, COUNT(*), SUM(uploaded = 0) "
+                "FROM readings GROUP BY sensor_location"
         ):
             print(f"Sensor: {location}; rows: {count}; pending: {waiting}")
         for row in connection.execute(
-            "SELECT sequence_no, sensor_location, sample_id, profile_id, "
-            "observed_at, clock_reliable, quality, temperature_c, uploaded "
-            "FROM readings ORDER BY sequence_no DESC LIMIT 6"
+                "SELECT sequence_no, sensor_location, sample_id, profile_id, "
+                "observed_at, clock_reliable, quality, temperature_c, uploaded "
+                "FROM readings ORDER BY sequence_no DESC LIMIT 6"
         ):
             print("Recent sample:", row)
         if connection.execute(
-            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='device_configuration'"
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='device_configuration'"
         ).fetchone():
             for row in connection.execute(
-                "SELECT box_id, profile_id, lower_c, warning_c, upper_c FROM device_configuration"
+                    "SELECT box_id, profile_id, lower_c, warning_c, upper_c FROM device_configuration"
             ):
                 print("Saved configuration:", row)
 

@@ -1,6 +1,7 @@
 # TempSafe: Database Technology Research
 
-**Original research scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone notifications for a
+**Original research scope:** one internal temperature sensor, a single-colour warning LED and Must Have phone
+notifications for a
 paramedic medication box. The buzzer is Should Have; humidity reporting is outside this release.
 
 The device records temperature inside a portable medication box. MySQL is the deployed central database; SQLite provides
@@ -177,7 +178,8 @@ ORDER BY s.sequence_no DESC;
 
 Persist the sample ID, box ID, sequence, profile version, observation time/clock flag, value/quality and delivery status
 in one local transaction before uploading. Store the next sequence safely. Remove or mark delivered only after server
-acknowledgement. A test at 30-second sampling must reconcile the sample attempts from each active sensor over 24 hours and survive a
+acknowledgement. A test at 30-second sampling must reconcile the sample attempts from each active sensor over 24 hours
+and survive a
 normal restart. Report storage errors/full queues; no silent overwriting of pending data. Profile configuration is
 retained locally so offline warnings still work.
 

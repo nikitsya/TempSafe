@@ -11,7 +11,7 @@ service environment and masks the project's administrative `.env` file.
 
 | Check                      | Observed result                                                                                                                                                                                                                                                            |
 |----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Effective grants           | Hosted `SHOW GRANTS` returned global `USAGE` and the seven table grants recorded in Git revision `0f302d9`.                                                                                                                     |
+| Effective grants           | Hosted `SHOW GRANTS` returned global `USAGE` and the seven table grants recorded in Git revision `0f302d9`.                                                                                                                                                                |
 | Live service               | After restart, the local health endpoint returned 200. A connection using the running service's environment returned `tempsafe_runtime@%`, read the samples and locked a box row.                                                                                          |
 | Backup                     | Consistent MySQL 8.4 dump from EC2. All eight base tables used InnoDB. The encrypted archive and separate key on the operator's Mac were both mode 0600.                                                                                                                   |
 | Restore                    | Authenticated decryption and SQL import into an empty schema on a socket-only MySQL 9.4 instance took 0.175 seconds. This measures import, excluding setup and verification.                                                                                               |
@@ -88,7 +88,8 @@ Only in the socket-only disposable instance, create the test runtime account
 and run the access check. For the eight-table archive above, use the grants
 from the drill revision. Later grants refer to columns and tables added after
 that backup. For a newer backup, use the grants matching its schema. The check
-changes one restored account's password and adds an unassigned box. Shut down the disposable instance and remove its private
+changes one restored account's password and adds an unassigned box. Shut down the disposable instance and remove its
+private
 directory, including its plaintext data, after collecting the results.
 
 ~~~sh

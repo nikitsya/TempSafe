@@ -273,11 +273,11 @@ acknowledgement action is not part of these read endpoints.
 
 ## Other available endpoints
 
-| Endpoint                        | Response                                                                                                      |
-|---------------------------------|---------------------------------------------------------------------------------------------------------------|
-| `GET /api/readings?limit=20`    | Samples for the chosen sensor across assigned boxes, newest receipt first. Default limit 20, allowed 1–100. Empty result: `[]`.         |
-| `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`. |
-| `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                              |
+| Endpoint                        | Response                                                                                                                        |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| `GET /api/readings?limit=20`    | Samples for the chosen sensor across assigned boxes, newest receipt first. Default limit 20, allowed 1–100. Empty result: `[]`. |
+| `GET /api/readings/{sample_id}` | One sample, without `temperature_state`; missing ID: `404` with `{"detail":"Temperature reading not found"}`.                   |
+| `GET /api/health`               | `200` with `{"status":"ok"}`; checks the application, not MySQL.                                                                |
 
 Run the server using the [backend guide](../../backend/tempsafe/README.md); inspect schemas at `/docs`
 on the local development server. The hosted Nginx configuration blocks public documentation routes.
@@ -292,11 +292,11 @@ through the [threshold configuration API](threshold-configuration.md).
 All three routes require a signed-in session. The backend checks box assignments
 when it queues and sends notifications.
 
-| Route | Successful response |
-|-------|---------------------|
-| `GET /api/push/public-key` | `200` with `applicationServerKey` for the browser. |
-| `POST /api/push/subscriptions` | `200` with the subscription `id`. Registering the same endpoint for the same user refreshes its keys. |
-| `DELETE /api/push/subscriptions/{endpoint_id}` | `204`. Removes a matching subscription owned by the signed-in user. |
+| Route                                          | Successful response                                                                                   |
+|------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `GET /api/push/public-key`                     | `200` with `applicationServerKey` for the browser.                                                    |
+| `POST /api/push/subscriptions`                 | `200` with the subscription `id`. Registering the same endpoint for the same user refreshes its keys. |
+| `DELETE /api/push/subscriptions/{endpoint_id}` | `204`. Removes a matching subscription owned by the signed-in user.                                   |
 
 The key and registration routes return `503` when Web Push is disabled. Registration
 returns `409` if another account owns the endpoint. See the [Web Push guide](../operations/web-push.md)

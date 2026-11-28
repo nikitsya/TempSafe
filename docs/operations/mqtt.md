@@ -118,7 +118,8 @@ with concurrent settings changes. A missing box or selection produces no configu
 
 `PUT /api/boxes/{box_id}/configuration` confirms database storage, not device adoption. An MQTT
 failure does not roll back that commit. With MQTT disabled, the worker does not run. The API can
-manage other boxes, but this instance publishes only for its configured box. The device contract requires the Pi to commit the profile in SQLite,
+manage other boxes, but this instance publishes only for its configured box. The device contract requires the Pi to
+commit the profile in SQLite,
 then publish a QoS 1, non-retained confirmation to `tempsafe/boxes/{box_id}/configuration/applied`. The JSON contains
 `schema_version: 1`, `box_id` and `profile_id`. The backend records a matching
 confirmation in `box_configuration.applied_profile_id`. NULL means no selection
@@ -138,7 +139,8 @@ when the selected profile is received again, remains a device integration step.
    broker's existing user entries and reload Mosquitto. Only the assigned device
    may publish confirmations for its box. The backend subscribes to that topic.
 3. Deploy the matching backend and restart its single worker with MQTT enabled.
-4. Deploy a Pi publisher that sends the applied confirmation together with the matching logger. Change the limits through Settings
+4. Deploy a Pi publisher that sends the applied confirmation together with the matching logger. Change the limits
+   through Settings
    and verify the retained JSON, the saved Pi profile, LED/buzzer behaviour and new readings with
    the selected `profile_id`. Compare the requested and confirmed IDs with
    `SELECT profile_id, applied_profile_id FROM box_configuration WHERE box_id='TS-01'`.

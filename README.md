@@ -31,7 +31,8 @@ The Scrum Master role rotates among team members. Sprint planning is maintained 
   assigned box through the API. Saving creates or selects a versioned demo profile. When MQTT
   is enabled, the backend publishes the selected profile as retained configuration and retries
   delivery. The Pi subscriber saves the limits locally. Reporting the applied profile back to the
-  backend and verifying it on the physical Pi remain outstanding. See the [configuration API guide](docs/api/threshold-configuration.md).
+  backend and verifying it on the physical Pi remain outstanding. See
+  the [configuration API guide](docs/api/threshold-configuration.md).
 - **Database:** MySQL schema and setup scripts for the prototype box and temperature profile.
 - **MQTT:** FastAPI uses FastMQTT to validate readings and acknowledge them after storage in MySQL.
   A Raspberry Pi reading reached the hosted history page on 3 November 2026 using the separate ingestion

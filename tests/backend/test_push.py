@@ -52,7 +52,8 @@ async def setup_push(client, db):
         "p256dh": base64.urlsafe_b64encode(point).decode().rstrip("="), "auth": secrets.token_urlsafe(16)}}
 
     async def login(account):
-        assert (await client.post("/api/login", json={"username": account.auth_subject, "password": password})).status_code == 204
+        assert (await client.post("/api/login",
+                                  json={"username": account.auth_subject, "password": password})).status_code == 204
 
     async def reading(sequence, temperature, age=1, sensor="inside"):
         payload = ReadingCreate(sample_id=uuid4(), box_id=box, profile_id=profile, sequence_no=sequence,
@@ -175,7 +176,8 @@ def test_provider_request_is_encrypted_and_signed(tmp_path, monkeypatch):
     endpoint = "https://fcm.googleapis.com/example"
     job = SimpleNamespace(endpoint=endpoint, p256dh=base64.urlsafe_b64encode(point).decode().rstrip("="),
                           auth_secret=base64.urlsafe_b64encode(auth).decode().rstrip("="), state="Warning",
-                          box_id="TS-01", sample_id=str(uuid4()), temperature_c=24, observed_at=datetime.now(UTC).replace(tzinfo=None))
+                          box_id="TS-01", sample_id=str(uuid4()), temperature_c=24,
+                          observed_at=datetime.now(UTC).replace(tzinfo=None))
 
     def capture(self, request, **options):
         assert request.url == endpoint and not options["allow_redirects"]

@@ -41,8 +41,8 @@ eight-table baseline used at the time. Its purpose was not established.
 ```mermaid
 flowchart LR
     Browser[Web browser] -->|HTTPS: TCP 443| Nginx[Nginx on EC2]
-    Nginx -->|HTTP: 127.0.0.1:8000| API[FastAPI on EC2]
-    API -->|MySQL: 127.0.0.1:3307| Port[Docker host port]
+    Nginx -->|HTTP: 127 . 0 . 0 . 1:8000| API[FastAPI on EC2]
+    API -->|MySQL: 127 . 0 . 0 . 1:3307| Port[Docker host port]
     Port -->|Container TCP 3306| DB[(MySQL: temsafe)]
     DB --- Volume[Persistent mysql_data volume]
 ```
@@ -75,9 +75,9 @@ protects browser traffic, while SSH protects the remote administration tunnel.
 
 ```mermaid
 flowchart LR
-    IDE[PyCharm on Mac] -->|127.0.0.1:13307| Tunnel[Local SSH tunnel]
+    IDE[PyCharm on Mac] -->|127 . 0 . 0 . 1:13307| Tunnel[Local SSH tunnel]
     Tunnel -->|Encrypted SSH: EC2 TCP 22| SSH[SSH server on EC2]
-    SSH -->|127.0.0.1:3307| DB[(MySQL via Docker)]
+    SSH -->|127 . 0 . 0 . 1:3307| DB[(MySQL via Docker)]
 ```
 
 Start the tunnel in a Mac terminal and keep it open:
@@ -95,17 +95,18 @@ The key stays on the Mac. Do not upload or commit it.
 
 Configure the PyCharm MySQL data source:
 
-| Field          | Value                                       |
-|----------------|---------------------------------------------|
-| Host           | `127.0.0.1`                                 |
-| Port           | `13307`                                     |
-| Database       | `temsafe`                                   |
+| Field          | Value                                           |
+|----------------|-------------------------------------------------|
+| Host           | `127.0.0.1`                                     |
+| Port           | `13307`                                         |
+| Database       | `temsafe`                                       |
 | User           | Your authorised database administration account |
 | Password       | The password for that administration account    |
-| IDE SSH tunnel | Disabled when using the manual tunnel above |
+| IDE SSH tunnel | Disabled when using the manual tunnel above     |
 
 The two occurrences of `127.0.0.1` refer to different machines: PyCharm connects
-to the Mac's local port; SSH forwards it to the EC2 server's local port. Use the hosted database name and credentials for this tunnel. Closing the tunnel disconnects PyCharm but does not
+to the Mac's local port; SSH forwards it to the EC2 server's local port. Use the hosted database name and credentials
+for this tunnel. Closing the tunnel disconnects PyCharm but does not
 stop the website or database.
 
 ## Network access and troubleshooting

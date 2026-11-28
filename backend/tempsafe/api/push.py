@@ -82,13 +82,18 @@ async def register(subscription: Subscription, request: Request, session: Curren
     params = dict(id=endpoint_id, user=session.user_id, endpoint=subscription.endpoint,
                   key=subscription.keys.p256dh, auth=subscription.keys.auth)
     await db.execute(text("""INSERT INTO push_subscriptions
-        (endpoint_id,user_id,endpoint,p256dh,auth_secret) VALUES (:id,:user,:endpoint,:key,:auth)
-        ON DUPLICATE KEY UPDATE endpoint_id=endpoint_id"""), params)
+                                 (endpoint_id, user_id, endpoint, p256dh, auth_secret)
+                             VALUES (:id, :user, :endpoint, :key, :auth)
+                             ON DUPLICATE KEY UPDATE endpoint_id=endpoint_id"""), params)
     owner = await db.scalar(text("SELECT user_id FROM push_subscriptions WHERE endpoint_id=:id FOR UPDATE"), params)
     if owner != session.user_id:
         raise HTTPException(409, "Subscription belongs to another account")
-    await db.execute(text("""UPDATE push_subscriptions SET p256dh=:key, auth_secret=:auth,
-        enabled=1 WHERE endpoint_id=:id AND user_id=:user"""), params)
+    await db.execute(text("""UPDATE push_subscriptions
+                             SET p256dh=:key,
+                                 auth_secret=:auth,
+                                 enabled=1
+                             WHERE endpoint_id = :id
+                               AND user_id = :user"""), params)
     await db.commit()
     return {"id": endpoint_id}
 

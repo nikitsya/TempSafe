@@ -1,14 +1,15 @@
 # Temperature sample volume per medication box
 
 At the nominal 30-second sampling interval, one sensor produces **2,880 records per 24 hours** and **86,400 per
-30 days**. With both inside and outside loggers running, the nominal totals for one box are
-**5,760 per 24 hours** and **172,800 per 30 days**. These estimates include recorded sensor errors.
+30 days**. With both inside and outside loggers running, the nominal totals for one box are **5,760 per 24 hours** and
+**172,800 per 30 days**. These estimates include recorded sensor errors.
 
 ## What the Raspberry Pi actually does
 
 The logger reads the SCD-41, attempts to save one record to SQLite, then waits 30 seconds. Reading the sensor, handling
 an error and writing to disk also take time, so two consecutive timestamps can be more than 30 seconds apart. If the
-sensor has no fresh value yet, the logger waits one second and checks again until 90 seconds have elapsed without a new measurement, then records a sensor error. A handled sensor
+sensor has no fresh value yet, the logger waits one second and checks again until 90 seconds have elapsed without a new
+measurement, then records a sensor error. A handled sensor
 exception produces a record with no temperature and the quality `sensor_error`, provided the SQLite write
 succeeds. [Logger implementation](../../device/temperature_readings.py) · [Device guide](../../device/README.md)
 
@@ -53,6 +54,7 @@ them. [Offline buffering requirement](../requirements/functional-requirements.md
 
 A row in MySQL includes identifiers, timestamps, quality and a profile reference as well as the temperature. Indexes
 also take space. To estimate the monthly footprint, measure the growth of the sample table **including its indexes**
-over a representative batch, divide by the number of rows added, then multiply by 86,400 per active sensor for a 30-day month. Measure the
+over a representative batch, divide by the number of rows added, then multiply by 86,400 per active sensor for a 30-day
+month. Measure the
 Pi's SQLite file and backup copies separately if budgeting total storage. No production disk measurement is assumed
 here. [MySQL sample schema](../../database/schema.sql)

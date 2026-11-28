@@ -24,18 +24,26 @@ async def record_transition(db, sample, profile):
                   state=classify_temperature(sample.temperature_c, sample.quality, profile),
                   sample=sample.sample_id, now=sample.received_at)
     # The ingestion transaction holds the parent box lock, including for the first observation.
-    previous = (await db.execute(text("""SELECT sequence_no, observed_at, state FROM push_box_state
-        WHERE box_id=:box FOR UPDATE"""), params)).mappings().first()
+    previous = (await db.execute(text("""SELECT sequence_no, observed_at, state
+                                         FROM push_box_state
+                                         WHERE box_id = :box FOR
+                                         UPDATE"""), params)).mappings().first()
     if previous and (previous.sequence_no >= sample.sequence_no or previous.observed_at > sample.observed_at):
         return
     changed = not previous or previous.state != params["state"]
-    await db.execute(text("""INSERT INTO push_box_state (box_id,sequence_no,observed_at,state,episode_id)
-        VALUES (:box,:seq,:observed,:state,:sample) ON DUPLICATE KEY UPDATE
-        sequence_no=:seq, observed_at=:observed, episode_id=IF(state=:state,episode_id,:sample), state=:state"""), params)
+    await db.execute(text("""INSERT INTO push_box_state (box_id, sequence_no, observed_at, state, episode_id)
+                             VALUES (:box, :seq, :observed, :state, :sample)
+                             ON DUPLICATE KEY UPDATE sequence_no=:seq,
+                                                     observed_at=:observed,
+                                                     episode_id=IF(state = :state, episode_id, :sample),
+                                                     state=:state"""), params)
     if changed and params["state"] in {"Warning", "Alert"}:
-        await db.execute(text("""INSERT INTO push_deliveries (sample_id,endpoint_id,state,next_attempt)
-            SELECT :sample,s.endpoint_id,:state,:now FROM push_subscriptions s
-            JOIN box_access a ON a.user_id=s.user_id WHERE a.box_id=:box AND s.enabled=1"""), params)
+        await db.execute(text("""INSERT INTO push_deliveries (sample_id, endpoint_id, state, next_attempt)
+                                 SELECT :sample, s.endpoint_id, :state, :now
+                                 FROM push_subscriptions s
+                                          JOIN box_access a ON a.user_id = s.user_id
+                                 WHERE a.box_id = :box
+                                   AND s.enabled = 1"""), params)
 
 
 class PushSession(requests.Session):
@@ -59,18 +67,32 @@ def send(job, ttl, settings: WebPushSettings):
 
 async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
     # Hold the job until the provider responds. Concurrent workers skip claimed jobs.
-    item = await db.scalar(text("""SELECT id FROM push_deliveries
-        WHERE status='pending' AND next_attempt<=UTC_TIMESTAMP(6)
-        ORDER BY next_attempt,id LIMIT 1 FOR UPDATE SKIP LOCKED"""))
+    item = await db.scalar(text("""SELECT id
+                                   FROM push_deliveries
+                                   WHERE status = 'pending'
+                                     AND next_attempt <= UTC_TIMESTAMP(6)
+                                   ORDER BY next_attempt, id
+                                   LIMIT 1
+                                   FOR
+                                   UPDATE SKIP LOCKED"""))
     if item is None:
         return False
-    job = (await db.execute(text("""SELECT d.*, t.box_id,t.observed_at,t.temperature_c,
-        s.endpoint,s.p256dh,s.auth_secret,s.enabled,b.episode_id,a.user_id
-        FROM push_deliveries d JOIN temperature_samples t USING(sample_id)
-        JOIN push_subscriptions s USING(endpoint_id)
-        JOIN push_box_state b ON b.box_id=t.box_id
-        LEFT JOIN box_access a ON a.box_id=t.box_id AND a.user_id=s.user_id
-        WHERE d.id=:id"""), {"id": item})).mappings().one()
+    job = (await db.execute(text("""SELECT d.*,
+                                           t.box_id,
+                                           t.observed_at,
+                                           t.temperature_c,
+                                           s.endpoint,
+                                           s.p256dh,
+                                           s.auth_secret,
+                                           s.enabled,
+                                           b.episode_id,
+                                           a.user_id
+                                    FROM push_deliveries d
+                                             JOIN temperature_samples t USING (sample_id)
+                                             JOIN push_subscriptions s USING (endpoint_id)
+                                             JOIN push_box_state b ON b.box_id = t.box_id
+                                             LEFT JOIN box_access a ON a.box_id = t.box_id AND a.user_id = s.user_id
+                                    WHERE d.id = :id"""), {"id": item})).mappings().one()
     now = datetime.now(UTC).replace(tzinfo=None)
     ttl = int((job.observed_at + timedelta(seconds=90) - now).total_seconds())
     code = None
@@ -101,8 +123,12 @@ async def deliver_one(db, sender, allowed_hosts: frozenset[str]):
             status = "failed"
         if status != "accepted":
             LOGGER.warning("Web Push job %s attempt %s: %s (HTTP %s)", item, attempts, status, code)
-    await db.execute(text("""UPDATE push_deliveries SET status=:status, attempts=:attempts,
-        http_status=:code, next_attempt=:next WHERE id=:id"""),
+    await db.execute(text("""UPDATE push_deliveries
+                             SET status=:status,
+                                 attempts=:attempts,
+                                 http_status=:code,
+                                 next_attempt=:next
+                             WHERE id = :id"""),
                      dict(id=item, status=status, attempts=attempts, code=code, next=now + timedelta(seconds=delay)))
     return True
 

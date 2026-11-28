@@ -144,7 +144,7 @@ async def main():
         await initialise_database()
         configuration = await ensure_active_configuration()
         with LED(18) as led, PWMOutputDevice(
-            17, frequency=500, initial_value=0
+                17, frequency=500, initial_value=0
         ) as buzzer:
             i2c = board.I2C()
             sensor = adafruit_scd4x.SCD4X(i2c)

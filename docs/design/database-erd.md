@@ -161,7 +161,8 @@ acknowledgement. The Pi stores the last adopted profile in `device_configuration
 [Migration 007](../../database/migrations/007_add_sensor_location.sql) adds the
 server column and indexes. The [device initialiser](../../device/database.py)
 upgrades the existing SQLite queue. Both upgrades assign `inside` to legacy
-samples and preserve identifiers, sequence numbers and temperatures. Follow the [rollout order](../operations/dual-sensor-rollout.md)
+samples and preserve identifiers, sequence numbers and temperatures. Follow
+the [rollout order](../operations/dual-sensor-rollout.md)
 before starting the updated Pi publisher.
 
 ## Desired box configuration

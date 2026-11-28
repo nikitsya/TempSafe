@@ -85,7 +85,8 @@ the first start of a fresh volume.
 
 The demo profile ID is `e93a4368-e11a-4f27-8b31-d55d61392548`. Rerunning these
 seed files preserves existing records. On a fresh installation, the first settings
-save selects a desired profile. Accounts and measurements are added separately. Future threshold changes require a new profile ID to preserve
+save selects a desired profile. Accounts and measurements are added separately. Future threshold changes require a new
+profile ID to preserve
 historical settings.
 
 See the [API contract](../docs/api/api-contract.md#temperature-classification)
@@ -94,7 +95,8 @@ for temperature classification rules.
 ## Threshold configuration migration
 
 If an existing database lacks `box_configuration`, back it up and apply
-[003_add_box_configuration.sql](migrations/003_add_box_configuration.sql) once. Fresh databases created with the updated schema already have this table;
+[003_add_box_configuration.sql](migrations/003_add_box_configuration.sql) once. Fresh databases created with the updated
+schema already have this table;
 do not run migration 003 again. See the
 [operator API guide](../docs/api/threshold-configuration.md) for selection and access rules.
 

@@ -28,9 +28,9 @@ sets their limits. Existing profiles and measurements are preserved.
 
 ## Routes
 
-| Method and path                         | Behaviour                                                                                     |
-|-----------------------------------------|-----------------------------------------------------------------------------------------------|
-| `GET /api/boxes/{box_id}/configuration` | Return the selected desired profile; `404` if the box or selection is absent.                 |
+| Method and path                         | Behaviour                                                                                                       |
+|-----------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `GET /api/boxes/{box_id}/configuration` | Return the selected desired profile; `404` if the box or selection is absent.                                   |
 | `PUT /api/boxes/{box_id}/configuration` | Select the submitted settings atomically and return `200`. An unchanged submission reuses the selected profile. |
 
 Example PUT body:
@@ -71,7 +71,8 @@ API while reading and queuing publication, so concurrent settings changes cannot
 queue an older profile after a newer one. Run one backend worker as documented.
 
 The selected profile in `box_configuration` is the durable source for retries;
-the device confirmation column is added separately by migration 008. Publication repeats on connection and every 30 seconds,
+the device confirmation column is added separately by migration 008. Publication repeats on connection and every 30
+seconds,
 including after a failed attempt or lost broker retained state. Each attempt has
 a 10-second timeout. A failed MQTT attempt does not undo saved settings. With
 `MQTT_ENABLED=false`, settings are saved without publication; enabling MQTT later
@@ -92,6 +93,7 @@ missing boxes, unchanged retries, profile retrieval and historical classificatio
 the [test guide](../../tests/backend/README.md).
 
 The configuration table was deployed on 7 November 2026; see the
-[deployment record](../operations/deployment.md). The [21 November deployment check](../operations/deployment.md#configuration-delivery-deployment--verified-21-november-2026)
+[deployment record](../operations/deployment.md).
+The [21 November deployment check](../operations/deployment.md#configuration-delivery-deployment--verified-21-november-2026)
 verified retained publication over TLS. Checking local adoption and the return
 confirmation on a physical Pi remains part of the [rollout](../operations/mqtt.md#configuration-rollout).

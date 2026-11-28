@@ -55,10 +55,11 @@ the last contact time; `never_reported` shows **NOT CONNECTED**. A reading older
 
 **Today** (the default) and a chosen **Date** use
 `start_date` and `end_date` (Irish calendar dates, observation time). History requests inside
-and outside readings separately in pages of up to 100, following `before_sequence` for each sensor.
-**1 hour** requests the dates it touches and keeps readings from the last hour. The graph uses a time axis; red bands mark sensor
+and outside readings separately in pages of up to 100, following `before_sequence` for each sensor. **1 hour** requests
+the dates it touches and keeps readings from the last hour. The graph uses a time axis; red bands mark sensor
 faults and grey bands mark periods with no data (box offline or readings missing). The Alerts
-page lists the same issues in a table. History also offers a CSV download for the chosen period. Inside readings are classified with their recorded profiles. Outside readings are for comparison.
+page lists the same issues in a table. History also offers a CSV download for the chosen period. Inside readings are
+classified with their recorded profiles. Outside readings are for comparison.
 Time gaps over 90 seconds, unknown or backwards observation times, and sensor errors break
 continuity. Interleaved sequence numbers are normal. Alert durations are estimates.
 
@@ -102,7 +103,8 @@ and a signed-in user's access each need a separate check.
 
 Every signed-in page checks the latest 100 readings every 15 seconds and announces two moments
 once each: an alert starts ("Too hot — 26.4°C · 4 min", kept up to date while it lasts) and it
-ends ("Back in range — 22.8°C"). The server classifies each inside reading using its recorded profile. They appear as a pop-up on the website and, if the **Notifications** switch in Settings is on,
+ends ("Back in range — 22.8°C"). The server classifies each inside reading using its recorded profile. They appear as a
+pop-up on the website and, if the **Notifications** switch in Settings is on,
 as a browser notification; clicking it opens Alerts.
 On a first visit only an alert that is still on is announced. The state is stored in the browser.
 The backend provides [Web Push subscriptions and delivery](../docs/operations/web-push.md).

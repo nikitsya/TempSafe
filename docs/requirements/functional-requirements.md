@@ -9,12 +9,12 @@ These requirements describe the target system; implementation status is tracked 
 
 ## 1. Users and context (UTSE)
 
-| Element      | Proposed definition                                                                                                                        |
-|--------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| Users        | Paramedic or staff member authorised to monitor the single shared prototype box; exact operational responsibility to be validated          |
-| Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                             |
+| Element      | Proposed definition                                                                                                                              |
+|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| Users        | Paramedic or staff member authorised to monitor the single shared prototype box; exact operational responsibility to be validated                |
+| Tasks        | Check temperature and data freshness, inspect out-of-range observations, review history and acknowledge review                                   |
 | Systems      | Inside SCD41, outside AM2302, Raspberry Pi, local SQLite queue, authenticated MQTT/TLS broker, HTTPS web API, MySQL database and web application |
-| Environments | A fixed Controlled Drug Box installed inside an ambulance; initial prototype testing takes place on a bench without medicines.             |
+| Environments | A fixed Controlled Drug Box installed inside an ambulance; initial prototype testing takes place on a bench without medicines.                   |
 
 ## 2. Functional requirements
 
