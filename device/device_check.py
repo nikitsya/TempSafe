@@ -2,10 +2,10 @@
 
 import argparse
 import asyncio
-from datetime import datetime, timezone
-from pathlib import Path
 import sqlite3
 import sys
+from datetime import datetime, timezone
+from pathlib import Path
 
 from database import DB_PATH, engine, initialise_database
 

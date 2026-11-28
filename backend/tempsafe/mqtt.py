@@ -6,10 +6,9 @@ import logging
 import os
 import re
 import ssl
-
-from fastapi_mqtt import FastMQTT, MQTTConfig
 from uuid import UUID
 
+from fastapi_mqtt import FastMQTT, MQTTConfig
 from pydantic import BaseModel, ConfigDict, StrictInt
 from sqlalchemy import update
 from sqlalchemy.exc import SQLAlchemyError

@@ -19,7 +19,6 @@ import adafruit_dht
 import adafruit_scd4x
 import board
 
-
 READ_INTERVAL_SECONDS = 5
 
 

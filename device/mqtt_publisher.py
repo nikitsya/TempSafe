@@ -1,14 +1,15 @@
 import asyncio
 import json
 import os
-import paho.mqtt.client as mqtt
 import ssl
 from queue import SimpleQueue, Empty
-from sqlalchemy import select, update
-from sqlalchemy.exc import SQLAlchemyError
 from threading import Event
 from time import monotonic
 from uuid import UUID
+
+import paho.mqtt.client as mqtt
+from sqlalchemy import select, update
+from sqlalchemy.exc import SQLAlchemyError
 
 from configuration import (
     configuration_from_payload,

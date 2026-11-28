@@ -1,8 +1,8 @@
 """Local storage and validation for the active temperature configuration."""
 
+import json
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-import json
 from math import isfinite
 from uuid import UUID
 
@@ -10,7 +10,6 @@ from sqlalchemy.dialects.sqlite import insert
 
 from database import AsyncSessionLocal
 from models import DeviceConfiguration
-
 
 BOX_ID = "TS-01"
 DEFAULT_PROFILE_ID = "e93a4368-e11a-4f27-8b31-d55d61392548"

@@ -1,8 +1,9 @@
-import adafruit_scd4x
-import board
 import csv
 import time
 from datetime import datetime
+
+import adafruit_scd4x
+import board
 
 i2c = board.I2C()
 sensor = adafruit_scd4x.SCD4X(i2c)

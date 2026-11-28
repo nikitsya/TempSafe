@@ -16,7 +16,6 @@ from database import engine, AsyncSessionLocal, initialise_database
 from models import Reading
 from observation_clock import observation_time
 
-
 BOX_ID = "TS-01"
 
 
