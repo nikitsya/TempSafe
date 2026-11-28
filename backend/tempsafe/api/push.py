@@ -6,11 +6,11 @@ import re
 from urllib.parse import urlsplit
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 
-from tempsafe.api.auth import CurrentSession, Database
+from tempsafe.api.auth import CurrentSession, Database, current_session
 from tempsafe.settings import WebPushSettings
 
 router = APIRouter(prefix="/push", tags=["Web Push"])
@@ -68,8 +68,8 @@ def require_push_settings(request: Request) -> WebPushSettings:
     return settings
 
 
-@router.get("/public-key", response_model=PushPublicKeyResponse)
-def public_key(request: Request, session: CurrentSession):
+@router.get("/public-key", response_model=PushPublicKeyResponse, dependencies=[Depends(current_session)])
+def public_key(request: Request):
     return {"applicationServerKey": require_push_settings(request).public_key}
 
 

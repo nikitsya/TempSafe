@@ -79,6 +79,7 @@ async def test_push_response_schema(client, path, method, field):
 async def test_manage_subscriptions(setup_push, client, db, push_worker):
     login, user, other, body, _ = setup_push
     path = "/api/push/subscriptions"
+    assert (await client.get("/api/push/public-key")).status_code == 401
     assert (await client.post(path, json=body)).status_code == 401
     await login(user)
     assert (await client.get("/api/push/public-key")).json() == {"applicationServerKey": "test"}
