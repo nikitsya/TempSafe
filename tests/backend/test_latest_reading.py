@@ -19,7 +19,7 @@ async def test_sensor_histories_are_separate(latest_reading_data):
             sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
             sequence_no=sequence, sensor_location=location,
             observed_at=datetime(2026, 1, 1, 12, 9, sequence), clock_reliable=True,
-            temperature_c=30, quality="valid",
+            temperature_c=Decimal("30"), quality="valid",
         ))
     await db.flush()
     url = f"/api/boxes/{boxes[0]}/readings"
@@ -45,7 +45,7 @@ async def test_outside_does_not_hide_missing_inside_data(latest_reading_data):
     client, db, boxes, profiles = latest_reading_data
     db.add(TemperatureSample(
         sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
-        sequence_no=2, sensor_location="outside", quality="valid", temperature_c=30,
+        sequence_no=2, sensor_location="outside", quality="valid", temperature_c=Decimal("30"),
         observed_at=datetime(2026, 1, 1, 12, 10), clock_reliable=True,
         received_at=datetime(2026, 1, 1, 12, 10),
     ))
@@ -57,7 +57,7 @@ async def test_outside_does_not_hide_missing_inside_data(latest_reading_data):
     assert status["freshness"] == "unknown" and status["observed_at"] is None
     db.add(TemperatureSample(
         sample_id=str(uuid4()), box_id=boxes[0], profile_id=profiles[0],
-        sequence_no=1, quality="valid", temperature_c=5,
+        sequence_no=1, quality="valid", temperature_c=Decimal("5"),
         observed_at=datetime(2026, 1, 1, 12), clock_reliable=True,
         received_at=datetime(2026, 1, 1, 12),
     ))
@@ -348,7 +348,7 @@ async def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
     # The clocks go back on 25 October. Local midnight starts at 23:00 UTC.
     start = datetime(2026, 10, 24, 23)
     stop = datetime(2026, 10, 26)
-    times = [start - timedelta(seconds=1)]
+    times: list[datetime | None] = [start - timedelta(seconds=1)]
     times.extend(start + timedelta(seconds=i * 30) for i in range(100))
     times.extend([stop - timedelta(seconds=1), stop, None])
     sample_ids = [str(uuid4()) for _ in times]
@@ -376,7 +376,7 @@ async def test_history_pages_cover_the_irish_calendar_day(latest_reading_data):
         ("2026-10-20", "2026-10-26", [1, 0]),
         ("2026-10-27", "2026-10-27", []),
     ]:
-        query = {"start_date": start_date, "end_date": end_date}
+        query: dict[str, str | int] = {"start_date": start_date, "end_date": end_date}
         if start_date != end_date:
             query["before_sequence"] = 2
         response = await client.get(url, params=query)

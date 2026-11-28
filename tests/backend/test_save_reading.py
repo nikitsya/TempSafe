@@ -1,6 +1,7 @@
 """Check incoming validation and storage against the existing MySQL schema."""
 
 from datetime import datetime
+from decimal import Decimal
 from uuid import uuid4
 
 import pytest
@@ -41,22 +42,23 @@ def payload(monkeypatch, grant_boxes):
 @pytest.fixture
 async def stored_box(payload, app_lifespan):
     """Commit only test parents, then remove this test's samples and parents."""
+    reading = ReadingCreate.model_validate(payload)
     async with AsyncSessionLocal() as db:
         try:
-            db.add(Box(box_id=payload["box_id"], name="Reading storage test"))
+            db.add(Box(box_id=reading.box_id, name="Reading storage test"))
             await db.flush()
             db.add(ThresholdProfile(
-                profile_id=payload["profile_id"], box_id=payload["box_id"],
-                lower_c=0, warning_c=24, upper_c=25,
+                profile_id=str(reading.profile_id), box_id=reading.box_id,
+                lower_c=Decimal("0"), warning_c=Decimal("24"), upper_c=Decimal("25"),
                 source_note="Synthetic profile for storage tests.", is_demo=True,
             ))
             await db.commit()
             yield payload
         finally:
             await db.rollback()
-            await db.execute(delete(TemperatureSample).where(TemperatureSample.box_id == payload["box_id"]))
-            await db.execute(delete(ThresholdProfile).where(ThresholdProfile.box_id == payload["box_id"]))
-            await db.execute(delete(Box).where(Box.box_id == payload["box_id"]))
+            await db.execute(delete(TemperatureSample).where(TemperatureSample.box_id == reading.box_id))
+            await db.execute(delete(ThresholdProfile).where(ThresholdProfile.box_id == reading.box_id))
+            await db.execute(delete(Box).where(Box.box_id == reading.box_id))
             await db.commit()
 
 
@@ -205,7 +207,7 @@ async def test_duplicate_insert_race(stored_box, monkeypatch, conflicting):
                 await save_reading(other_db, ReadingCreate(**winner))
             await commit()
 
-        monkeypatch.setattr(db, "commit", competing_commit)
+        monkeypatch.setattr(db, commit.__name__, competing_commit)
 
         if conflicting:
             with pytest.raises(ValueError, match="conflicts"):

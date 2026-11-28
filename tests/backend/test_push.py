@@ -3,6 +3,7 @@
 import base64
 import secrets
 from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -16,7 +17,7 @@ from tempsafe.api.auth import hasher
 from tempsafe.db.models import AppUser, Box, BoxAccess, ThresholdProfile
 from tempsafe.monitoring.push import deliver_one
 from tempsafe.monitoring.readings import save_reading
-from tempsafe.schemas import ReadingCreate
+from tempsafe.schemas import ReadingCreate, SensorLocation
 from tempsafe.settings import WebPushSettings
 
 pytestmark = pytest.mark.anyio
@@ -30,13 +31,13 @@ def push_worker(monkeypatch, request):
     if missing := getattr(request, "param", None):
         monkeypatch.delenv("WEB_PUSH_" + missing)
     worker = AsyncMock()
-    monkeypatch.setattr(main, "run_worker", worker)
+    monkeypatch.setattr("tempsafe.main.run_worker", worker)
     return worker
 
 
 @pytest.fixture
 async def setup_push(client, db):
-    box, profile = str(uuid4()), str(uuid4())
+    box, profile = str(uuid4()), uuid4()
     db.add(Box(box_id=box, name="Test"))
     password = secrets.token_hex()
     user = AppUser(auth_subject=str(uuid4()), password_hash=hasher.hash(password))
@@ -44,7 +45,8 @@ async def setup_push(client, db):
     db.add_all([user, other])
     await db.flush()
     db.add_all([BoxAccess(user_id=user.user_id, box_id=box), ThresholdProfile(
-        box_id=box, profile_id=profile, lower_c=0, warning_c=24, upper_c=25, source_note="Test")])
+        box_id=box, profile_id=str(profile), lower_c=Decimal("0"), warning_c=Decimal("24"),
+        upper_c=Decimal("25"), source_note="Test")])
     await db.commit()
     point = ec.generate_private_key(ec.SECP256R1()).public_key().public_bytes(
         serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint)
@@ -55,10 +57,10 @@ async def setup_push(client, db):
         assert (await client.post("/api/login",
                                   json={"username": account.auth_subject, "password": password})).status_code == 204
 
-    async def reading(sequence, temperature, age=1, sensor="inside"):
+    async def reading(sequence: int, temperature: int, age: int = 1, sensor: SensorLocation = "inside"):
         payload = ReadingCreate(sample_id=uuid4(), box_id=box, profile_id=profile, sequence_no=sequence,
                                 clock_reliable=True, observed_at=datetime.now(UTC) - timedelta(seconds=age),
-                                temperature_c=temperature, sensor_location=sensor, quality="valid")
+                                temperature_c=Decimal(temperature), sensor_location=sensor, quality="valid")
         await save_reading(db, payload)
 
     return login, user, other, body, reading
@@ -113,7 +115,7 @@ async def test_transition_selection_and_delivery(setup_push, client, db):
     for account in (user, other):
         await login(account)
         assert (await client.post("/api/push/subscriptions", json=body | {
-            "endpoint": body["endpoint"] + str(account.user_id)})).status_code == 200
+            "endpoint": f"https://fcm.googleapis.com/{account.auth_subject}"})).status_code == 200
     await reading(1, 23)
     await reading(2, 24)
     await reading(3, 24)
@@ -162,7 +164,7 @@ def test_provider_request_is_encrypted_and_signed(tmp_path, monkeypatch):
 
     import http_ece
     from requests import Response
-    from tempsafe.monitoring.push import PushSession, send
+    from tempsafe.monitoring.push import send
 
     key = ec.generate_private_key(ec.SECP256R1())
     pem = tmp_path / "vapid.pem"
@@ -179,16 +181,18 @@ def test_provider_request_is_encrypted_and_signed(tmp_path, monkeypatch):
                           box_id="TS-01", sample_id=str(uuid4()), temperature_c=24,
                           observed_at=datetime.now(UTC).replace(tzinfo=None))
 
-    def capture(self, request, **options):
+    def capture(_session, request, **options):
         assert request.url == endpoint and not options["allow_redirects"]
         assert request.headers["Authorization"].startswith("vapid ")
         assert request.headers["TTL"] == "30"
-        payload = json.loads(http_ece.decrypt(request.body, private_key=browser, auth_secret=auth, version="aes128gcm"))
+        # http-ece documents auth_secret as str, but its key derivation requires bytes.
+        # noinspection PyTypeChecker
+        plaintext = http_ece.decrypt(request.body, private_key=browser, auth_secret=auth, version="aes128gcm")
+        payload = json.loads(plaintext)
         assert payload["sample_id"] == job.sample_id and payload["state"] == "Warning"
         response = Response()
         response.status_code = 201
-        response._content = b""
         return response
 
-    monkeypatch.setattr(PushSession, "send", capture)
+    monkeypatch.setattr("requests.sessions.Session.send", capture)
     assert send(job, 30, WebPushSettings.from_env()) == 201

@@ -5,11 +5,11 @@ import json
 from contextlib import suppress
 from datetime import datetime
 from decimal import Decimal
-from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, Mock
 from uuid import uuid4
 
 import pytest
+from fastapi import FastAPI, Request
 from sqlalchemy.exc import SQLAlchemyError
 
 from tempsafe.api.configuration import set_configuration
@@ -80,7 +80,7 @@ async def test_disconnected_client_does_not_open_database(delivery):
 async def test_disconnect_during_database_read_does_not_publish(delivery, profile):
     publisher, mqtt, db, factory = delivery
 
-    async def read(query):
+    async def read(_query):
         mqtt.client.is_connected = False
         return profile
 
@@ -121,9 +121,12 @@ async def test_worker_republishes_unchanged_profile_to_restore_retained_state(de
     publisher, mqtt, db, factory = delivery
     db.scalar.side_effect = [Box(box_id="TS-01"), profile] * 2
     repeated = asyncio.Event()
-    mqtt.client.publish.side_effect = lambda *a, **kw: (
-        repeated.set() if mqtt.client.publish.call_count == 2 else None
-    )
+
+    def publish(*_args, **_kwargs):
+        if mqtt.client.publish.call_count == 2:
+            repeated.set()
+
+    mqtt.client.publish.side_effect = publish
     await wait_for_worker(publisher, repeated)
     assert mqtt.client.publish.call_args_list[0] == mqtt.client.publish.call_args_list[1]
 
@@ -137,7 +140,7 @@ async def test_retry_reads_new_selected_profile_instead_of_failed_payload(delive
     db.scalar.side_effect = [Box(box_id="TS-01"), profile, Box(box_id="TS-01"), replacement]
     recovered = asyncio.Event()
 
-    def publish(*args, **kwargs):
+    def publish(*_args, **_kwargs):
         if mqtt.client.publish.call_count == 1:
             raise ConnectionError("offline")
         recovered.set()
@@ -201,7 +204,7 @@ def test_wildcard_configuration_topic_is_rejected():
 @pytest.mark.parametrize("commit_fails", [False, True])
 async def test_api_requests_delivery_only_after_commit(profile, unchanged, commit_fails):
     settings = ThresholdSettingsCreate(
-        lower_c="0", warning_c="24", upper_c="25", source_note="Bench test"
+        lower_c=Decimal("0"), warning_c=Decimal("24"), upper_c=Decimal("25"), source_note="Bench test"
     )
     db = AsyncMock()
     db.add = Mock()
@@ -215,18 +218,19 @@ async def test_api_requests_delivery_only_after_commit(profile, unchanged, commi
 
     db.refresh.side_effect = refresh
     publisher = Mock()
-    request = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(configuration_publisher=publisher)))
-    committed = False
+    app = FastAPI()
+    app.state.configuration_publisher = publisher
+    request = Request({"type": "http", "app": app})
+    committed = asyncio.Event()
 
     async def commit():
-        nonlocal committed
         publisher.request_publish.assert_not_called()
         if commit_fails:
             raise SQLAlchemyError("commit failed")
-        committed = True
+        committed.set()
 
     def wake(box_id):
-        assert committed
+        assert committed.is_set()
         assert box_id == "TS-01"
 
     db.commit.side_effect = commit

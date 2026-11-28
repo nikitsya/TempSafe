@@ -106,10 +106,11 @@ async def test_only_current_device_confirmation_changes_applied_profile(configur
     monkeypatch.setenv("MQTT_BOX_ID", box_id)
     monkeypatch.setenv("MQTT_ENABLED", "true")
     monkeypatch.setenv("TEMPSAFE_LOCAL_MQTT", "1")
-    monkeypatch.setattr(mqtt, "AsyncSessionLocal", async_sessionmaker(
+    monkeypatch.setattr("tempsafe.mqtt.AsyncSessionLocal", async_sessionmaker(
         bind=await db.connection(), join_transaction_mode="create_savepoint",
     ))
     broker = mqtt.create_mqtt()
+    assert broker is not None
     topic = f"tempsafe/boxes/{box_id}/configuration/applied"
     path = f"/api/boxes/{box_id}/configuration"
     first = (await client.put(path, json=SETTINGS)).json()["profile_id"]

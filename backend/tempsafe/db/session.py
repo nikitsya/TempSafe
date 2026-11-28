@@ -1,7 +1,7 @@
 """Configure SQLAlchemy sessions for the TEMPSAFE MySQL database."""
 
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ class Base(DeclarativeBase):
     """Provide the shared base for database models added in later steps."""
 
 
-async def get_db() -> AsyncIterator[AsyncSession]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Supply a session to a FastAPI dependency and close it after the request."""
     async with AsyncSessionLocal() as db:
         yield db

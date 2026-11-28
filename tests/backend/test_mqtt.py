@@ -20,7 +20,7 @@ def consumer_data():
     save = AsyncMock()
     consumer = ReadingConsumer("TS-01", factory, save)
     client = Mock()
-    payload = dict(
+    payload: dict[str, str | int | bool | None] = dict(
         schema_version=1, sample_id=str(uuid4()), box_id="TS-01",
         sequence_no=12, profile_id=str(uuid4()), observed_at="2026-11-03T12:00:00Z",
         clock_reliable=True, temperature_c="23.45", quality="valid",
@@ -41,6 +41,7 @@ async def test_acknowledgement_follows_successful_storage(consumer_data, locatio
     save.assert_awaited_once()
     assert str(save.call_args.args[1].sample_id) == payload["sample_id"]
     assert save.call_args.args[1].sensor_location == (location or "inside")
+    assert ack is not None
     assert json.loads(ack) == dict(schema_version=1, sample_id=payload["sample_id"], status="stored")
 
 
@@ -77,10 +78,12 @@ async def test_rejects_unauthorised_or_invalid_readings(consumer_data, case):
 
 async def test_repeated_reading_is_passed_unchanged_to_idempotent_storage(consumer_data):
     consumer, factory, save, client, payload, message = consumer_data
-    ack = await consumer.store(message.topic, message.payload, message.retain)
-    ack = await consumer.store(message.topic, message.payload, message.retain)
+    first = await consumer.store(message.topic, message.payload, message.retain)
+    retry = await consumer.store(message.topic, message.payload, message.retain)
     assert save.call_args_list[0].args[1] == save.call_args_list[1].args[1]
-    assert json.loads(ack)["sample_id"] == payload["sample_id"]
+    assert first is not None and retry is not None
+    assert json.loads(first) == json.loads(retry)
+    assert json.loads(first)["sample_id"] == payload["sample_id"]
 
 
 def test_wildcard_box_configuration_is_rejected():
@@ -117,6 +120,8 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
 
     async def scenario():
         mqtt = create_mqtt()
+        assert mqtt is not None
+        assert isinstance(mqtt.config.ssl, ssl.SSLContext)
         assert mqtt.config.ssl.verify_mode == ssl.CERT_REQUIRED
         assert mqtt.config.ssl.check_hostname
         assert mqtt.config.reconnect_retries == -1
@@ -131,9 +136,7 @@ def test_fastmqtt_dispatch_and_reconnection(monkeypatch):
         assert subscription.topic == "tempsafe/boxes/TS-01/readings"
         assert subscription.retain_as_published
         client = mqtt.client
-        client._connack_received.set()
-        client._connection = Mock()
-        client._connection.is_closing.return_value = False
+        monkeypatch.setattr("gmqtt.client.Client.is_connected", property(lambda _: True))
         client.publish = Mock()
         client.publish.side_effect = lambda *a, **k: store.assert_awaited_once()
         await mqtt.client.on_message(subscription.topic, b"payload", 1, {"retain": 1})
@@ -157,8 +160,8 @@ async def test_lifespan_stops_mqtt_before_closing_database_pool(monkeypatch, fai
     elif failure == "shutdown":
         mqtt.mqtt_shutdown.side_effect = ConnectionError(failure)
     dispose = AsyncMock(side_effect=mqtt.mqtt_shutdown.assert_awaited_once)
-    monkeypatch.setattr(main, "create_mqtt", lambda: mqtt)
-    monkeypatch.setattr(main, "engine", Mock(dispose=dispose))
+    monkeypatch.setattr("tempsafe.main.create_mqtt", lambda: mqtt)
+    monkeypatch.setattr("tempsafe.main.engine", Mock(dispose=dispose))
 
     with pytest.raises(ConnectionError, match=failure) if failure else nullcontext():
         async with main.app.router.lifespan_context(main.app):
@@ -192,9 +195,9 @@ async def test_lifespan_cancels_configuration_worker_before_mqtt_shutdown(monkey
 
     mqtt.mqtt_shutdown.side_effect = disconnect
     dispose = AsyncMock(side_effect=mqtt.mqtt_shutdown.assert_awaited_once)
-    monkeypatch.setattr(main, "create_mqtt", lambda: mqtt)
-    monkeypatch.setattr(main, "ConfigurationPublisher", lambda *args: publisher)
-    monkeypatch.setattr(main, "engine", Mock(dispose=dispose))
+    monkeypatch.setattr("tempsafe.main.create_mqtt", lambda: mqtt)
+    monkeypatch.setattr("tempsafe.main.ConfigurationPublisher", lambda *_args: publisher)
+    monkeypatch.setattr("tempsafe.main.engine", Mock(dispose=dispose))
 
     async with main.app.router.lifespan_context(main.app):
         await asyncio.wait_for(started.wait(), timeout=1)
